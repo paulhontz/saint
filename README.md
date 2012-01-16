@@ -85,9 +85,9 @@ There are also tree association, when some item may belong to another item of sa
 
     saint.is_tree
 
-[More on Associations](Associations.md)
+[More on Associations](saint/blob/master/Associations.md)
 
-[More on CRUD pages](CRUDPages.md)
+[More on CRUD pages](saint/blob/master/CRUDPages.md)
 
 ###Summary pages
 
@@ -120,7 +120,7 @@ Use *saint.items_per_page* to override this:
     # or just
     saint.ipp 50
 
-[More on Summary pages](SummaryPages.md)
+[More on Summary pages](saint/blob/master/SummaryPages.md)
 
 ###Menu
 
@@ -143,7 +143,7 @@ To have menu displayed, simply call *Saint::Menu.new.render* in your layout:
         ...
     </body>
 
-[More on Menus](Menu.md)
+[More on Menus](saint/blob/master/Menu.md)
 
 ###File Manager
 
@@ -162,7 +162,7 @@ Simply let Saint know the full path to folder and it will turn a class into a fu
 
     end
 
-[More on File Manager](FileManager.md)
+[More on File Manager](saint/blob/master/FileManager.md)
 
 
 ###Opts Manager
@@ -198,7 +198,7 @@ Options defined inside Opts Manager can be accessed by #opts Api.
         end
     end
 
-[More on Opts Manager](OptsManager.md)
+[More on Opts Manager](saint/blob/master/OptsManager.md)
 
 ###rb_wrapper
 

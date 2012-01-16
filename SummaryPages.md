@@ -44,7 +44,7 @@ To have a custom header for both Summary and CRUD pages, use *saint.header*:
         end
     end
 
-[More on Filters](Filters.md)
+[More on Filters](saint/blob/master/Filters.md)
 
 ###Tabs
 
