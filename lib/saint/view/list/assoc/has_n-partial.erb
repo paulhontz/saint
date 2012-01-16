@@ -45,7 +45,7 @@
 
                   <% if @attached == 0 -%>
 
-                      <% if @attached_keys_or_remote_item.include?(remote_id) -%>
+                      <% if (@attached_keys_or_remote_item||[]).include?(remote_id) -%>
                       <span class="saint-button ui-state-highlight">
                         attached
                       </span>
