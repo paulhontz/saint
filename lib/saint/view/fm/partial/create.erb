@@ -1,0 +1,5 @@
+<form action="<%= http.route(:create, @path, file: @active_file && @active_file[:path]) %>" method="post">
+  <input type="text" name="name" value="" style="width: 200px;"/>
+  <input type="submit" name="file" value="file" class="saint-button"/>
+  <input type="submit" name="folder" value="folder" class="saint-button"/>
+</form>

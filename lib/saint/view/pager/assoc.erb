@@ -1,0 +1,72 @@
+<table style="margin-left:auto; margin-right:auto;">
+
+  <tr>
+    <% if @pages > 1 %>
+        <td>
+          1
+        </td>
+        <td>
+          <% marker = "<img src='#{Saint::FileServer['vendor/icons/Oxygen/24/first.png']}' />"
+             if @page_prev %>
+              <a onclick="Saint.pager('<%= link_page 1 %>','<%= @opts[:container_id] %>');" href="javascript:void(0);">
+                <%= marker %>
+              </a>
+          <% else %>
+              <%= marker %>
+          <% end %>
+        </td>
+        <td>
+          <% marker = "<img src='#{Saint::FileServer['vendor/icons/Oxygen/24/prev.png']}' />"
+             if @page_prev %>
+              <a onclick="Saint.pager('<%= link_page @page_prev %>','<%= @opts[:container_id] %>');" href="javascript:void(0);">
+                <%= marker %>
+              </a>
+          <% else %>
+              <%= marker %>
+          <% end %>
+        </td>
+        <td>
+          <% @page_min.upto(@page_max) do |page| -%>
+
+              <% if page == @page_label -%>
+                  <div class="saint-button ui-state-highlight">
+                    <%= page %>
+                  </div>
+              <% else -%>
+                  <a onclick="Saint.pager('<%= link_page page %>','<%= @opts[:container_id] %>');" href="javascript:void(0);" class="saint-button">
+                    <%= page %>
+                  </a>
+              <% end -%>
+
+          <% end -%>
+        </td>
+
+        <td>
+          <% marker = "<img src='#{Saint::FileServer['vendor/icons/Oxygen/24/next.png']}' />"
+             if @page_next %>
+              <a onclick="Saint.pager('<%= link_page @page_next %>','<%= @opts[:container_id] %>');" href="javascript:void(0);">
+                <%= marker %>
+              </a>
+          <% else %>
+              <%= marker %>
+          <% end %>
+        </td>
+        <td>
+          <% marker = "<img src='#{Saint::FileServer['vendor/icons/Oxygen/24/last.png']}' />"
+             if @page_next %>
+              <a onclick="Saint.pager('<%= link_page @pages %>','<%= @opts[:container_id] %>');" href="javascript:void(0);">
+                <%= marker %>
+              </a>
+          <% else %>
+              <%= marker %>
+          <% end %>
+        </td>
+    <% end %>
+    <% if @pages > 1 %>
+    <td>
+      <%= @pages %>
+    </td>
+    <% end -%>
+  </tr>
+</table>
+

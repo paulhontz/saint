@@ -1,0 +1,23 @@
+<script type="text/javascript" src="<%= Saint::FileServer["ui.js"] %>"></script>
+<form method="post" action="<%= http.route(:save, @row_id) %>" id="<%= http.params['form_id'] %>">
+
+  <% reject = []
+     (belongs_to = saint.belongs_to) && belongs_to.each_pair do |name, rel|
+         value = @row[rel.local_key] || http.params[rel.local_key.to_s]
+         reject << name if value
+  -%>
+      <input type="hidden" name="<%= rel.local_key %>" id="<%= rel.id %>-element"
+             value="<%= value || ::Saint::RV_NULL_VALUE %>"
+      />
+      <% unless value -%>
+          <input type="button" class="saint-button" value="Click to select <%= rel.label %>"
+                 onclick="$('#saint-assoc-belongs_to-container-<%= rel.id %>').toggle();"
+          />
+      <% end -%>
+  <% end -%>
+
+  <%= saint_view.render_partial('edit/assoc/belongs_to', reject: reject) %>
+
+  <%= render_elements @elements %>
+  
+</form>

@@ -1,0 +1,86 @@
+<span class="saint-flash_alert"><%= http.flash[:alert] %></span>
+
+<% if filters = saint.filters(:html) -%>
+    <fieldset>
+      <legend>Filters</legend>
+      <div style="clear: both;">
+        <form action="">
+          <%= filters %>
+          <div style="display: inline-block;">
+            <div class="saint-filter_label">&nbsp;</div>
+            <input type="submit" value="Search" class="saint-button"/>
+            <a href="<%= http.route %>" class="saint-button">
+              Reset
+            </a>
+          </div>
+        </form>
+      </div>
+    </fieldset>
+<% end -%>
+
+<table style="width: 100%;">
+  <tr>
+    <% if saint.create -%>
+        <td style="width: 5%;">
+          <a href="<%= http.route(:edit, @pager.query_string) %>" class="saint-button" style="width: 100px;">
+            New
+          </a>
+        </td>
+    <% end -%>
+    <td>
+      <%= @pager.html %>
+    </td>
+  </tr>
+</table>
+
+<div class="saint-tabs">
+
+  <ul>
+    <li>
+      <a href="#saint-tabs-master">
+        <% if master_tab = saint.summary_tabs[:master] -%>
+            <%= master_tab.label %>
+        <% else -%>
+            <%= saint.h %>
+        <% end -%>
+      </a>
+    </li>
+
+    <% saint.summary_tabs.reject { |k, v| k == :master }.each_value do |tab| -%>
+        <li>
+          <a href="#saint-tabs-opted-<%= tab.id %>">
+            <%= tab.label %>
+          </a>
+        </li>
+    <% end -%>
+
+  </ul>
+
+  <div id="saint-tabs-master">
+
+    <% if master_tab -%>
+        <%= self.instance_exec @rows, @pager, &master_tab.proc %>
+    <% else -%>
+
+        <form action="<%= http.route(:delete) %>" method="post">
+          <input type="hidden" name="redirect_to" value="<%= http.route(@pager.query_string) %>"/>
+
+          <%= saint_view.render_partial('list/list-partial', items: @rows, level: 0, color: nil) %>
+
+          <% if saint.delete -%>
+              <div style="text-align: right; margin: 20px;">
+                <input type="submit" value="remove selected" onclick="return confirm('This will remove selected items. This action CAN NOT be undone! Continue?');" class="saint-button"/>
+              </div>
+          <% end -%>
+        </form>
+
+    <% end -%>
+  </div>
+
+  <% saint.summary_tabs.reject { |k, v| k == :master }.each_value do |tab| -%>
+      <div id="saint-tabs-opted-<%= tab.id %>">
+        <%= self.instance_exec @rows, @pager, &tab.proc %>
+      </div>
+  <% end -%>
+
+</div>

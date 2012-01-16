@@ -1,0 +1,7 @@
+<select name="value">
+  <% options.each_pair do |value, label| -%>
+      <option value="<%= value %>" <%= 'selected' if value == row.value %>>
+        <%= label %>
+      </option>
+  <% end -%>
+</select>

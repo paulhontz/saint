@@ -1,0 +1,11 @@
+<% (options = @element.options) && options.each_pair do |value, label|
+    label_id = ["saint-input-radio", @element.name.to_s, @row_id.to_s, value.to_s.gsub(/[^\w|\d]/im, "_")].join("-") %>
+    <input type="radio" name="<%= @element.name %>" id="<%= label_id %>" value="<%= value %>"
+           style="<%= @element.css_style %>" class="<%= @element.css_class %>"
+           <%= 'checked' if (@row_val == value) || ((@row_id == 0 || @row_id.nil?) && @element.default == value) -%>
+    />
+    <label for="<%= label_id %>">
+      <%= label %>
+    </label>
+    <br/>
+<% end %>

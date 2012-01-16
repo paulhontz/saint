@@ -1,0 +1,119 @@
+<fieldset>
+    <legend>Filters</legend>
+    <form action="">
+        </div>
+        <div style="display: inline-block; white-space: nowrap; background-color: #CCC; vertical-align: top;">
+            Name
+            <input type="text" name="saint-filters[name][like]" value=""
+                   onkeyup="       "
+                    />
+
+            <br/>
+        </div>
+        <div style="display: inline-block; white-space: nowrap; background-color: #CCC; vertical-align: top;">
+            Content
+            <input type="text" name="saint-filters[content][like]" value=""
+                   onkeyup="       "
+                    />
+
+            <br/>
+        </div>
+        <div style="display: inline-block; white-space: nowrap; background-color: #CCC; vertical-align: top;">
+    
+    <span id="saint_filters_Ctrl_Page_active748e56bf52fa031cb9419f2ba3af76a4">
+<select name="saint-filters[active][eql]"
+        id="saint_filters_Ctrl_Page_active748e56bf52fa031cb9419f2ba3af76a4-input"
+        class="saint-ui-chosen"
+        data-placeholder="Active"
+
+        style="width: 200px;"
+        onchange="        ">
+    <option value=""></option>
+    <option value="1">
+        Yes
+    </option>
+    <option value="0">
+        No
+    </option>
+</select>
+    </span>
+
+            <br/>
+        </div>
+        <div style="display: inline-block; white-space: nowrap; background-color: #CCC; vertical-align: top;">
+    
+    <span id="saint_filters_Ctrl_Page_Model_Menu_Model_MenuPage_menu748e56bf52fa031cb9419f2ba3af76a4">
+<select name="saint-filters[menu][eql]"
+        id="saint_filters_Ctrl_Page_Model_Menu_Model_MenuPage_menu748e56bf52fa031cb9419f2ba3af76a4-input"
+        class="saint-ui-chosen"
+        data-placeholder="Menus: 0"
+
+        style="width: 200px;"
+        onchange="        ">
+    <option value=""></option>
+</select>
+    </span>
+
+            <br/>
+        </div>
+        <div style="display: inline-block; white-space: nowrap; background-color: #CCC; vertical-align: top;">
+            Country Name
+            <input type="text" name="saint-filters[country_name][like]" value=""
+                   onkeyup="
+               $('#saint_filters_Ctrl_Page_Model_Author_author_id748e56bf52fa031cb9419f2ba3af76a4-input,#saint_filters_Ctrl_Page_Model_Country_country_id748e56bf52fa031cb9419f2ba3af76a4-input').remove();
+               var query_string = $(this).closest('form').serialize();
+               $.get( '/page/filter/author_id/748e56bf52fa031cb9419f2ba3af76a4',
+                       query_string,
+                       function(response){ $('#saint_filters_Ctrl_Page_Model_Author_author_id748e56bf52fa031cb9419f2ba3af76a4').html(response); }
+                       );
+               $.get( '/page/filter/country_id/748e56bf52fa031cb9419f2ba3af76a4',
+                       query_string,
+                       function(response){ $('#saint_filters_Ctrl_Page_Model_Country_country_id748e56bf52fa031cb9419f2ba3af76a4').html(response); }
+                       );
+       "
+                    />
+
+            <br/>
+    
+    <span id="saint_filters_Ctrl_Page_Model_Country_country_id748e56bf52fa031cb9419f2ba3af76a4">
+<select name="saint-filters[country_id][eql]"
+        id="saint_filters_Ctrl_Page_Model_Country_country_id748e56bf52fa031cb9419f2ba3af76a4-input"
+        class="saint-ui-chosen"
+        data-placeholder="Country Name required"
+
+        style="width: 100%;"
+        onchange="
+                $('#saint_filters_Ctrl_Page_Model_Author_author_id748e56bf52fa031cb9419f2ba3af76a4-input').remove();
+                var query_string = $(this).closest('form').serialize();
+                $.get( '/page/filter/author_id/748e56bf52fa031cb9419f2ba3af76a4',
+                        query_string,
+                        function(response){ $('#saint_filters_Ctrl_Page_Model_Author_author_id748e56bf52fa031cb9419f2ba3af76a4').html(response); }
+                        );
+        ">
+    <option value=""></option>
+</select>
+    </span>
+
+            <br/>
+    
+    <span id="saint_filters_Ctrl_Page_Model_Author_author_id748e56bf52fa031cb9419f2ba3af76a4">
+<select name="saint-filters[author_id][eql]"
+        id="saint_filters_Ctrl_Page_Model_Author_author_id748e56bf52fa031cb9419f2ba3af76a4-input"
+        class="saint-ui-chosen"
+        data-placeholder="Country required"
+
+        style="width: 100%;"
+        onchange="        ">
+    <option value=""></option>
+</select>
+    </span>
+
+            <br/>
+        </div>
+
+        <input type="submit" value="search" class="saint-button"/>
+        <a href="/page/" class="saint-button">
+            reset
+        </a>
+    </form>
+</fieldset>

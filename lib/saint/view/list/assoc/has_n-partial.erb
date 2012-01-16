@@ -1,0 +1,117 @@
+<% remote_node = @relation.remote_node
+   readonly = @relation.readonly
+   tree = remote_node && remote_node.saint.is_tree?
+-%>
+<table width="100%">
+
+  <tr class="ui-widget-header <%= 'saint-header' if level == 0 %>">
+    <% if level == 0 -%>
+        <td style="width: 5%;">
+          #
+        </td>
+        <% unless readonly -%>
+            <td style="width: 5%;"></td>
+        <% end -%>
+    <% end -%>
+
+    <% @remote_columns.each do |column| -%>
+        <td style="<%= 'width: ' + (90 / @remote_columns.size).ceil.to_s + '%;' %>">
+          <%= column.label %>
+        </td>
+    <% end -%>
+
+  </tr>
+
+  <% items_counter = 0
+     items.each do |remote_item|
+         remote_id = remote_item[@relation.remote_pkey]
+         update_relation_action = :assoc__has_n__update_remote_item
+         update_relation_action = :assoc__has_n__update_through_model if @relation.through_model
+         update_relation_url = http.route(update_relation_action, @relation.id, "/")
+         children = tree ? remote_item.send(tree[:has_n].children) : []
+         self_color = color || Saint.tree_colors.sample
+         bg_color = color || (self_color if children.size > 0)
+  -%>
+
+      <tr class="saint-selectable" style="<%= "background-color: ##{bg_color}" if bg_color %>">
+        <% if level == 0 -%>
+            <td style="text-align: center;">
+              <a href="<%= remote_node ? remote_node.http.route(:edit, remote_id) : 'javascript:void(0);' %>" target="_blank">
+                <%= (items_counter += 1) + @pager.page_number * @relation.ipp %>
+              </a>
+            </td>
+            <% unless readonly -%>
+                <td style="text-align: center;">
+
+                  <% if @attached == 0 -%>
+
+                      <% if @attached_keys_or_remote_item.include?(remote_id) -%>
+                      <span class="saint-button ui-state-highlight">
+                        attached
+                      </span>
+                      <% else -%>
+                          <input type="button" value="attach" class="saint-button"
+                                 <% if (@relation.is_tree? && remote_id == @local_id) || (@relation.belongs_to? && remote_item[@relation.remote_key] == @local_id) -%>
+                                 disabled="true"
+                                 <% end -%>
+                                 onclick="if(confirm('Please confirm Attach action')){Saint.valid_get('<%= update_relation_url + "#{remote_id}/#{@local_id}/create" %>', function(){
+                                         Saint.update_container('<%= @relation.id %>0', '<%= @update_selector_url + "0" + @pager.query_string %>');
+                                         Saint.update_container('<%= @relation.id %>1', '<%= @update_selector_url + "1" %>');
+                                         Saint.update_container('<%= @relation.id %>-edit_assoc_container');
+                                         },
+                                         '<%= @relation.id %>-error_container'
+                                         );}"
+                                 />
+                      <% end -%>
+
+                  <% else -%>
+
+                      <input type="button" value="detach" class="saint-button"
+                             onclick="if(confirm('Please confirm Detach action')){Saint.valid_get('<%= update_relation_url + "#{remote_id}/#{@local_id}/delete" %>', function(){
+                                     Saint.update_container('<%= @relation.id %>0', '<%= @update_selector_url + "0" %>');
+                                     Saint.update_container('<%= @relation.id %>1', '<%= @update_selector_url + "1" + @pager.query_string %>');
+                                     Saint.update_container('<%= @relation.id %>-edit_assoc_container');
+                                     },
+                                     '<%= @relation.id %>-error_container'
+                                     );}"
+                      />
+
+                  <% end -%>
+                </td>
+            <% end -%>
+        <% end -%>
+
+        <% @remote_columns.each do |column| -%>
+            <td>
+              <a href="<%= remote_node ? remote_node.http.route(:edit, remote_id) : 'javascript:void(0);' %>" target="_blank" class="saint-link">
+                <%= column.summary_value remote_item %>
+              </a>
+            </td>
+        <% end -%>
+
+      </tr>
+
+      <% if children.size > 0
+             children_container_id = @relation.id + @attached.to_s + level.to_s + remote_id.to_s + '_children_container' -%>
+          <tr>
+            <td></td>
+            <td style="text-align: right; vertical-align: top;">
+              <% if level == 0 -%>
+                  <div id="<%= children_container_id %>-status"
+                       style="cursor: pointer;" class="saint-text_note"
+                       onclick="Saint.Utils.toggleChildrenContainer('<%= children_container_id %>');">
+                    children +
+                  </div>
+              <% end -%>
+            </td>
+            <td colspan="<%= @remote_columns.size %>">
+              <div id="<%= children_container_id %>" style="<%= 'display: none;' if level == 0 %>">
+                <%= saint_view.render_partial('list/assoc/has_n-partial', items: children, level: level + 1, color: self_color) %>
+              </div>
+            </td>
+          </tr>
+      <% end -%>
+
+  <% end %>
+
+</table>

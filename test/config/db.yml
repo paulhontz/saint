@@ -1,0 +1,5 @@
+:type: mysql
+:host: localhost
+:user: scidev
+:pass: 
+:name: scidev_saint_test

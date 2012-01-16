@@ -1,0 +1,19 @@
+<table>
+  <tr>
+    <% Saint::Utils::BOOLEAN_OPTIONS.each_pair do |value, label|
+        label_id = ["saint-input-boolean", @element.name.to_s, @row_id.to_s, value.to_s.gsub(/[^\w|\d]/im, "_")].join("-")
+    -%>
+        <td style="padding-right: 10px;">
+          <input type="radio" name="<%= @element.name %>" value="<%= value %>"
+                 style="<%= @element.css_style %>" class="<%= @element.css_class %>" id="<%= label_id %>"
+                 <%= "checked" if @row_val == value || (@row_id.to_i == 0 && @element.default == value) %>
+          />
+        </td>
+        <td>
+          <label for="<%= label_id %>">
+            <%= label %>
+          </label>
+        </td>
+    <% end -%>
+  </tr>
+</table>

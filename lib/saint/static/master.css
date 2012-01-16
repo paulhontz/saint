@@ -1,0 +1,170 @@
+body, a, input, textarea {
+    font-family: 'PT Sans', sans-serif;
+    font-size: 15px;
+}
+
+input[type=text] {
+    height: 25px;
+}
+input[type=text], textarea {
+    color: #333333;
+    border: #CCCCBB solid 1px;
+    border-radius: 4px 4px 4px 4px;
+    -moz-border-radius: 4px 4px 4px 4px;
+    -webkit-border-radius: 4px 4px 4px 4px;
+    outline: none;
+}
+
+input:focus, textarea:focus {
+    box-shadow: 0 0 5px rgba(20, 110, 232, .5);
+    -webkit-box-shadow: 0 0 5px rgba(20, 110, 232, .5);
+    -moz-box-shadow: 0 0 5px rgba(20, 110, 232, .5);
+}
+
+table {
+    font-size: inherit;
+}
+
+fieldset {
+
+    border: #CCCCBB solid 1px;
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+
+    margin-top: 20px;
+    margin-bottom: 15px;
+
+    background-color: #F8F8F8;
+
+    box-shadow: 2px 2px 8px #bbb;
+    -moz-box-shadow: 5px 5px 10px #bbb;
+    -webkit-box-shadow: 2px 2px 8px #bbb;
+}
+
+fieldset legend {
+
+    float: left;
+    margin-top: -20px;
+    margin-bottom: 10px;
+    padding: 5px 10px;
+
+    border: 1px solid #aaa;
+    border-radius: 4px 4px 4px 4px;
+    -moz-border-radius: 4px 4px 4px 4px;
+    -webkit-border-radius: 4px 4px 4px 4px;
+
+
+    background-color: #FFFFFF;
+
+    box-shadow: 2px 2px 15px #bbb;
+    -moz-box-shadow: 2px 2px 15px #bbb;
+    -webkit-box-shadow: 2px 2px 15px #bbb;
+
+    color: #FF0084;
+}
+
+.saint-filter_label {
+    font-size: 80%;
+    color: #808080;
+}
+
+.saint-save_button {
+    width: 200px;
+}
+
+.saint-save_button_container {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    text-align: right;
+}
+
+.saint-button {
+}
+
+.saint-selectable {
+
+}
+
+.saint-selectable-hover {
+    background-color: #F1F1F1;
+}
+
+.saint-selectable-active {
+    background-color: #32cd32;
+}
+
+.saint-selectable-selected {
+    background-color: #F1F1F1;
+}
+
+.saint-header {
+    line-height: 40px;
+    text-align: center;
+}
+
+.saint-list-row {
+    text-align: center;
+}
+
+.saint-pager-active {
+    background-color: #9acd32;
+}
+
+.saint-alert {
+    color: #8b0000;
+}
+
+.saint-flash_alert {
+    color: #8b0000;
+}
+
+.saint-error {
+    color: #8b0000;
+}
+
+.saint-text_note {
+    font-size: 90%;
+    color: gray;
+    margin-bottom: 5px;
+}
+
+.saint-cms-datepicker {
+    width: 100px;
+    color: gray;
+    font-size: 80%;
+}
+
+.saint-link {
+    text-decoration: none;
+}
+
+.saint-menu-top-container {
+    display: table;
+}
+
+.saint-menu-top {
+
+}
+
+.saint-fm-node-container {
+    color: inherit;
+    width: 100%;
+}
+
+.saint-fm-node-icon {
+    width: 20px;
+}
+
+.saint-fm-node-name {
+
+    white-space: nowrap;
+    width: 90%;
+
+}
+
+.saint-fm-node-size {
+    font-size: 80%;
+    text-align: right;
+    white-space: nowrap;
+}

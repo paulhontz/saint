@@ -1,0 +1,15 @@
+<% label = el.label
+   if el.layout -%>
+    <%= el.layout.sub("[label]", label).sub("[field]", el_html) -%>
+<% else -%>
+    <% if layout -%>
+        <%= layout.sub("[label]", label).sub("[field]", el_html) -%>
+    <% else -%>
+        <fieldset style="<%= el.layout_style %>" class="<%= el.layout_class %>">
+          <legend><%= label %></legend>
+          <div style="clear: left;">
+              <%= el_html %>
+          </div>
+        </fieldset>
+    <% end -%>
+<% end -%>

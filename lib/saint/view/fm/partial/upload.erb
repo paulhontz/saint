@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="<%= Saint::FileServer['vendor/plupload/js/jquery.plupload.queue/css/jquery.plupload.queue.css'] %>"/>
+<script type="text/javascript" src="<%= Saint::FileServer['vendor/plupload/js/plupload.full.js'] %>"></script>
+<script type="text/javascript" src="<%= Saint::FileServer['vendor/plupload/js/jquery.plupload.queue/jquery.plupload.queue.js'] %>"></script>
+
+<div id="saint-fm-uploader-dialog">
+  <div id="saint-fm-uploader-queue"></div>
+</div>
+<img src="<%= Saint::FileServer['vendor/icons/Oxygen/16/upload.png'] %>" style="cursor: pointer;"
+     onclick="$('#saint-fm-uploader-dialog').dialog({
+             title: 'Uploading files into <%= label %>',
+             width: 800,
+             height: 450,
+             open: function(){
+                     var errors = new Array();
+                     $('#saint-fm-uploader-queue').pluploadQueue({
+                             runtimes : 'html5,gears,flash,html4',
+                             flash_swf_url : '<%= Saint::FileServer['vendor/plupload/js/plupload.flash.swf'] %>',
+                             url : '<%= http.route(:upload) %>',
+                             multipart_params: {dir: '<%= path %>'},
+                             init: {
+                                     FileUploaded: function(uploader, file, response){
+                                             if(response.response == 1)
+                                                     return true;
+                                             errors.push(response.response);
+                                             },
+                                     UploadComplete: function(uploader, files){
+                                             if(errors.length > 0)
+                                                     return alert(errors.join());
+                                             window.location.reload();
+                                             }
+                                     }
+                             });
+                     },
+             buttons: {
+                     'Close / Cancel': function(){
+                             $(this).dialog('destroy');
+                             }
+                     }
+             });"
+/>

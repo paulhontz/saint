@@ -1,0 +1,10 @@
+<div>
+<% filters.each do |filter| -%>
+    <% if filter.depends_on.size == 0 -%>
+        </div>
+        <div style="display: inline-block; white-space: nowrap; vertical-align: top;">
+    <% end -%>
+    <%= filter.html %>
+    <br/>
+<% end -%>
+</div>
