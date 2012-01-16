@@ -60,7 +60,7 @@ To have some column excluded from CRUD pages, set :crud option to false:
 
     saint.column :date, crud: false
 
-[More on Columns](blob/master/Columns.md)
+[More on Columns](saint/blob/master/Columns.md)
 
 **Associations**
 
