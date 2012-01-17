@@ -39,6 +39,12 @@ by passing it as second argument or by using #saint.pkey:
         saint.pkey :uid
     end
 
+**Deploy:**
+
+    app = Presto::App.new
+    app.mount Page
+    app.run
+
 ###CRUD Pages - edit columns and associations
 
 **Columns**
