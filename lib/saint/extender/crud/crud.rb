@@ -126,7 +126,7 @@ module Saint
               @row, @errors = saint.orm.new(ds)
             end
 
-            if @errors.size == 0
+            if @row && @errors.size == 0
               ds.each_pair { |c, v| @row[c] = v } if row_id > 0
               @row, @errors = saint.orm.save @row
             end
@@ -134,6 +134,10 @@ module Saint
             @errors = ['Update capability disabled by admin']
           end
 
+          unless @row
+            @errors = ['Unknown error occurred']
+          end
+          
           if @errors.size > 0
             json = {error: saint_view.render_partial("error"), status: 0}
           else

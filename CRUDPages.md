@@ -1,5 +1,6 @@
+###Header
 
-**Header** - defaulted to pluralized model name
+Defaulted to pluralized model name
 
 To have a custom header for both Summary and CRUD pages, use *saint.header*:
 
@@ -34,8 +35,7 @@ To achieve same result without a block, pass methods to be called inside block a
     # Pages : [page name] by [author name], [views] views
 
 
-Labels
----
+###Labels
 
 By default, Saint will use capitalized name for column label:
 
@@ -48,8 +48,7 @@ To have an custom label, use :label option:
     # HTML: <fieldset><legend>Author's Name</legend>...
 
 
-Grids
----
+###Grids
 
 By default, columns are separated by a new line.
 
@@ -94,8 +93,7 @@ To have a custom width/height for some column, use :grid_width and :grid_height 
 
 Numerical widht/height are used as pixels.
 
-Tabs
----
+###Tabs
 
 If you have to say more than Saint's default UI,
 feel free to integrate your pages directly into pages rendered by Saint.
@@ -145,48 +143,7 @@ so it may call any controller action.
     end
 
 
-Layouts
----
-
-####Global lyouts
-By default, Saint use an fieldset as columns layout.
-
-Default layout for an text element looks like:
-
-    <fieldset><legend>[label]</legend>[field]</fieldset>
-
-Use *saint.column_layout* to render all columns using custom layout:
-
-    saint.column_layout '<div class="column-layout">[label]: [field]</div>'
-
-####Per column layout
-
-Use custom layout for a specific column:
-
-    saint.column :some_column, layout: '<div class="column-layout">[label]: [field]</div>'
-
-Use default layout with custom style/class:
-
-    saint.column :some_column, layout_style: 'width: 20%;'
-    saint.column :some_another_column, layout_class: 'custom-column-layout'
-
-CSS
----
-
-**Custom width/height for specific columns:**
-
-    saint.column :some_column, width: 400, height: 200
-    saint.column :some_another_column, width: '20%', height: '10%'
-
-Numerical widht/height are used as pixels.
-
-**Custom style/class for specific columns:**
-
-    saint.column :some_column, css_style: 'width: 400px;'
-    saint.column :some_another_column, css_class: 'custom-column-css-class'
-
-Confines
----
+###Confines
 
 Prohibit create new items:
 
@@ -200,8 +157,7 @@ Prohibit delete items:
 
     saint.delete false
 
-Callbacks
----
+###Callbacks
 
 Callbacks will be executed before/after given ORM action(s).
 If no actions given, callbacks will be executed before any action.
@@ -233,3 +189,40 @@ Proc will be executed inside node instance,
 so it will have access to http/view/node/saint api.
 
 
+###Layouts
+
+####Global lyouts
+By default, Saint use an fieldset as columns layout.
+
+Default layout for an text element looks like:
+
+    <fieldset><legend>[label]</legend>[field]</fieldset>
+
+Use *saint.column_layout* to render all columns using custom layout:
+
+    saint.column_layout '<div class="column-layout">[label]: [field]</div>'
+
+####Per column layout
+
+Use custom layout for a specific column:
+
+    saint.column :some_column, layout: '<div class="column-layout">[label]: [field]</div>'
+
+Use default layout with custom style/class:
+
+    saint.column :some_column, layout_style: 'width: 20%;'
+    saint.column :some_another_column, layout_class: 'custom-column-layout'
+
+###CSS
+
+**Custom width/height for specific columns:**
+
+    saint.column :some_column, width: 400, height: 200
+    saint.column :some_another_column, width: '20%', height: '10%'
+
+Numerical widht/height are used as pixels.
+
+**Custom style/class for specific columns:**
+
+    saint.column :some_column, css_style: 'width: 400px;'
+    saint.column :some_another_column, css_class: 'custom-column-css-class'

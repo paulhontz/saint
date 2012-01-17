@@ -1,5 +1,7 @@
 
-###Header - defaulted to pluralized model name
+###Header
+
+Defaulted to pluralized model name
 
 To have a custom header for both Summary and CRUD pages, use *saint.header*:
 
@@ -13,13 +15,17 @@ To have a custom header for both Summary and CRUD pages, use *saint.header*:
         # header now is "CMS Pages"
     end
 
-###Items per page - defaulted to 10
+###Items per page
+
+Defaulted to 10
 
     saint.items_per_page 100
     # or
     saint.ipp 100
 
-###Order - defaulted to model's order
+###Order
+
+Defaulted to model's order
 
     saint.order :date, :desc
     saint.order :name, :asc

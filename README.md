@@ -45,7 +45,9 @@ by passing it as second argument or by using #saint.pkey:
     app.mount Page
     app.run
 
-###CRUD Pages - edit columns and associations
+###CRUD Pages
+
+Aimed to edit columns and associations.
 
 **Columns**
 
