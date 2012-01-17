@@ -1,0 +1,14 @@
+--readme README.md
+--markup markdown
+--title 'Saint Documentation'
+--charset utf-8
+lib/**/*.rb
+-
+Associations.md
+Columns.md
+CRUDPages.md
+FileManager.md
+Filters.md
+Menu.md
+OptsManager.md
+SummaryPages.md
