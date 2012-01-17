@@ -1,2 +1,2 @@
-require './init'
+require './load'
 APP.test

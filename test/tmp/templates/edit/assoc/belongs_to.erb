@@ -1,0 +1,22 @@
+<% reject ||= []
+   saint.belongs_to && saint.belongs_to.reject { |k, v| reject.include?(k) }.each_value do |rel|
+       route = http.route(:assoc__any__remote_items, rel.id, @row_id, 0, http.get_params) -%>
+
+    <fieldset id="saint-assoc-belongs_to-container-<%= rel.id %>" style="display: none;" class="saint-assoc-belongs_to-container">
+      <legend>
+        Select <%= rel.label %> |
+        <a href="javascript:void(0);" onclick="$('#saint-assoc-belongs_to-container-<%= rel.id %>').toggle();" style="text-decoration: none;">
+          close
+          <img src="<%= Saint::FileServer['vendor/icons/Oxygen/16/delete.png'] %>" style="vertical-align: bottom;">
+        </a>
+      </legend>
+
+      <script type="text/javascript">
+          $(function() {
+              Saint.update_container('<%= rel.id %>0', '<%= route %>');
+          });
+      </script>
+      <div id="<%= rel.id %>0"></div>
+    </fieldset>
+
+<% end -%>

@@ -1,0 +1,15 @@
+<ul id="saint-errors_dialog_container">
+  <% @errors.each do |e| %>
+      <li>
+        <% if e.is_a?(Array) -%>
+            <ul>
+              <% e.each do |error| -%>
+                  <li><%= error %></li>
+              <% end -%>
+            </ul>
+        <% else -%>
+            <%= e.to_s %>
+        <% end -%>
+      </li>
+  <% end %>
+</ul>

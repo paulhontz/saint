@@ -1,14 +1,16 @@
-require 'ap'
-require 'json'
-require 'yaml'
+require File.expand_path('../../../presto/lib/presto', __FILE__)
+require File.expand_path('../../lib/saint', __FILE__)
 require 'data_mapper'
-require 'dm-types'
 require 'dm-is-tree'
 require 'mongo'
+require 'digest'
+require 'json'
+require 'yaml'
 
-require File.expand_path('../../presto/lib/presto', File.dirname(__FILE__))
-require File.expand_path('../../saint/lib/saint', File.dirname(__FILE__))
-require File.expand_path('./config/config', File.dirname(__FILE__))
+Dir[File.expand_path('../extend/**/*.rb', __FILE__)].each { |f| require f }
+require File.expand_path('../config/config', __FILE__)
+require File.expand_path('../config/db', __FILE__)
+
 
 MONGODB_PORT = 20_000
 MONGODB_PATH = "/tmp/presto/mongodb/"
@@ -46,27 +48,4 @@ rescue
     puts
     exit 1
   end
-end
-
-%w[model assoc].each do |file|
-  Dir[Pfg.model "**/#{file}.rb"].each { |f| require f }
-end
-DataMapper.finalize
-
-%w[ctrl model admin test/*].each do |file|
-  Dir[Pfg.ctrl "**/#{file}.rb"].each { |f| require f }
-end
-
-module Helper
-  
-end
-
-APP = Presto::App.new
-APP.helper Helper
-APP.mount Ctrl do
-  http.use Rack::CommonLogger
-  http.use Rack::ShowExceptions
-  view.root Pfg.view
-  view.layouts_root Pfg.view
-  view.layout :layout
 end

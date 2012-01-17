@@ -1,0 +1,10 @@
+<li>
+  <%= @menu.prefix -%>
+  <a href='<%= @menu.void? ? 'javascript:void(0);' : @menu.node.http.route  %>'>
+    <%= @menu.label -%>
+  </a>
+  <%= @menu.suffix -%>
+  <% if @menu.children.size > 0 -%>
+      <ul><%= build @menu.scope, @menu.node -%></ul>
+  <% end -%>
+</li>

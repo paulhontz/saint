@@ -134,7 +134,9 @@ module Saint
           'saint_filters', @node, remote_model, through_model, @var
       ].map { |c| c.to_s }.join('_').gsub(/[^\w|\d|\-]/, '_').gsub(/_+/, '_')
 
-      @local_model = @node.saint.model
+      unless @local_model = @node.saint.model
+        raise "Please define model before any setup"
+      end
       @local_pkey = @node.saint.pkey
       if @local_model.new.respond_to?(@column) || through_model
         @local_orm = Saint::ORM.new(@local_model)

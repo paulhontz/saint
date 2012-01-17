@@ -2,21 +2,50 @@ class Pfg
 
   class << self
 
-    def root *paths
-      [@root ||= File.expand_path('..', File.dirname(__FILE__))].concat(paths).join('/')
+    def root
+      @root ||= File.expand_path('..', File.dirname(__FILE__)) + '/'
     end
 
-    %w[config model ctrl view].each do |m|
-      define_method m.to_sym do |*paths|
-        [self.instance_variable_get(:"@#{m}") || self.instance_variable_set(:"@#{m}", root(m))].concat(paths).join('/')
+    %w[config base public].each do |m|
+      define_method m.to_sym do
+        Pfg.root / m / ''
       end
     end
-  end
 
+    %w[model view ctrl].each do |m|
+      define_method m.to_sym do
+        Pfg.base / m / ''
+      end
+    end
+
+    def tmp
+      root / :tmp / ''
+    end
+  end
+  Pfg.root
 end
 
 class Cfg
 
-end
+  class << self
+    def env
+      'prod'
+    end
 
-require Pfg.config 'db'
+    def dev?
+      env == 'dev'
+    end
+
+    def prod?
+      env == 'prod'
+    end
+
+    YAML.load(File.read(Pfg.config / 'config.yml')).select { |e, v| e.to_s == Cfg.env }.each_value do |opts|
+      opts.each_pair do |var, val|
+        define_method var do
+          instance_variable_get("@#{var}") || instance_variable_set("@#{var}", val)
+        end
+      end
+    end
+  end
+end

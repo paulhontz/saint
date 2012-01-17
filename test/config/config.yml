@@ -1,0 +1,17 @@
+---
+:prod:
+
+  :hostname: saint.dev
+  :baseurl: /
+  :port: 8050
+
+  :db:
+    :type: mysql
+    :host: localhost
+    :port:
+    :user: scidev
+    :pass:
+    :name: scidev_saint_test
+
+  :cache:
+    :pool: :memory
