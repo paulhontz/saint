@@ -5,13 +5,13 @@ Saint allow developers to easily manage existing ORM models(currently only DataM
 
 It is aimed to automatize the backend building process, by creating **Summary** and **CRUD** pages.
 
-Install:
+**Install:**
 
     $ gem install saint
 
 Before any setup, let Saint know the model to be managed.
 
-Model to be managed:
+**Model to be managed:**
 
     class PageModel
         include DataMapper::Resource
@@ -19,7 +19,7 @@ Model to be managed:
         property :name, String
     end
 
-Saint setup:
+**Saint setup:**
 
     class Page
         include Saint::Api
