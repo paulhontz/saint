@@ -17,12 +17,14 @@ module Saint
       # @param [Symbol] name
       # @param [Hash] opts
       # @option opts [Symbol] :type (:string) one of :string, :text, :select
+      # @option opts [String] :details option description
       # @option opts [Object] :default default value
       # @option opts [Hash, Array] :options options to be used by :select type
       def opt name, opts = {}
         name = normalize_name(name)
         opts['name'] = name
         opts['type'] = opts.delete(:type) || :string
+        opts['details'] = opts.delete(:details)
         opts['default_value'] = opts.delete(:default)
         if options = opts.delete(:options)
           options = Hash[options.zip(options)] if options.is_a?(Array)
@@ -146,8 +148,14 @@ module Saint
 
         saint.grid do
 
-          column :name, label: 'Option', type: :plain do |val|
-            '<b>%s</b>' % Saint::Inflector.titleize(val)
+          column :name, label: 'Option', type: :plain do |val, scp, row|
+            if row && opt = pool.opts[row.name]
+              context = {
+                  name: Saint::Inflector.titleize(row.name),
+                  details: opt['details']
+              }
+              saint_view.render_view('opts/about', context)
+            end
           end
 
           column :value, type: nil do |val, scope, row|

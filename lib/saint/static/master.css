@@ -168,3 +168,11 @@ fieldset legend {
     text-align: right;
     white-space: nowrap;
 }
+
+.saint-opts_manager-name{
+    font-weight: bold;;
+}
+.saint-opts_manager-details{
+    font-size: 80%;
+    color: #808080;
+}
