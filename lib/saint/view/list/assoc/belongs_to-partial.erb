@@ -1,5 +1,8 @@
 <% remote_node = @relation.remote_node
    tree = remote_node && remote_node.saint.is_tree?
+   local_item_children = tree ?
+           @local_item.send(tree[:has_n].children).inject({}) { |children, child| children.update(child[@relation.local_pkey] => child) } :
+           {}
 -%>
 <table width="100%">
 
@@ -43,7 +46,7 @@
                 <td style="text-align: center;">
                   <% if level == 0 -%>
                       <input type="radio" name="saint-belongs_to_selector-<%= @relation.id %>"
-                             <%= 'disabled' if (@relation.is_tree? && remote_item_id == @local_id) || (@attached_keys_or_remote_item.respond_to?(@relation.remote_pkey) && @attached_keys_or_remote_item.send(@relation.remote_pkey) == remote_item_id) %>
+                             <%= 'disabled' if (@relation.is_tree? && (local_item_children[remote_item_id] || remote_item_id == @local_id)) || (@attached_keys_or_remote_item.respond_to?(@relation.remote_pkey) && @attached_keys_or_remote_item.send(@relation.remote_pkey) == remote_item_id) %>
                              <% if @local_id > 0 -%>
                              onclick="if(confirm('Please confirm Select action')){ <%= "update_relation_#{@relation.id}(#{remote_item_id});" %> }else{$(this).attr('checked', false)}"
                              <% else -%>
