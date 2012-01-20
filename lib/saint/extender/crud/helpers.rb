@@ -7,22 +7,11 @@ module Saint
         private
 
         def render_columns columns, scope, row
-
-          common_fields, password_fields = Hash.new, Hash.new
-
-          columns.select { |n, c| c.send scope }.each_value do |column|
-
-            @element = column
-            @row_val = column.value row, scope
-            if column.password
-              password_fields[column] = saint_view.render_partial('edit/password')
-            else
-              common_fields[column] = column.type ?
-                  saint_view.render_partial('edit/elements/%s' % column.type) :
-                  @row_val
-            end
+          columns.select { |n, c| c.send scope }.values.inject({}) do |map, column|
+            @element, @row_val = column, column.value(row, scope)
+            html = column.type ? saint_view.render_partial('edit/elements/%s' % column.type) : @row_val
+            map.update(column => html)
           end
-          [common_fields, password_fields]
         end
 
         def render_elements elements, opts = {}
@@ -59,7 +48,7 @@ module Saint
           if columns.size == 0
             implicit_columns.each_value do |column|
               next unless column.summary
-              next if column.password
+              next if column.password?
               columns << column
             end
           end

@@ -72,7 +72,7 @@ module Saint
             end
           end
 
-          @elements, @password_elements = render_columns(saint.columns, :crud, @row)
+          @elements = render_columns(saint.columns, :crud, @row)
           view.render_layout saint_view.render_partial('edit/edit')
         end
 
@@ -102,11 +102,22 @@ module Saint
           if saint.update
             ds = Hash.new
             saint.columns.select { |n, c| c.save }.each_value do |column|
-              value = http.params[column.name.to_s]
-              # nil columns are not saved/updated.
+
+              value = http.params[column.name.to_s] || ''
+              value = nil if value.size == 0
+
+              # nil and empty columns are not saved/updated.
               # to set an column's value to nil, use {Saint::RV_NULL_VALUE} as column value
-              next unless value
+              unless value
+                # exception making only checkbox columns, which can be nil
+                next unless column.checkbox?
+              end
+
+              # joining values for checkbox and select-multiple columns
+              value = value.join(column.join_with) if value.is_a?(Array)
+              
               value = nil if value == ::Saint::RV_NULL_VALUE
+              
               if value && rb_wrapper = saint.rbw
                 value = rb_wrapper.unwrap(value)
               end
@@ -137,7 +148,7 @@ module Saint
           unless @row
             @errors = ['Unknown error occurred']
           end
-          
+
           if @errors.size > 0
             json = {error: saint_view.render_partial("error"), status: 0}
           else
@@ -146,34 +157,6 @@ module Saint
             json = {alert: alert, status: @row[saint.pkey]}
           end
           json.to_json
-        end
-
-        def save_password row_id, updated_column
-
-          if saint.update
-            return unless column = saint.columns[updated_column.to_sym]
-
-            row_id = row_id.to_i
-            row, @errors = saint.orm.first(saint.pkey => row_id)
-
-            if row && @errors.size == 0
-
-              value, confirmation = http.post_params.values_at(updated_column, updated_column + '_confirm')
-
-              if value == confirmation
-                @errors = saint.orm.update(row, column.name => value)[1]
-              else
-                @errors = ["Passwords mismatch"]
-              end
-            end
-            alert = column.label + " updated successfully!"
-            alert = saint_view.render_partial("error") if @errors.size > 0
-          else
-            alert = 'Update capability disabled by admin'
-          end
-
-          http.flash[:alert] = alert
-          http.redirect http.post_params['redirect-to'] || http.route(:edit, row_id)
         end
 
         def delete row_id = nil

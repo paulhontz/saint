@@ -542,9 +542,6 @@ module Saint
         end
       end
       @depends_on.select { |f, v| v }.each_pair do |f, v|
-        puts
-        p [f.var ,v ]
-        puts
         v = [f.logic_prefix, v, f.logic_suffix].compact.join
         filters.update(f.remote_orm.send(f.logic, f.column, v))
       end

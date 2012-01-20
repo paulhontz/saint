@@ -1,14 +1,15 @@
 <% if options = @element.options
-       if options.is_a?(Array)
-           options = Hash[options.zip(options.map { |o| Saint::Inflector.titleize(o) })]
-       end
+       values = (@row_val||'').split(@element.join_with)
 -%>
-    <select style="<%= @element.css_style %>" class="<%= @element.css_class %>" name="<%= @element.name %>" <%= @element.multiple ? 'multiple="multiple"' : "" %> size="<%= @element.size ? @element.size : 1 %>">
-      <% unless @element.required %>
+    <select style="<%= @element.css_style %>" class="<%= @element.css_class %>"
+            name="<%= @element.name %><%= '[]' if @element.multiple %>"
+            <%= 'multiple' if @element.multiple %>
+            size="<%= @element.size || 1 %>">
+      <% if @element.required.nil? && @element.multiple.nil? %>
           <option value="">---</option>
       <% end %>
       <% options.each_pair do |value, label| -%>
-          <option value="<%= value %>" <%= "selected" if (@row_val == value) || ((@row_id == 0 || @row_id.nil?) && @element.default == value) %> >
+          <option value="<%= value %>" <%= 'selected' if values.include?(value) || (@row_val == value) || ((@row_id == 0 || @row_id.nil?) && @element.default == value) %> >
             <%= label %>
           </option>
       <% end %>

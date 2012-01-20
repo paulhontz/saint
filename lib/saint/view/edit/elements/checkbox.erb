@@ -1,8 +1,17 @@
-<% label_id = ["saint-input-checkbox", @element.name.to_s, @row_id.to_s, @row_val.to_s.gsub(/[^\w|\d]/im, "_")].join("-") %>
-<input type="checkbox" name="<%= @element.name %>" id="<%= label_id %>" value="1"
-       style="<%= @element.css_style %>" class="<%= @element.css_class %>"
-       <%= "checked" if @row_val -%>
-/>
-<label for="<%= label_id %>">
-  <%= @element.label(@row) %>
-</label>
+<% values = (@row_val||'').split(@element.join_with)
+   (options = @element.options) && options.each_pair do |value, label|
+    label_id = ["saint-input-checkbox", @element.name.to_s, @row_id.to_s, value.to_s.gsub(/[^\w|\d]/im, "_")].join('-')
+-%>
+    <div style="display: inline-block;">
+      <input type="checkbox"
+             name="<%= @element.name %>[]" id="<%= label_id %>" value="<%= value %>"
+             style="<%= @element.css_style %>" class="<%= @element.css_class %>"
+             <%= 'checked' if values.include?(value) -%>
+      />
+    </div>
+    <div style="display: inline-block;">
+      <label for="<%= label_id %>" style="margin-left: 10px; cursor: pointer;">
+        <%= label %>
+      </label>
+    </div>
+<% end -%>

@@ -3,10 +3,11 @@ body, a, input, textarea {
     font-size: 15px;
 }
 
-input[type=text] {
+input[type=text], input[type=password] {
     height: 25px;
 }
-input[type=text], textarea {
+
+input[type=text], input[type=password], textarea {
     color: #333333;
     border: #CCCCBB solid 1px;
     border-radius: 4px 4px 4px 4px;
@@ -54,7 +55,6 @@ fieldset legend {
     -moz-border-radius: 4px 4px 4px 4px;
     -webkit-border-radius: 4px 4px 4px 4px;
 
-
     background-color: #FFFFFF;
 
     box-shadow: 2px 2px 15px #bbb;
@@ -70,13 +70,15 @@ fieldset legend {
 }
 
 .saint-save_button {
-    width: 200px;
+
 }
 
-.saint-save_button_container {
-    padding-top: 20px;
-    padding-bottom: 20px;
-    text-align: right;
+.saint-crud_button-container {
+    margin-bottom: 10px;
+}
+
+.saint-crud_button {
+    width: 100px;
 }
 
 .saint-button {
@@ -169,10 +171,11 @@ fieldset legend {
     white-space: nowrap;
 }
 
-.saint-opts_manager-name{
+.saint-opts_manager-name {
     font-weight: bold;;
 }
-.saint-opts_manager-details{
+
+.saint-opts_manager-details {
     font-size: 80%;
     color: #808080;
 }

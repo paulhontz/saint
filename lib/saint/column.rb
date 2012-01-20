@@ -5,10 +5,15 @@ module Saint
         # if set to true, item wont be saved if field is empty.
         :required,
 
-        # allow to select multiple options on drop-down selectors.
-        :multiple,
+        # :multiple allow to select multiple options on drop-down selectors.
+        # :size indicates how much lines to display for select-multiple columns.
+        :multiple, :size,
 
-        # define options for drop-down and radio selectors.
+        # string used to join values for checkbox and select-multiple columns.
+        # by default a coma will be used.
+        :join_with,
+
+        # options to be used on select, radio and checkbox selectors.
         :options,
 
         # set value to be used when value for given column is nil.
@@ -27,19 +32,15 @@ module Saint
         #   # HTML: <fieldset><legend>Author's Name</legend>...
         :label,
 
-        # if set to true, GUI will display an separate tab for each password column,
-        # with an confirmation field.
-        :password,
-            
         # search/group columns by tags
         :tag,
-            
+
         # make current column a part of a grid
         :grid,
-            
+
         # set width/height for used grid
         :grid_width, :grid_height,
-            
+
         # css
         :width, :height, :css_style, :css_class,
 
@@ -49,14 +50,13 @@ module Saint
 
         # use default layout but add this css style
         :layout_style,
-            
+
         # use default layout but add this css class
         :layout_class
     ]
     OPTS.each { |o| attr_reader o }
 
-    attr_reader :id, :name, :type, :proc, :rb_wrapper,
-                :summary, :crud, :save
+    attr_reader :id, :name, :type, :proc, :summary, :crud, :save
 
     def initialize node_or_node_instance, name, opts = {}
 
@@ -67,7 +67,7 @@ module Saint
       end
 
       @proc = opts[:proc]
-      @id = "#{name}_#{Digest::MD5.hexdigest(@proc.to_s)}"
+      @id = '%s_%s' % [name, Digest::MD5.hexdigest(@proc.to_s)]
       @name = name.to_sym
 
       # default type is string
@@ -84,10 +84,36 @@ module Saint
 
       OPTS.each { |v| self.instance_variable_set(:"@#{v}", opts[v]) }
 
+      if @options
+        if @options.is_a?(Array)
+          @options = Hash[@options.zip(@options.map { |o| Saint::Inflector.titleize(o) })]
+        else
+          raise('options should be either an Hash or an Array') unless @options.is_a?(Hash)
+        end
+      end
+
       @label ||= Saint::Inflector.titleize(@name)
 
-      width = @width ? (@width.is_a?(Numeric) ? '%spx' % @width : @width) : '100%'
-      @css_style = "#{@css_style} #{ "width: #{width};" } #{"height: #{@height};" if @height}"
+      width = @width ?
+          (@width.is_a?(Numeric) ? '%spx' % @width : @width) :
+          select? || password? ? nil : '100%'
+      @css_style = "#{@css_style} #{ "width: #{width};" if width } #{"height: #{@height};" if @height}"
+    end
+
+    def join_with
+      @join_with || ','
+    end
+
+    def required?
+      @required
+    end
+
+    def select?
+      @type == :select
+    end
+
+    def checkbox?
+      @type == :checkbox
     end
 
     def plain?
@@ -100,6 +126,10 @@ module Saint
 
     def password?
       @type == :password
+    end
+    
+    def rte?
+      @type == :rte
     end
 
     class ScopeHelper
@@ -141,9 +171,6 @@ module Saint
 
       value = row[@name]
       scope = ScopeHelper.new scope
-
-      # valuable on radio and drop-down selectors
-      value = @options[value] if @options
 
       if boolean? && scope.summary?
         value = Saint::Utils::BOOLEAN_OPTIONS[value]
