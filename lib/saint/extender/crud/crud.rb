@@ -170,13 +170,13 @@ module Saint
             rows = rows.compact.uniq
             rows.delete(0)
 
-            alert = "No items selected"
+            alert = 'No items selected'
             if rows.size > 0
 
               @errors = saint.orm.delete(saint.pkey => rows)[1]
 
-              alert = "Item(s) deleted!"
-              alert = saint_view.render_partial("error") if @errors.size > 0
+              alert = "%s deleted!" % saint.h
+              alert = saint_view.render_partial('error') if @errors.size > 0
 
             end
           else

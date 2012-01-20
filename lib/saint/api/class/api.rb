@@ -41,6 +41,7 @@ module Saint
         @model, @pkey = model, pkey
         # adding CRUD methods to node
         Saint::CrudExtender.new @node
+        Saint::ORMUtils.finalize
       end
       @model
     end

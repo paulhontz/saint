@@ -108,7 +108,7 @@ module Saint
     def delete filters = {}
       row, errors = db { model.first(filters.merge @subset) }
       return [row, errors] if errors.size > 0
-      db(__method__, row) { row.destroy }
+      db(__method__, row) { row.destroy! }
     end
 
     # delete all found items by given filters
@@ -162,9 +162,11 @@ module Saint
 
         result = proc.call
 
-        if row
-          after.select { |c| [operation, '*'].include?(c[0]) }.each do |c|
-            scope.instance_exec row, operation, &c[1]
+        unless operation == :delete
+          if row
+            after.select { |c| [operation, '*'].include?(c[0]) }.each do |c|
+              scope.instance_exec row, operation, &c[1]
+            end
           end
         end
 

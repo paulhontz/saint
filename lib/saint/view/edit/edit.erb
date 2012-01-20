@@ -197,46 +197,60 @@
 </div>
 
 <div style="display: inline-block; vertical-align: top;">
+  <div class="saint-tabs" style="position: fixed;">
 
-  <% if saint.update -%>
-      <div style="width: 100%; position: fixed;">
+    <ul>
+      <li>
+        <a href="#saint-tabs-actions-master">Actions</a>
+      </li>
+    </ul>
 
-        <div class="saint-crud_button-container" style="margin-bottom: 20px;">
-          <a href="javascript:void(0);" class="saint-button saint-save_button saint-crud_button"
-             onclick="<% saint.columns.select { |n,c| c.rte? }.each_value do |column| -%>
-                     <%= "$('##{column.id}').val( $('##{column.id}').elrte('val') );" -%>
-                     <% end -%>
-                     <% saint.columns.select { |n,c| c.password? }.each_value do |column| -%>
-                     <%= "if($('##{column.id}').val() != $('##{column.id}_confirm').val()) {alert('Values mismatch for #{column.label} field'); return false;}" %>
-                     <% end -%>
-                     Saint.submit_valid_form(
-                             'saint-form-edit-<%= @row_id %>',
-                             'saint-errors_container-<%= @row_id %>',
-                             '<%= http.route(:edit) %>/',
-                             '/<%= @pager.query_string %>'
-                             );"
-          >Save</a>
+    <div id="saint-tabs-actions-master">
 
-          <% if saint.delete -%>
-              <a href="<%= http.route(:delete, @row_id, redirect_to: http.route(@pager.query_string)) %>"
-                 class="saint-button saint-crud_button"
-                 onclick="return confirm('This action can not be undone! Continue?');">
-                Delete</a>
-          <% end -%>
-        </div>
+      <% if saint.update -%>
+          <div style="width: 100%; ">
 
-        <div class="saint-crud_button-container">
-          <a href="<%= http.route(@pager.query_string) %>" class="saint-button saint-crud_button">
-            Summary</a>
+            <div class="saint-crud_button-container">
 
-          <% if saint.create -%>
-              <a href="<%= http.route(:edit, @pager.query_string) %>" class="saint-button saint-crud_button">
-                New</a>
-          <% end -%>
-        </div>
+              <a href="javascript:void(0);" class="saint-button saint-save_button saint-crud_button"
+                 onclick="<% saint.columns.select { |n,c| c.rte? }.each_value do |column| -%>
+                         <%= "$('##{column.id}').val( $('##{column.id}').elrte('val') );" -%>
+                         <% end -%>
+                         <% saint.columns.select { |n,c| c.password? }.each_value do |column| -%>
+                         <%= "if($('##{column.id}').val() != $('##{column.id}_confirm').val()) {alert('Values mismatch for #{column.label} field'); return false;}" %>
+                         <% end -%>
+                         Saint.submit_valid_form(
+                                 'saint-form-edit-<%= @row_id %>',
+                                 'saint-errors_container-<%= @row_id %>',
+                                 '<%= http.route(:edit) %>/',
+                                 '/<%= @pager.query_string %>'
+                                 );"
+              >Save</a>
+            </div>
+            <div class="saint-crud_button-container">
+              <% if saint.create -%>
+                  <a href="<%= http.route(:edit, @pager.query_string) %>" class="saint-button saint-crud_button">
+                    New</a>
+              <% end -%>
+            </div>
+            <div class="saint-crud_button-container">
+
+              <% if saint.delete -%>
+                  <a href="<%= http.route(:delete, @row_id, redirect_to: http.route(@pager.query_string)) %>"
+                     class="saint-button saint-crud_button"
+                     onclick="return confirm('This action can not be undone! Continue?');">
+                    Delete</a>
+              <% end -%>
+            </div>
+            <div class="saint-crud_button-container">
+              <a href="<%= http.route(@pager.query_string) %>" class="saint-button saint-crud_button">
+                Summary</a>
 
 
-      </div>
-  <% end -%>
+            </div>
+          </div>
+      <% end -%>
+    </div>
+  </div>
 </div>
 <div style="clear: both; margin-bottom: 20px;"></div>
