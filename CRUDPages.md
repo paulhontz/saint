@@ -52,7 +52,7 @@ To have an custom label, use :label option:
 
 By default, columns are separated by a new line.
 
-Use *saint.grid* to have N columns placed on same line:
+Use *saint.grid* to have N columns placed inline:
 
     saint.grid do
       column :meta_title

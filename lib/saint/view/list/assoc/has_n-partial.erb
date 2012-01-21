@@ -29,6 +29,7 @@
          update_relation_action = :assoc__has_n__update_through_model if @relation.through_model
          update_relation_url = http.route(update_relation_action, @relation.id, "/")
          children = tree ? remote_item.send(tree[:has_n].children) : []
+         children_map = children.inject({}) { |map, child| map.update(child[@relation.local_pkey] => true) }
          self_color = color || Saint.tree_colors.sample
          bg_color = color || (self_color if children.size > 0)
   -%>
@@ -51,7 +52,7 @@
                       </span>
                       <% else -%>
                           <input type="button" value="attach" class="saint-button"
-                                 <% if (@relation.is_tree? && remote_id == @local_id) || (@relation.belongs_to? && remote_item[@relation.remote_key] == @local_id) -%>
+                                 <% if (@relation.is_tree? && remote_id == @local_id || children_map[@local_id]) || (@relation.belongs_to? && remote_item[@relation.remote_key] == @local_id) -%>
                                  disabled="true"
                                  <% end -%>
                                  onclick="if(confirm('Please confirm Attach action')){Saint.valid_get('<%= update_relation_url + "#{remote_id}/#{@local_id}/create" %>', function(){
