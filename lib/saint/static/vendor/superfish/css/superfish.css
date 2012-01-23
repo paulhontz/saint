@@ -11,9 +11,9 @@
 }
 .saint-menu-top {
 	line-height:	1.0;
-    box-shadow: 5px 5px 100px #808080;
-    -moz-box-shadow: 5px 5px 100px #808080;
-    -webkit-box-shadow: 5px 5px 100px #808080;
+    box-shadow: 3px 3px 25px #808080;
+    -moz-box-shadow: 3px 3px 25px #808080;
+    -webkit-box-shadow: 3px 3px 25px #808080;
 }
 .saint-menu-top ul {
 	position:		absolute;

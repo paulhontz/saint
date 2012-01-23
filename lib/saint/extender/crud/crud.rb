@@ -47,7 +47,7 @@ module Saint
             http.halt error, status: 500
           end
 
-          http.flash[Saint::RV_META_TITLE] = '%s | %s' % [saint.h, saint.h(@row)]
+          http.flash[Saint::RV_META_TITLE] = saint.h(@row)
 
           orm_filters, http_filters = saint.filters(:orm, :http)
           @pager = Saint::Pager.new(http.params[Saint::Pager::VAR].to_i)

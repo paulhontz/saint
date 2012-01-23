@@ -1,6 +1,7 @@
 module Saint
   class ClassApi
 
+    include Saint::Utils
     include Saint::Inflector
 
     attr_reader :pkey
@@ -76,81 +77,109 @@ module Saint
       @order[column] = direction if configurable?
     end
 
-    # define the header to be displayed in UI
-    #
+    # define the header to be displayed in UI.
+    # header is defaulted to pluralized class name.
+    # 
     # @example
+    #    class Page
+    #      include Saint::Api
     #
-    #    region = Region.new(name: 'England')
-    #    competition = Competition.new(name: 'Championship', region: region)
-    #    edition = Edition.new(name: 2011, competition: competition)
+    #      # as header is defaulted to pluralized class name,
+    #      # Page.saint.h will return "Pages"
     #
-    #    # set header
-    #    saint.header 'Editions', :name
-    #    # get header
-    #    saint.h #=> Editions
-    #    saint.h(edition) #=> 2011
+    #      # setting custom header label:
+    #      saint.header label: 'CMS Pages'
+    #      # now Page.saint.h and Page.saint.h(page) will return "CMS Pages"
     #
-    #    # set header
-    #    saint.header 'Editions', '(\##id) #name'
-    #    # get header
-    #    saint.h #=> Editions
-    #    saint.h(edition) #=> (#1) 2011
+    #      # setting custom header for defined pages:
+    #      saint.header :name, ' (by #author.name)'
+    #      # now Page.saint.h will return "Pages"
+    #      # however, Page.saint.h(page) will return "Pages | page.name (by page.author.name)"
+    #      # IMPORTANT! if page has no author, ' (by #author.name)' will be ignored,
+    #      # and Page.saint.h(page) will return only "Pages | page.name"
     #
-    #    # set header
-    #    saint.header 'Editions', 'competition.name', :name
-    #    # get header
-    #    saint.h #=> Editions
-    #    saint.h(edition) #=> Championship, 2011
+    #      # setting custom header for defined pages with custom label:
+    #      saint.header '#name', ' (by #author.name)', label: 'CMS Pages'
+    #      # now Page.saint.h will return "CMS Pages"
+    #      # and Page.saint.h(page) will return "CMS Pages | page.name (by page.author.name)"
     #
-    #    # set header
-    #    saint.header 'Editions', '#competition.region.name, #competition.name', :name, join: ' / '
-    #    # get header
-    #    saint.h #=> Editions
-    #    saint.h(edition) #=> England, Championship / 2011
-    #
-    #    # set header
-    #    saint.header 'Editions' do |row|
-    #      if row
-    #        "<a href='#{row.competition.url}'>#{row.competition.name}</a> / #{row.name}"
+    #      # setting custom header using a block with default label:
+    #      saint.header do |page|
+    #        if page
+    #          "#{page.name} (by #{page.author.name})"
+    #        end
     #      end
-    #    end
-    #    # get header
-    #    saint.h #=> Editions
-    #    saint.h(some_edition) #=> <a href='/competitions/championship'>Championship</a> / 2011
+    #      # now Page.saint.h will return "Pages"
+    #      # and Page.saint.h(page) will return "Pages: page.name (by page.author.name)"
     #
-    # @param [String, Symbol] label
-    #   label to be used on summary pages
-    # @param [Array] *args
-    #   snippets to be used on CRUD pages.
-    #   snippets may contain static strings/symbols as well as methods.
-    # @param [Proc] &proc
-    #   ignore any snippets and use value returned by proc.
-    #   proc receives current row as first argument.
-    def header label, *args, &proc
+    #      # setting custom header using a block with custom label:
+    #      saint.header label: 'CMS Pages' do |page|
+    #        "#{page.name} (by #{page.author.name})" if page
+    #      end
+    #      # now Page.saint.h will return "CMS Pages"
+    #      # and Page.saint.h(page) will return "CMS Pages | page.name (by page.author.name)"
+    #
+    #    end
+    #
+    def header *format_and_or_opts, &proc
       return unless configurable?
-      @header_label = label
-      @header_args, @header_opts = [], {}
-      args.each { |a| a.is_a?(Hash) ? @header_opts.update(a) : @header_args << a }
-      @header_proc = proc if proc.is_a?(Proc)
+      format_and_or_opts.each do |a|
+        a.is_a?(Hash) ? @header_opts.update(a) : @header_args << a
+      end
+      @header_proc = proc if proc
     end
 
     # evaluate earlier defined header.
     # (see #header)
-    def h row = nil, scope = nil
-
-      header = []
+    #
+    # @example
+    #
+    #    class Page
+    #      include Saint::Api
+    #
+    #      saint.header :name, ', by #author.name'
+    #      # saint.h(page) for a page with author will return "Pages | page.name, by page.author.name"
+    #      # saint.h(page, join: ' / ') for a page with author will return "Pages / page.name, by page.author.name"
+    #      # saint.h(page, join: false) for a page with author will return ["Pages", page.name, by page.author.name]
+    #      # saint.h(page) for a page without author will return "Pages | page.name"
+    #      # saint.h(page, join: ' / ') for a page without author will return "Pages / page.name"
+    #      # saint.h(page, join: false) for a page without author will return ["Pages", page.name]
+    #
+    #    end
+    #
+    # @param [Object] row `nil`
+    # @param [Hash] opts
+    # @option opts [String] :label
+    #   override the label set by #header
+    # @option opts [String] :join
+    #   the string to join label and header.
+    #   if not provided, " | " will be used.
+    #   if it is set to nil or false, an array of label and header snippets will be returned.
+    def h row = nil, opts = {}
+      label = @header_opts[:label] || pluralize(titleize(demodulize(@node)))
+      label = opts[:label] if opts.has_key?(:label)
+      join = opts.has_key?(:join) ? opts[:join] : ' | '
+      header = Array.new
       if @header_proc
-        val = @header_proc.call(row, scope).to_s
-        header << val if val.size > 0
+        header << @header_proc.call(row).to_s
       else
-        if row && @header_args.size > 0
-          header << @header_args.map do |a|
-            val = Saint::Utils.column_format a, row
-            val.size > 0 ? val : nil
-          end.compact.join(@header_opts[:join] || ', ')
+        args = @header_args
+        if row && args.size == 0
+          # no snippets defined, so using first 3 non-id columns
+          orm = Saint::ORM.new(@node.saint.model)
+          orm.properties.each do |p|
+            next if (p == :id) || (p.to_s =~ /_id$/i)
+            break if args.size == 3
+            args << p
+          end
+          args = ['#' % args.join(', #')]
+        end
+        args.each do |a|
+          (s = column_format(a, row)) && s.strip.size > 0 && header << s
         end
       end
-      header.size > 0 ? header.join(' | ') : @header_label || pluralize(titleize(demodulize(@node)))
+      return [label, header.join].join(label && label.size > 0 && header.size > 0 ? join : '') if join
+      [label, *header]
     end
 
     # prohibit :create operation
@@ -176,6 +205,7 @@ module Saint
       remove_capability __method__ if configurable? && args.size > 0
       check_capability __method__
     end
+
     alias :remove :delete
 
     # callbacks to be executed before/after given ORM action(s).

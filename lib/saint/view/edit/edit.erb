@@ -1,20 +1,20 @@
-<% belongs_to, has_n = saint.belongs_to, saint.has_n -%>
+<% header = saint.h(@row)
+   factory_header = header == saint.h
+   belongs_to, has_n = saint.belongs_to, saint.has_n -%>
 
 <table style="width: 100%;">
   <tr>
     <td style="width: 33%; text-align: left;">
       <% if @prev_item -%>
           <a href="<%= http.route(:edit, @prev_item.send(saint.pkey), @pager.query_string) %>" class="saint-link">
-            &laquo; <%= saint.h @prev_item %>
+            &laquo; <%= factory_header ? 'prev' : saint.h(@prev_item, label: nil) %>
           </a>
       <% end -%>
     </td>
     <td style="width: 33%; vertical-align: top; text-align: center;">
 
       <h3 style="color: #808080;">
-        <%= saint.h %>
-        :
-        <%= saint.h @row %>
+        <%= header %>
       </h3>
 
       <div class="saint-flash_alert"><%= http.flash[:alert] %></div>
@@ -23,7 +23,7 @@
     <td style="width: 33%; text-align: right;">
       <% if @next_item -%>
           <a href="<%= http.route(:edit, @next_item.send(saint.pkey), @pager.query_string) %>" class="saint-link">
-            <%= saint.h @next_item %> &raquo;
+            <%= factory_header ? 'next' : saint.h(@next_item, label: nil) %> &raquo;
           </a>
       <% end -%>
     </td>

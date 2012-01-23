@@ -97,7 +97,14 @@ module Saint
       width = @width ?
           (@width.is_a?(Numeric) ? '%spx' % @width : @width) :
           select? || password? ? nil : '100%'
-      @css_style = "#{@css_style} #{ "width: #{width};" if width } #{"height: #{@height};" if @height}"
+      height = @height ?
+          (@height.is_a?(Numeric) ? '%spx' % @height : @height) :
+          nil
+      @css_style = '%s %s %s' % [
+          @css_style,
+          ("width: %s;" % width if width),
+          ("height: %s;" % height if height)
+      ]
     end
 
     def join_with
@@ -127,7 +134,7 @@ module Saint
     def password?
       @type == :password
     end
-    
+
     def rte?
       @type == :rte
     end

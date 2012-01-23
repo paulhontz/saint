@@ -61,7 +61,7 @@
         <% if remote_node -%>
             <td>
               <a href="<%= remote_node.http.route(:edit, remote_item_id) %>" target="_blank" class="saint-link">
-                <%= remote_node.saint.h remote_item -%>
+                <%= remote_node.saint.h remote_item, label: nil -%>
               </a>
             </td>
         <% else -%>

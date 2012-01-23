@@ -10,7 +10,7 @@ module Ctrl
 
     saint.rb_wrapper
 
-    saint.header 'Pages', :name, ' (#author.name)'
+    saint.header :name, ', by #author.name'
 
     saint.ipp 1000
     saint.grid do
