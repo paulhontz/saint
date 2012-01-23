@@ -9,9 +9,6 @@ Menu label is defaulted to node's header, set by *saint.header*.
 
 Use #label to override this:
 
-    saint.header 'Pages'
-    # menu label is(yet) "Pages"
-
     saint.menu.label 'CMS Pages'
     # now menu label is "CMS Pages"
 

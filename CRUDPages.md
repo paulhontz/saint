@@ -1,6 +1,6 @@
 ###Header
 
-Defaulted to pluralized model name
+Defaulted to pluralized class name
 
 To have a custom header for both Summary and CRUD pages, use *saint.header*:
 
@@ -10,7 +10,10 @@ To have a custom header for both Summary and CRUD pages, use *saint.header*:
         saint.model Model::Page
         # header is(yet) "Pages"
 
-        saint.header 'CMS Pages'
+        # by default, header for this class will be "Pages".
+        # setting custom header:
+        #
+        saint.header label: 'CMS Pages'
         # header now is "CMS Pages"
     end
 
@@ -18,21 +21,29 @@ To have an even more useful header, use a proc.
 
 The proc will receive back the current row.
 
-    saint.header 'CMS Pages' do |row|
+    saint.header do |row|
         row.name
     end
     # now the header on CRUD pages will be
-    # CMS Pages : [page name]
+    # CMS Pages | [page name]
 
 To achieve same result without a block, pass methods to be called inside block as arguments:
 
-    saint.header 'CMS Pages', :name
+    saint.header :name
     # now the header on CRUD pages will be
-    # CMS Pages : [page name]
+    # Pages | [page name]
     
-    saint.header 'Pages', '#name by #author.name', '#views views'
+    saint.header :name, ', by #author.name', ', #views views'
     # now the header on CRUD pages will be
-    # Pages : [page name] by [author name], [views] views
+    # Pages | [page name] by [author name], [views] views
+
+Worth to note that if some snippet(arg) returns nil or empty string, it will be ignored:
+
+    saint.header :name, ', by #author.name', ', #views views'
+    # if page has an author, header will be:
+    # Pages | [page name], by [author name], [views] views
+    # however, if page has no author, header will be:
+    # Pages | [page name], [views] views
 
 
 ###Labels

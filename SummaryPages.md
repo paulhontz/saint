@@ -1,7 +1,7 @@
 
 ###Header
 
-Defaulted to pluralized model name
+Defaulted to pluralized class name
 
 To have a custom header for both Summary and CRUD pages, use *saint.header*:
 
@@ -11,7 +11,7 @@ To have a custom header for both Summary and CRUD pages, use *saint.header*:
         saint.model Model::Page
         # header is(yet) "Pages"
 
-        saint.header 'CMS Pages'
+        saint.header label: 'CMS Pages'
         # header now is "CMS Pages"
     end
 
