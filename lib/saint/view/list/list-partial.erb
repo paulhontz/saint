@@ -10,7 +10,6 @@
     <% end -%>
     <% if level == 0 -%>
         <td style="width: 5%"></td>
-        <td style="width: 5%"></td>
     <% end -%>
   </tr>
 
@@ -39,13 +38,6 @@
         <% end -%>
         <% if level == 0 -%>
             <td style="text-align: center;">
-              <% if saint.update -%>
-                  <a href="<%= edit_url %>" class="saint-button">
-                    <img src="<%= Saint::FileServer['vendor/icons/Oxygen/16/edit.png'] %>"/>
-                  </a>
-              <% end -%>
-            </td>
-            <td style="text-align: center;">
               <div class="saint-button">
                 <input type="checkbox" name="rows[]" value="<%= row_id %>"/>
               </div>
@@ -70,8 +62,6 @@
                       <%= column.label %>
                     </td>
                 <% end %>
-                <td>
-                </td>
                 <td>
                   Delete?
                 </td>

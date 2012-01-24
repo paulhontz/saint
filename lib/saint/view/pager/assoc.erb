@@ -1,30 +1,12 @@
-<table style="margin-left:auto; margin-right:auto;">
-
-  <tr>
-    <% if @pages > 1 %>
-        <td>
-          1
-        </td>
-        <td>
-          <% marker = "<img src='#{Saint::FileServer['vendor/icons/Oxygen/24/first.png']}' />"
-             if @page_prev %>
-              <a onclick="Saint.pager('<%= link_page 1 %>','<%= @opts[:container_id] %>');" href="javascript:void(0);">
-                <%= marker %>
-              </a>
-          <% else %>
-              <%= marker %>
-          <% end %>
-        </td>
-        <td>
-          <% marker = "<img src='#{Saint::FileServer['vendor/icons/Oxygen/24/prev.png']}' />"
-             if @page_prev %>
-              <a onclick="Saint.pager('<%= link_page @page_prev %>','<%= @opts[:container_id] %>');" href="javascript:void(0);">
-                <%= marker %>
-              </a>
-          <% else %>
-              <%= marker %>
-          <% end %>
-        </td>
+<% if @pages > 1 %>
+    <table style="margin-left: auto; margin-right: auto;">
+      <tr>
+        <% if @page_min > 1 -%>
+            <td style="white-space: nowrap;">
+              <a href="<%= link_page 1 %>" class="saint-button">1</a>
+              ...
+            </td>
+        <% end -%>
         <td>
           <% @page_min.upto(@page_max) do |page| -%>
 
@@ -40,33 +22,12 @@
 
           <% end -%>
         </td>
-
-        <td>
-          <% marker = "<img src='#{Saint::FileServer['vendor/icons/Oxygen/24/next.png']}' />"
-             if @page_next %>
-              <a onclick="Saint.pager('<%= link_page @page_next %>','<%= @opts[:container_id] %>');" href="javascript:void(0);">
-                <%= marker %>
-              </a>
-          <% else %>
-              <%= marker %>
-          <% end %>
-        </td>
-        <td>
-          <% marker = "<img src='#{Saint::FileServer['vendor/icons/Oxygen/24/last.png']}' />"
-             if @page_next %>
-              <a onclick="Saint.pager('<%= link_page @pages %>','<%= @opts[:container_id] %>');" href="javascript:void(0);">
-                <%= marker %>
-              </a>
-          <% else %>
-              <%= marker %>
-          <% end %>
-        </td>
-    <% end %>
-    <% if @pages > 1 %>
-    <td>
-      <%= @pages %>
-    </td>
-    <% end -%>
-  </tr>
-</table>
-
+        <% if @page_max < @pages -%>
+            <td style="white-space: nowrap;">
+              ...
+              <a href="<%= link_page @pages %>" class="saint-button"><%= @pages %></a>
+            </td>
+        <% end -%>
+      </tr>
+    </table>
+<% end %>
