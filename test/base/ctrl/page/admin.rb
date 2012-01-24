@@ -12,7 +12,8 @@ module Ctrl
 
     saint.header :name, ', by #author.name'
 
-    saint.ipp 1000
+    saint.order :id, :desc
+    
     saint.grid do
       column :name, type: :string, rb_wrapper: false
       column :label, type: :string
@@ -39,8 +40,7 @@ module Ctrl
     end
 
     saint.has_n :menus, Model::Menu, Model::MenuPage do
-      order :id
-      ipp 1000
+      order :id, :desc
     end
 
     saint.is_tree
@@ -49,8 +49,6 @@ module Ctrl
       #readonly true
     end
 
-    saint.order :id
-
     saint.filter :menu, Model::Menu, Model::MenuPage
 
     saint.filter :country_id, Model::Country do
@@ -58,6 +56,7 @@ module Ctrl
     end
 
     saint.filter :author_id, Model::Author do
+      multiple true
       option_label '#name (#pages.count pages)'
       depends_on :country_id
     end

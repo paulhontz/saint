@@ -9,8 +9,9 @@ module Ctrl
     saint.header 'Countries', :name
     saint.menu.label saint.h
 
+    saint.order :id, :desc
     saint.has_n :authors, Model::Author do
-      ipp 1000
+      order :id, :desc
     end
 
   end

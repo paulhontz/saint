@@ -11,11 +11,12 @@ module Ctrl
 
     saint.filter :name
 
-    saint.header 'Authors', :name
+    saint.header :name
     saint.menu.label saint.h
 
+    saint.order :id, :desc
     saint.has_n :pages, Model::Page do
-      ipp 1000
+      order :id, :desc
       column :name, label: 'Name / Author' do |val, scp, row|
         val && (val + ((author = row.author) ? ' (%s)' % author.name : ''))
       end

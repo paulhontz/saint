@@ -54,19 +54,11 @@ module Saint
           @pager.paginate(query: http_filters.join('&'), skip_render: true)
 
           if  @row_id > 0
-
-            # decrementing offset just in case the current item is first on page
-            offset = (@pager.page_number * saint.ipp) - 2
-            # incrementing limit just in case the current item is last on page
-            limit = saint.ipp + 2
-
-            offset = 0 if offset < 0
-            limits = saint.orm.limit(limit, offset)
             order = saint.orm.order(saint.order)
-            rows, errors = saint.orm.filter(orm_filters.merge(limits).merge(order))
+            rows, errors = saint.orm.filter(orm_filters.merge(order))
             if errors.size == 0 && (rows = rows.to_a rescue nil)
               if i = rows.index { |o| o.send(saint.pkey) == @row_id }
-                @prev_item = i == 0 && offset == 0 ? nil : rows[i-1]
+                @prev_item = i == 0 ? nil : rows[i-1]
                 @next_item = rows[i+1]
               end
             end

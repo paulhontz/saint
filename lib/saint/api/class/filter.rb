@@ -308,6 +308,14 @@ module Saint
       @type_proc = proc if proc
     end
 
+    def multiple *args
+      @type_opts[:multiple] = true
+    end
+
+    def multiple?
+      @type_opts[:multiple]
+    end
+
     # sometimes used column should be just an informative label.
     # use this method to define column to be used by ORM
     #
@@ -428,13 +436,13 @@ module Saint
     #
     # @param [String] var
     # @param [Symbol] logic
-    def self.query_string var, logic = :eql
-      "saint-filters[%s][%s]%s" % [var, logic, ('[]' if @multiple)]
+    def self.query_string var, logic = :eql, multiple = false
+      "saint-filters[%s][%s]%s" % [var, logic, ('[]' if multiple)]
     end
 
     # (see #self.query_string)
     def query_string
-      self.class.query_string @var, @logic
+      self.class.query_string @var, @logic, multiple?
     end
 
     private
@@ -474,26 +482,31 @@ module Saint
 
     # return orm filters
     def orm
+
       return {} unless @setup.local_orm && @setup.column && @val
+
+      val = @val.is_a?(Array) ?
+          @val.map { |v| v if v.size > 0 }.compact :
+          [@setup.logic_prefix, @val, @setup.logic_suffix].compact.join
+
+      return {} unless val.size > 0
+
       if @setup.through_orm
-        # @val is effectively the remote item pkey
+        # val is effectively the remote item pkey
         local_keys = []
-        if remote_keys = @setup.through_orm.filter(@setup.remote_key => @val)[0]
+        if remote_keys = @setup.through_orm.filter(@setup.remote_key => val)[0]
           remote_keys.each { |r| local_keys << r.send(@setup.local_key) }
         end
-        @setup.local_orm.eql(@setup.local_pkey, local_keys)
-      else
-        @setup.local_orm.send(
-            @setup.logic,
-            @setup.column,
-            [@setup.logic_prefix, @val, @setup.logic_suffix].compact.join
-        )
+        return @setup.local_orm.eql(@setup.local_pkey, local_keys)
       end
+      @setup.local_orm.send(@setup.logic, @setup.column, val)
     end
 
     # return HTTP query
     def http
-      "#{query_string}=#{escape @val}"
+      @val.is_a?(Array) ?
+          @val.map { |v| '%s=%s' % [@setup.query_string, escape(v)] }.join('&') :
+          '%s=%s' % [@setup.query_string, escape(@val)]
     end
 
     # render filter into UI representation
@@ -513,11 +526,6 @@ module Saint
     def filter? column
       return @val if column == @setup.column
       @setup.node.saint.filter? column, @params
-    end
-
-    # see Saint::ClassApi::Filter#query_string
-    def query_string
-      @setup.query_string
     end
 
     # see Saint::ClassApi::Filter#label

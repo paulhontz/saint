@@ -18,9 +18,9 @@
   <%= label -%>
 </div>
 
-<select name="<%= query_string %>" id="<%= @id %>-input" class="saint-ui-chosen"
+<select name="<%= @setup.query_string %>" id="<%= @id %>-input" class="saint-ui-chosen"
         data-placeholder="<%= data_placeholder %>"
-        <%= 'multiple="true"' if @setup.type_opts[:multiple] %>
+        <%= 'multiple="true"' if @setup.multiple? %>
         style="width: 200px;"
         onchange="<% if (dependant_filters =  @setup.dependant_filters).size > 0 -%>
                 $('<%= dependant_filters.map{|f| "##{f.id + @seed}-input"}.join(',') %>').remove();
