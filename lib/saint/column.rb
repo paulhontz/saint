@@ -179,6 +179,10 @@ module Saint
       value = row[@name]
       scope = ScopeHelper.new scope
 
+      if @options && scope.summary?
+        value = @options[value]
+      end
+
       if boolean? && scope.summary?
         value = Saint::Utils::BOOLEAN_OPTIONS[value]
       end
