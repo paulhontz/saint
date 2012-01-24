@@ -304,10 +304,30 @@ module Saint
     # @param [Proc] &proc
     def type type = nil, opts = {}, &proc
       return @type_tpl if type.nil?
-      @type_tpl, @type_opts = type, opts
+      @type_tpl = type
+      @type_opts.update opts
       @type_proc = proc if proc
     end
 
+    # turn an associative filter into an select-multiple drop-down.
+    # also can be used on :select filters.
+    # examples here works identically.
+    #
+    # @example declare :multiple via option
+    #    saint.filter :color do
+    #      type :select, multiple: true do
+    #        # some hash
+    #      end
+    #    end
+    #
+    # @example declare :multiple via method
+    #    saint.filter :color do
+    #      multiple true
+    #      type :select do
+    #        # some hash
+    #      end
+    #    end
+    #
     def multiple *args
       @type_opts[:multiple] = true
     end
