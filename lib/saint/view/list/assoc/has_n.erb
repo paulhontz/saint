@@ -1,4 +1,5 @@
 <script type="text/javascript" src="<%= Saint::FileServer["ui.js"] %>"></script>
+
 <% xhr = http.params['xhr']
    remote_node = @relation.remote_node
    @update_selector_url = http.route(:assoc__any__remote_items, @relation.id, @local_id, "/")

@@ -28,6 +28,11 @@
               <a href="<%= link_page @pages %>" class="saint-button"><%= @pages %></a>
             </td>
         <% end -%>
+        <td>
+          <% arrow_style = 'font-size: 80%;' -%>
+          <a href="<%= link_page @page_label-1 %>" class="saint-button" style="<%= arrow_style %>">&lt;</a>
+          <a href="<%= link_page @page_label+1 %>" class="saint-button" style="<%= arrow_style %>">&gt;</a>
+        </td>
       </tr>
     </table>
 <% end %>

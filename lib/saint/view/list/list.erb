@@ -68,7 +68,7 @@
           <%= saint_view.render_partial('list/list-partial', items: @rows, level: 0, color: nil) %>
 
           <% if saint.delete -%>
-              <div style="text-align: right; margin: 20px;">
+              <div style="margin-top: 40px; margin-bottom: 20px;">
                 <input type="submit" value="remove selected" onclick="return confirm('This will remove selected items. This action CAN NOT be undone! Continue?');" class="saint-button"/>
               </div>
           <% end -%>
