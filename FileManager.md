@@ -1,5 +1,5 @@
 
-To make use of built-in file manager, simply call #saint.fm with a block.
+To make use of built-in file manager, simply call `saint.fm` with a block.
 
 Block should define at least one root.
 
@@ -11,6 +11,7 @@ Each root should provide the absolute path to the folder to be managed.
         root '/some/path/'
         root '/some/another/path/'
     end
+{:lang='ruby'}
 
 By default, Saint will use the folder name for root label.
 
@@ -25,4 +26,4 @@ To have a custom label for some root, use :label option.
         root '/path/to/templates', label: "Views"
     end
     # this will use Views as label
-
+{:lang='ruby'}

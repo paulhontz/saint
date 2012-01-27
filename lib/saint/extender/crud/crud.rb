@@ -99,7 +99,7 @@ module Saint
 
               # nil columns are not saved/updated
               # to set column's value to nil, use {Saint::RV_NULL_VALUE} as column value
-              
+
               # exception making only checkbox columns, which can be nil
               unless value
                 next unless column.checkbox?
@@ -107,9 +107,9 @@ module Saint
 
               # joining values for checkbox and select-multiple columns
               value = value.join(column.join_with) if value.is_a?(Array)
-              
+
               value = nil if value == ::Saint::RV_NULL_VALUE
-              
+
               if value && rb_wrapper = saint.rbw
                 value = rb_wrapper.unwrap(value)
               end
@@ -123,15 +123,22 @@ module Saint
               end
             end
 
-            if (row_id = row_id.to_i) > 0
-              @row, @errors = saint.orm.first(saint.pkey => row_id)
-            else
-              @row, @errors = saint.orm.new(ds)
+            @errors = []
+            saint.columns.select { |n, c| c.required? && c.save? }.each_key do |column|
+              @errors << '%s is required' % column unless ds[column]
             end
 
-            if @row && @errors.size == 0
-              ds.each_pair { |c, v| @row[c] = v } if row_id > 0
-              @row, @errors = saint.orm.save @row
+            if @errors.size == 0
+              if (row_id = row_id.to_i) > 0
+                @row, @errors = saint.orm.first(saint.pkey => row_id)
+              else
+                @row, @errors = saint.orm.new(ds)
+              end
+
+              if @row && @errors.size == 0
+                ds.each_pair { |c, v| @row[c] = v } if row_id > 0
+                @row, @errors = saint.orm.save @row
+              end
             end
           else
             @errors = ['Update capability disabled by admin']

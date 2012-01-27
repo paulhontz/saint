@@ -4,25 +4,28 @@ Text fields
 ###:string
 
     saint.column :name
+{:lang='ruby'}
 
 <div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/tutorial/columns/page-name.png" />
+<img src="http://saintrb.org/screenshots/columns/page-name.png" />
 </div>
 
 ###:text
 
     saint.column :meta_title, :text
+{:lang='ruby'}
 
 <div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/tutorial/columns/page-meta_title.png" />
+<img src="http://saintrb.org/screenshots/columns/page-meta_title.png" />
 </div>
 
 ###:rte
 
     saint.column :content, :rte
+{:lang='ruby'}
 
 <div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/tutorial/columns/page-rte.png" />
+<img src="http://saintrb.org/screenshots/columns/page-rte.png" />
 </div>
 
 ###:plain
@@ -31,9 +34,10 @@ Will only display the value, without render any field.<br/>
 Plain columns are not saved to db.
 
     saint.column :option, :plain
+{:lang='ruby'}
 
 <div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/tutorial/columns/plain.png" />
+<img src="http://saintrb.org/screenshots/columns/plain.png" />
 </div>
 
 ###:password
@@ -41,9 +45,10 @@ Plain columns are not saved to db.
 Creates two password fields - password and password confirmation.
 
     saint.column :content, :password
+{:lang='ruby'}
 
 <div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/tutorial/columns/password.png" />
+<img src="http://saintrb.org/screenshots/columns/password.png" />
 </div>
 
 Selectors
@@ -54,9 +59,10 @@ Selectors
     saint.column :status, :radio do
         options 1 => :Active, 0 => :Suspended
     end
+{:lang='ruby'}
 
 <div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/tutorial/columns/radio.png" />
+<img src="http://saintrb.org/screenshots/columns/radio.png" />
 </div>
 
 ###:select
@@ -64,25 +70,28 @@ Selectors
     saint.column :status, :select do
         options: 1 => :Active, 0 => :Suspended
     end
+{:lang='ruby'}
 
 <div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/tutorial/columns/select.png" />
+<img src="http://saintrb.org/screenshots/columns/select.png" />
 </div>
 
-Use "multiple: true" option to render an select field allowing to select multiple options.<br/>
-Use "size: N" to define how much lines to display when :multiple set to true.
+Use `multiple true` option to render an select field allowing to select multiple options.
+
+Use `size: N` to define how much lines to display when :multiple set to true.
 
     saint.column :color, :select do
         multiple true
         options ['red', 'green', 'blue']
     end
+{:lang='ruby'}
 
 <div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/tutorial/columns/select-multiple.png" />
+<img src="http://saintrb.org/screenshots/columns/select-multiple.png" />
 </div>
 
 By default, Saint will join selected options with a coma when saved to db.<br/>
-Use :join_with option to override this.
+Use `join_with 'some-str'` to override this.
 
 
 ###:checkbox
@@ -90,27 +99,30 @@ Use :join_with option to override this.
     saint.column :color, :checkbox do
         options ['red', 'green', 'blue']
     end
+{:lang='ruby'}
 
 <div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/tutorial/columns/checkbox.png" />
+<img src="http://saintrb.org/screenshots/columns/checkbox.png" />
 </div>
 
 By default, Saint will join selected options with a coma when saved to db.<br/>
-Use `join_with` option to override this:
+Use `join_with 'some-str'` to override this:
 
     saint.column :color, :checkbox do
         options ['red', 'green', 'blue']
         join_with '/'
     end
+{:lang='ruby'}
 
 ###:boolean
 
 Renders an radio selector with 2 options: 1 => 'Yes' and 0 => 'No'
 
     saint.column :active, :boolean
+{:lang='ruby'}
 
 <div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/tutorial/columns/boolean.png" />
+<img src="http://saintrb.org/screenshots/columns/boolean.png" />
 </div>
 
 Options
@@ -128,6 +140,7 @@ Accepts: [String, Integer]
     end
     # for selectable columns, default option will be auto-selected.
     # on text columns, default text will be displayed for items with nil column value.
+{:lang='ruby'}
 
 ###options
 
@@ -152,23 +165,24 @@ Accepts: [Hash, Array]
     # HTML: <input type="checkbox" name="color[]" value="red" />Red
     #       <input type="checkbox" name="color[]" value="green" />Green
     #       <input type="checkbox" name="color[]" value="blue" />Blue
+{:lang='ruby'}
 
 ###multiple
 
 Instruct UI to render an selector allowing to select multiple options.<br/>
-Used with ":type => :select" option.<br/>
+Used with :select type.<br/>
 Accepts: [true]
 
 ###size
 
 Allow UI to know how much lines multiple selector should have.<br/>
-Used with ":type => :select, :multiple => true" options.<br/>
+Used along with :select type and `multiple true` option.<br/>
 Accepts: [Integer]
 
 ###join_with
 
 The string to be used when joining multiple values.<br/>
-Used with ":type => :select, :multiple => true" and ":type => :checkbox" options.<br/>
+Used with :select and :checkbox types.<br/>
 Accepts: [String]
 
 ###label
@@ -184,6 +198,7 @@ Accepts: [String, Symbol]
         label "Author's Name"
     end
     # Label to be used: Author's Name
+{:lang='ruby'}
 
 ###summary
 
@@ -193,6 +208,7 @@ Accepts: [false]
     saint.column :some_column do
         summary false
     end
+{:lang='ruby'}
 
 ###crud
 
@@ -202,6 +218,7 @@ Accepts: [false]
     saint.column :some_column do
         crud false
     end
+{:lang='ruby'}
 
 ###save
 
@@ -211,6 +228,7 @@ Accepts: [false]
     saint.column :some_column do
         save false
     end
+{:lang='ruby'}
 
 ###required
 
@@ -220,13 +238,13 @@ Accepts: [true]
     saint.column :some_column do
         required true
     end
-
+{:lang='ruby'}
 
 ###value
 ---
 
-Define a block that will modify current value depending on scope.\\
-The block will receive current value as first argument.\\
+Define a block that will modify current value depending on scope.<br/>
+The block will receive current value as first argument.<br/>
 Current value will be set to value returned by block.
 
 Methods available inside block:
@@ -243,6 +261,7 @@ So, if we want to prefix the author's name with Mr., we simply do like this:
             'Mr. %s' % value
         end
     end
+{:lang='ruby'}
 
 Lets say we want to prefix the author's name with Mr. only on Summary pages:
 
@@ -251,6 +270,7 @@ Lets say we want to prefix the author's name with Mr. only on Summary pages:
             summary? ? 'Mr. %s' % value : value
         end
     end
+{:lang='ruby'}
 
 Lets say we want to prefix the author's name with Mr. for men,  Ms. for women and empty for unknown:
 
@@ -262,3 +282,4 @@ Lets say we want to prefix the author's name with Mr. for men,  Ms. for women an
             '%s %s' % [prefix, value]
         end
     end
+{:lang='ruby'}

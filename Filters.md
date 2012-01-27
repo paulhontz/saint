@@ -4,6 +4,7 @@ Text Filters
 
     saint.filter :name
     saint.filter :about
+{:lang='ruby'}
 
 *Note:* for filter to work, it should use a earlier defined column or association.
 
@@ -13,6 +14,7 @@ Dropdown Filters
     saint.filter :active do
         type :select, options: {1 => 'Yes', 0 => 'No'}
     end
+{:lang='ruby'}
 
 Associative Filters
 ---
@@ -22,6 +24,7 @@ Simply filter by author:
     saint.belongs_to :author, Model::Author
 
     saint.filter :author_id, Model::Author
+{:lang='ruby'}
 
 This will create an dropdown selector containing all authors.
 
@@ -39,6 +42,7 @@ Create an dropdown selector containing only active authors.
     saint.filter :author_id, Model::Author do
         filter active: 1
     end
+{:lang='ruby'}
 
 *Dynamic filters*
 
@@ -61,6 +65,7 @@ Proc should return a hash.
             end
         end
     end
+{:lang='ruby'}
 
 Make authors list to be empty until a country selected:
 
@@ -71,7 +76,9 @@ Make authors list to be empty until a country selected:
         {country_id: filter?(:country_id) || -1}
       end
     end
-
+    # country_id will never be -1,
+    # so authors filter is empty until a country with valid id selected.
+{:lang='ruby'}
 
 You can combine statical filters with dynamical ones:
 
@@ -80,9 +87,9 @@ You can combine statical filters with dynamical ones:
             # some logic
         end
     end
+{:lang='ruby'}
 
 On keys collisions, dynamic filters will override statical ones.
-
 
 **Narrowing filters externally**
 
@@ -93,6 +100,7 @@ On keys collisions, dynamic filters will override statical ones.
     saint.filter :author_id, Model::Author do
         depends_on :country_id
     end
+{:lang='ruby'}
 
 This will create 2 dropdown selectors:
 
@@ -114,6 +122,7 @@ Following example above, we can narrow down the countries as well:
     saint.filter :author_id, Model::Author do
         depends_on :country_id
     end
+{:lang='ruby'}
 
 This will create 3 fields:
 
@@ -137,6 +146,7 @@ This allow to filter authors by both country and email or any other N columns.
     saint.filter :author_id, Model::Author do
         depends_on :author_email, :country_id
     end
+{:lang='ruby'}
 
 This will create 3 fields:
 
@@ -156,12 +166,14 @@ Say you need to filter pages by menu, and pages are associated to menus through 
         # building the filter
         saint.filter :menu, Model::Menu, Model::MenuPage
     end
+{:lang='ruby'}
 
 this will create a single dropdown containing menu list.
 
 Saint expects middle model(Model::MenuPage) to have at least 2 columns: page_id and menu_id.
 
-If your middle model has another ideas about this, use #local_key and #remote_key inside filter block.
+If your middle model has another considerations about this,
+use `local_key` and `remote_key` inside filter block.
 
 \#local_key will override :page_id column and #remote_key will override :menu_id column.
 
@@ -169,6 +181,7 @@ If your middle model has another ideas about this, use #local_key and #remote_ke
         local_key :p_id
         remote_key :m_id
     end
+{:lang='ruby'}
 
 Also, Saint expects your remote model(Model::Menu) to have :id as primary key.
 
@@ -177,6 +190,7 @@ If that's not the case, use #remote_pkey:
     saint.filter :menu, Model::Menu, Model::MenuPage do
         remote_pkey :uid
     end
+{:lang='ruby'}
 
 More on Associative Filters
 ---
@@ -184,11 +198,12 @@ More on Associative Filters
 **order**
 
 Saint will display association items in the order they was extracted.
-To have a custom order, use #order inside filter block:
+To have a custom order, use `order` inside filter block:
 
     saint.filter :author_id, Model::Author do
         order :name
     end
+{:lang='ruby'}
 
 This will order authors by name.
 
@@ -217,6 +232,7 @@ To avoid columns collisions, use #column to define the real ORM column.
             depends_on :author_name
         end
     end
+{:lang='ruby'}
 
 **option_label**
 
@@ -228,25 +244,29 @@ By default, Saint will use first 2 non ID columns to build the label for dropdow
     #       <option value="2">Alice, alice@dot.com</option>
     #       <option value="3">Bob, bob@dot.com</option>
     #       ...
+{:lang='ruby'}
 
-As seen, it ignores :id column, and use :name and :email, separated by coma.
+As seen, it ignores :id column, and uses :name.
 
-To override this, use #option_label inside filter block:
+To override this, use `option_label` inside filter block:
 
     saint.filter :author_id, Model::Author do
-        option_label :name
+        option_label :name, :email
     end
+{:lang='ruby'}
 
-this will use only name.
+this will use only name and email, separated by a coma.
 
 More syntax sugar:
 
     saint.filter :author_id, Model::Author do
-        option_label '#name from #country.name'
+        option_label :name, ' from #country.name'
     end
     # HTML: <select...
     #       <option value="1">John from NowhereCountry</option>
+    #       <option value="2">Jack</option>
     #       ...
+    # Jack has no country, so second argument ignored
     
     saint.filter :author_id, Model::Author do
         option_label :name, '#pages.count pages'
@@ -254,6 +274,7 @@ More syntax sugar:
     # HTML: <select...
     #       <option value="1">John, 10 pages</option>
     #       ...
+{:lang='ruby'}
 
 More on Filters
 ---
@@ -261,11 +282,12 @@ More on Filters
 **label**
 
 By default, label is built from provided column.
-To have a custom label, use #label inside filter block:
+To have a custom label, use `label` inside filter block:
 
     saint.filter :name do
         label "Page Name"
     end
+{:lang='ruby'}
 
 **type**
 
@@ -276,31 +298,36 @@ Available types:
 
 Type is defaulted to :string for non-associative filters and to :select from associative ones.
 
-To override this, use #type inside filter block.
+To override this, use `type` inside filter block.
 
-If a proc used with #type, the returned proc value will be used as value
-for :string type and options for :select type.
+`type` accepts :options option, used as options on :select type.
 
-So, make sure provided proc returns a string for :string filters
+Options can also be provided via block, just make sure given block returns a string for :string filters
 and an hash or array for :select type.
 
-*Example:* use :select for non-associative filter:
+*Example:* set options by option
+
+    saint.filter :status do
+        type :select, options: {1 => 'Active', 0 => 'Suspended'}
+    end
+{:lang='ruby'}
+
+*Example:* set options by block
 
     saint.filter :status do
         type :select do
             {1 => 'Active', 0 => 'Suspended'}
         end
     end
-
-this will use Model::Author#email rather than Model::Author#author_email
+{:lang='ruby'}
 
 **logic**
 
 By default, db query will be built using LIKE logic.
 
-Use #logic inside filter block to override this.
+Use `logic` inside filter block to override this.
 
-It accepts 3 arguments: logic, prefix, suffix.
+It accepts 3 arguments: logic, prefix, suffix.<br/>
 Both prefix and suffix will be accordingly concatenated to searched value.
 
 Available logics:
@@ -317,6 +344,7 @@ Return names containing "foo":
 
     saint.filter :name
     # SQL: SELECT FROM page WHERE name LIKE '%foo%'
+{:lang='ruby'}
 
 Return names starting with "foo":
 
@@ -324,6 +352,7 @@ Return names starting with "foo":
         logic :like, nil, '%'
     end
     # SQL: SELECT FROM page WHERE name LIKE 'foo%'
+{:lang='ruby'}
 
 Return names ending in "foo":
 
@@ -331,6 +360,7 @@ Return names ending in "foo":
         logic :like, '%'
     end
     # SQL: SELECT FROM page WHERE name LIKE '%foo'
+{:lang='ruby'}
 
 Return "foo" names:
 
@@ -338,4 +368,4 @@ Return "foo" names:
         logic :eql
     end
     # SQL: SELECT FROM page WHERE name = 'foo'
-
+{:lang='ruby'}

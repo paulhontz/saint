@@ -1,19 +1,20 @@
 
 Opts Manager is a simple UI for editing predefined options.
 
-Saint nodes calling #saint.opts will act as opts editor UI.
+Saint nodes calling `saint.opts` will act as opts editor UI.
 
-Model should be defined(via saint.model(Model)) before #saint.opts called.
+Model should be defined before `saint.opts` called.
 
 Given model should have at least two columns: name and value.
 
-To define a opt, use #opt inside block:
+To define a opt, use `opt` inside block:
 
     saint.opts do
         opt :favourite_author
     end
+{:lang='ruby'}
 
-**Options accepted by #opt:**
+**Options accepted by `opt`:**
 
 *   :type - one of :string, :text, :select. defaulted to :string
 *   :default - default value. to be used until you edit it.
@@ -43,15 +44,16 @@ To define a opt, use #opt inside block:
         #     <option value="green" selected>green</option>
         #     <option value="blue">blue</option>
     end
+{:lang='ruby'}
 
 Opts are persisted to database, however they are not loaded every time.
 
 Saint using an cache pool instead, defaulted to an memory based pool.
 
 If you have multiple processes, please consider to use a persistent pool,
-by passing it as #opts first argument.
+by passing it as first argument to `opts`.
 
-*Example:* creating UI
+*Example:* creating Opts UI
 
     module Admin
     
@@ -74,14 +76,15 @@ by passing it as #opts first argument.
             end
         end
     end
+{:lang='ruby'}
 
-After Opts Managers defned, any class may include Saint::OptsApi and read options via #opts method.
+After Opts Managers defned, any class may include `Saint::OptsApi` and read options via `opts` method.
 
-The scenarion is a s simple as:
+The scenarios is a s simple as:
 
-*   include Saint::OptsApi
+*   include `Saint::OptsApi`
 *   let saint know what managers to read opts from: opts Manager1, Manager2
-*   use #opts to read options: opts.some_options, opts.some_another_option
+*   use `opts` to read options: `opts.some_options`, `opts.some_another_option`
 
 *Example:*
 
@@ -101,4 +104,4 @@ The scenarion is a s simple as:
             end
         end
     end
-
+{:lang='ruby'}

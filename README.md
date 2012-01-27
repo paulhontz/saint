@@ -7,7 +7,7 @@ It is aimed to automatize the backend building process, by creating **Summary** 
 
 **Install:**
 
-    $ gem install saint
+    $ [sudo] gem install saint
 
 Before any setup, let Saint know the model to be managed.
 
@@ -18,6 +18,7 @@ Before any setup, let Saint know the model to be managed.
         property :id, Serial
         property :name, String
     end
+{:lang='ruby'}
 
 **Saint setup:**
 
@@ -27,9 +28,10 @@ Before any setup, let Saint know the model to be managed.
         saint.model PageModel
         saint.column :name
     end
+{:lang='ruby'}
 
 Saint expects given model to have :id as primary key, but allow to set a custom key,
-by passing it as second argument or by using #saint.pkey:
+by passing it as second argument or by using `saint.pkey`:
 
     class Page
         include Saint::Api
@@ -38,12 +40,15 @@ by passing it as second argument or by using #saint.pkey:
         # or
         saint.pkey :uid
     end
+{:lang='ruby'}
 
 **Deploy:**
 
     app = Presto::App.new
     app.mount Page
     app.run
+{:lang='ruby'}
+
 
 ###CRUD Pages
 
@@ -57,20 +62,22 @@ Text field:
 
     saint.column :name
     # UI output: <input type="text" name=":name" />
+{:lang='ruby'}
 
 Textarea field:
 
     saint.column :about, :text
     # UI output: <textarea name="about" style="width: 100%;"></textarea>
-
+{:lang='ruby'}
 
 To have some column excluded from CRUD pages, set :crud option to false:
 
     saint.column :date do
         crud false
     end
+{:lang='ruby'}
 
-[More on Columns](saint/blob/master/Columns.md)
+[More on Columns](http://saintrb.org/Columns.md)
 
 **Associations**
 
@@ -90,14 +97,15 @@ Saint does support *"belongs to"*, *"has N"* and *"has N through"* associations.
         # game has N scorers(players), through PlayersScorers model
         saint.has_n :scorers, Model::Player, Model::PlayersScorers
     end
+{:lang='ruby'}
 
 There are also tree association, when some item may belong to another item of same model.
 
     saint.is_tree
 
-[More on Associations](saint/blob/master/Associations.md)
+[More on Associations](http://saintrb.org/Associations.md)
 
-[More on CRUD pages](saint/blob/master/CRUDPages.md)
+[More on CRUD pages](http://saintrb.org/CRUDPages.md)
 
 ###Summary pages
 
@@ -111,48 +119,52 @@ To exclude some column, set :summary option to false:
     saint.column :date do
         summary false
     end
+{:lang='ruby'}
 
 **Order**
 
 Saint will extract and display model items in the order ORM returns them.
 
-*saint.order* allow to display items in the desired way:
+`saint.order` allow to display items in the desired way:
 
     saint.order :date, :desc
     saint.order :name
     # SQL: ORDER BY date DESC, name
+{:lang='ruby'}
 
 **Pagination**
 
 By default, Saint will display 10 items per page.
 
-Use *saint.items_per_page* to override this:
+Use `saint.items_per_page` to override this:
 
     saint.items_per_page 50
     # or just
     saint.ipp 50
+{:lang='ruby'}
 
-[More on Summary pages](saint/blob/master/SummaryPages.md)
+[More on Summary pages](http://saintrb.org/SummaryPages.md)
 
 ###Menu
 
 Saint will automatically build an menu containing links to all pages.
 
-Any class including *Saint::Api* will be automatically included in menu.
+Any class including `Saint::Api` will be automatically included in menu.
 
-Menu label is defaulted to node's header, set by *saint.header*:
+Menu label is defaulted to node's header, set by `saint.header`:
 
     saint.menu.label 'CMS Pages'
     # now menu label is "CMS Pages"
+{:lang='ruby'}
 
-To have menu displayed, simply call *Saint::Menu.new.render* in your layout:
+To have menu displayed, simply call `Saint::Menu.new.render` in your layout:
 
     <body>
         <%= Saint::Menu.new.render %>
         ...
     </body>
 
-[More on Menus](saint/blob/master/Menu.md)
+[More on Menus](http://saintrb.org/Menu.md)
 
 ###File Manager
 
@@ -170,17 +182,18 @@ Simply let Saint know the full path to folder and it will turn a class into a fu
         end
 
     end
+{:lang='ruby'}
 
-[More on File Manager](saint/blob/master/FileManager.md)
+[More on File Manager](http://saintrb.org/FileManager.md)
 
 
 ###Opts Manager
 
 Saint also has an built-in Opts Manager, which is a simple UI for editing predefined options.
 
-Any class may include Saint::OptsApi and get an extra Api, via #opts method.
+Any class may include `Saint::OptsApi` and get an extra Api, via `opts` method.
 
-Options defined inside Opts Manager can be accessed by #opts Api.
+Options defined inside Opts Manager can be accessed by `opts` Api.
 
     # creating Opts Manager UI
     class Admin
@@ -206,8 +219,9 @@ Options defined inside Opts Manager can be accessed by #opts Api.
             opts.items_per_page # available in class instances as well
         end
     end
+{:lang='ruby'}
 
-[More on Opts Manager](saint/blob/master/OptsManager.md)
+[More on Opts Manager](http://saintrb.org/OptsManager.md)
 
 ###rb_wrapper
 
