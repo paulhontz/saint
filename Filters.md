@@ -2,9 +2,6 @@
 Text Filters
 ---
 
-    saint.column :name
-    saint.column :about, type: :text
-
     saint.filter :name
     saint.filter :about
 
@@ -13,12 +10,8 @@ Text Filters
 Dropdown Filters
 ---
 
-    saint.column :active, type: :boolean
-
     saint.filter :active do
-        type :select do
-            {1 => 'Yes', 0 => 'No'}
-        end
+        type :select, options: {1 => 'Yes', 0 => 'No'}
     end
 
 Associative Filters

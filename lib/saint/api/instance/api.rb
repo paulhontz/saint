@@ -1,7 +1,7 @@
 module Saint
   class InstanceApi
 
-    attr_reader :orm, :columns
+    attr_reader :orm
 
     def initialize node_instance
 
@@ -10,12 +10,6 @@ module Saint
       @orm = Saint::ORM.new @node.saint.model, @node_instance
       @node.saint.before.each_pair { |a, p| @orm.before a, &p }
       @node.saint.after.each_pair { |a, p| @orm.after a, &p }
-
-      @columns = Hash.new
-      @node.saint.columns.each_pair do |name, opts|
-        column = SaintColumn.new(@node_instance, name, opts)
-        @columns[column.name] = column
-      end
 
     end
 

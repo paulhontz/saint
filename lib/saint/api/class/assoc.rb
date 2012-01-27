@@ -237,8 +237,7 @@ module Saint
 
     # by default, UI will display all columns for remote items.
     # use #column to define custom columns to be displayed.
-    # the syntax is same as when using saint.column,
-    # with one exception - the proc has no access to current node instance.
+    # the syntax is same as when using saint.column
     #
     # @example use only :title when displaying remote items
     #    saint.has_h :pages, Page do
@@ -246,29 +245,33 @@ module Saint
     #    end
     #
     # see {Saint::ClassApi#column}
-    def column name, opts = {}, &proc
+    def column name, type = nil, &proc
       @default_columns = nil
-      column = ::Saint::SaintColumn.new(@local_node, name, opts.update(proc: proc))
+      column = ::Saint::SaintColumn.new(name, type, &proc)
       @columns[column.name] = column
     end
 
-    # returns earlier defined columns
+    # returns earlier defined columns.
+    # if none defined, returns 3 remote columns if remote node given,
+    # or first non-id remote column otherwise.
     def columns
 
       return @columns if @columns.size > 0
 
+      # no columns defined for current assoc
+
       if @remote_node
-        rc = @remote_node.saint.columns
-        rc.select { |k, v| rc.keys[0..2].include?(k) }.each_pair do |name, opts|
-          column = ::Saint::SaintColumn.new(@remote_node, name, opts)
+        # remote_node defined, using 3 remote columns
+        remote_columns = @remote_node.saint.columns
+        remote_columns.select { |k, v| remote_columns.keys[0..2].include?(k) }.each_value do |column|
           @columns[column.name] = column
         end
       end
       if @columns.size == 0
-        @remote_orm.properties.each do |p|
-          next if (p == :id) || (p.to_s =~ /_id$/i)
-          break if @columns.size == 3
-          @columns[p] = ::Saint::SaintColumn.new(@local_node, p)
+        # seems remote node not defined, using 1st non-id remote column
+        if column = @remote_orm.properties.select { |p| false if p == :id || p.to_s =~ /_id$/i }.compact.first
+          column = ::Saint::SaintColumn.new(column)
+          @columns[column.name] = column
         end
       end
       @columns

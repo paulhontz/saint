@@ -2,51 +2,43 @@ module Saint
   class ClassApi
 
     # given model may contain many columns,
-    # however, in most cases, not all of them should be displayed in GUI.
-    # this method allow to add columns one by one, with opts and callback.
+    # however, in most cases, not all of them should be managed by Saint.
     #
-    # this method also accepts an proc.
-    # proc meaning is to modify given value, depending on given scope,
-    # and return modified version.
-    # 
-    # if proc returns nil, original value will be used.
-    # 
-    # given block will receives back 3 arguments:
-    # *  value
-    # *  scope, one of
-    #    -  :summary, used when data displayed on summary pages.
-    #    -  :crud, used when data displayed on crud pages.
-    # *  row, currently handled row, so you can mix the value of current column with values of other columns.
-    #
-    # block is executed inside currently running controller,
-    # so it have access to any of #http, #view, #admin Api methods.
-    #
-    # @example display :name in both Summary and CRUD pages, type defaulted to String
+    # @example display :name in both Summary and CRUD pages. type defaulted to String
     #    saint.column :name
     #
     # @example show the :date only on CRUD pages
-    #    saint.column :date, summary: false
+    #    saint.column :date do
+    #      summary false
+    #    end
+    #
+    # @example drop-down selector
+    #    saint.column :color, :select do
+    #      options ['red', 'green', 'blue']
+    #    end
     #
     # @example display date in human format on summary pages
-    #    saint.column :date do |val, scope|
-    #      val.strftime('%b %d, %Y') if scope.summary?
+    #    saint.column :date do
+    #      value do |val|
+    #        val.strftime('%b %d, %Y') if summary?
+    #      end
     #    end
     #
     # @example display name with email on summary pages
-    #    saint.column :name do |val, scope, row|
-    #      '%s <%s>' % [val, row.email] if scope.summary?
+    #    saint.column :name do
+    #      value do |val|
+    #        '%s <%s>' % [val, row.email] if summary?
+    #      end
     #    end
     #
     # @param [Symbol] name
-    # @param [Hash] opts
+    # @param [Symbol] type
     # @param [Proc] &proc
-    def column name, opts = {}, &proc
+    def column name, type = nil, &proc
       return unless configurable?
-      opts[:proc] = proc
-      if opts[:grid] = @grid
-        @grid_columns += 1
-      end
-      columns[name] = opts
+      @grid && @grid_columns += 1
+      column = SaintColumn.new(name, type, rbw: @node.saint.rbw, grid: @grid, &proc)
+      columns[column.name] = column
     end
 
     # by default, GUI use a fieldset to display elements.

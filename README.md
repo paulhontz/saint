@@ -60,13 +60,15 @@ Text field:
 
 Textarea field:
 
-    saint.column :about, type: :text
+    saint.column :about, :text
     # UI output: <textarea name="about" style="width: 100%;"></textarea>
 
 
 To have some column excluded from CRUD pages, set :crud option to false:
 
-    saint.column :date, crud: false
+    saint.column :date do
+        crud false
+    end
 
 [More on Columns](saint/blob/master/Columns.md)
 
@@ -106,7 +108,9 @@ in the order they was defined.
 
 To exclude some column, set :summary option to false:
 
-    saint.column :date, summary: false
+    saint.column :date do
+        summary false
+    end
 
 **Order**
 

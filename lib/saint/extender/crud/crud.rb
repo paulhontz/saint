@@ -64,7 +64,7 @@ module Saint
             end
           end
 
-          @elements = render_columns(saint.columns, :crud, @row)
+          @elements = crud_columns(saint.columns, @row)
           view.render_layout saint_view.render_partial('edit/edit')
         end
 
@@ -79,7 +79,7 @@ module Saint
           end
 
           @elements = Hash.new
-          saint.columns.select { |n, c| c.crud }.each_value do |column|
+          saint.columns.select { |n, c| c.crud? }.each_value do |column|
             @row_val = column.crud_value @row
             @element = column
             @elements[column] = column.type ?
@@ -93,15 +93,15 @@ module Saint
 
           if saint.update
             ds = Hash.new
-            saint.columns.select { |n, c| c.save }.each_value do |column|
+            saint.columns.select { |n, c| c.save? }.each_value do |column|
 
-              value = http.params[column.name.to_s] || ''
-              value = nil if value.size == 0
+              value = http.params[column.name.to_s]
 
-              # nil and empty columns are not saved/updated.
-              # to set an column's value to nil, use {Saint::RV_NULL_VALUE} as column value
+              # nil columns are not saved/updated
+              # to set column's value to nil, use {Saint::RV_NULL_VALUE} as column value
+              
+              # exception making only checkbox columns, which can be nil
               unless value
-                # exception making only checkbox columns, which can be nil
                 next unless column.checkbox?
               end
 

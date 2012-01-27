@@ -55,7 +55,9 @@ By default, Saint will use capitalized name for column label:
 
 To have an custom label, use :label option:
 
-    saint.column :name, label: "Author's Name"
+    saint.column :name do
+        label "Author's Name"
+    end
     # HTML: <fieldset><legend>Author's Name</legend>...
 
 
@@ -217,23 +219,39 @@ Use *saint.column_layout* to render all columns using custom layout:
 
 Use custom layout for a specific column:
 
-    saint.column :some_column, layout: '<div class="column-layout">[label]: [field]</div>'
+    saint.column :some_column do
+        layout '<div class="column-layout">[label]: [field]</div>'
+    end
 
 Use default layout with custom style/class:
 
-    saint.column :some_column, layout_style: 'width: 20%;'
-    saint.column :some_another_column, layout_class: 'custom-column-layout'
+    saint.column :some_column do
+        layout_style 'width: 20%;'
+    end
+    saint.column :some_another_column do
+        layout_class 'custom-column-layout'
+    end
 
 ###CSS
 
 **Custom width/height for specific columns:**
 
-    saint.column :some_column, width: 400, height: 200
-    saint.column :some_another_column, width: '20%', height: '10%'
+    saint.column :some_column do
+        width 400
+        height 200
+    end
+    saint.column :some_another_column do
+        width '20%'
+        height '10%'
+    end
 
 Numerical widht/height are used as pixels.
 
 **Custom style/class for specific columns:**
 
-    saint.column :some_column, css_style: 'width: 400px;'
-    saint.column :some_another_column, css_class: 'custom-column-css-class'
+    saint.column :some_column do
+        css_style 'width: 400px;'
+    end
+    saint.column :some_another_column do
+        css_class 'custom-column-css-class'
+    end

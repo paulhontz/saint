@@ -3,8 +3,8 @@ module Ctrl
 
     saint.model Model::Menu
     
-    saint.column :name, type: :string
-    saint.column :body, type: :text
+    saint.column :name
+    saint.column :body, :text
 
     saint.filter :name
     saint.filter :body

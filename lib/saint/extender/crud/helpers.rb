@@ -6,14 +6,6 @@ module Saint
 
         private
 
-        def render_columns columns, scope, row
-          columns.select { |n, c| c.send scope }.values.inject({}) do |map, column|
-            @element, @row_val = column, column.value(row, scope)
-            html = column.type ? saint_view.render_partial('edit/elements/%s' % column.type) : @row_val
-            map.update(column => html)
-          end
-        end
-
         def render_elements elements, opts = {}
           layout = opts[:layout] || saint.column_layout
           html = ''
@@ -36,6 +28,14 @@ module Saint
           end
         end
 
+        def crud_columns columns, row
+          columns.select { |n, c| c.crud? }.values.inject({}) do |map, column|
+            @element, @row_val = column, column.crud_value(row)
+            html = column.type ? saint_view.render_partial('edit/elements/%s' % column.type) : @row_val
+            map.update(column => html)
+          end
+        end
+
         def summary_columns implicit_columns, explicit_columns = nil
 
           columns = Array.new
@@ -46,8 +46,7 @@ module Saint
             end
           end
           if columns.size == 0
-            implicit_columns.each_value do |column|
-              next unless column.summary
+            implicit_columns.select { |n, c| c.summary? }.each_value do |column|
               next if column.password?
               columns << column
             end

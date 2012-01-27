@@ -5,9 +5,14 @@ module Ctrl
 
     saint.column :name
     saint.column :email
-    saint.column :password, type: :password
+    saint.column :password, :password
 
-    saint.column :status, label: :Color, type: :select, multiple: true, options: ['red', 'green', 'blue'], width: 200
+    saint.column :status, :select do
+      label :Color
+      multiple true
+      options ['red', 'green', 'blue']
+      width 200
+    end
 
     saint.filter :name
 

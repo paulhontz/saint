@@ -15,21 +15,41 @@ module Ctrl
     saint.order :id, :desc
     
     saint.grid do
-      column :name, type: :string, rb_wrapper: false
-      column :label, type: :string
+      column :name
+      column :label
     end
 
-    saint.column :url, type: :string, rb_wrapper: false
+    saint.column :url
 
     saint.grid do
-      column :meta_title, type: :text
-      column :meta_description, type: :text
-      column :meta_keywords, type: :text
+      column :meta_title, :text do
+        summary false
+      end
+      column :meta_description, :text do
+        summary false
+      end
+      column :meta_keywords, :text do
+        summary false
+      end
     end
 
-    saint.column :content, type: :rte, height: '400px'
+    saint.column :content, :rte do
+      height '400px'
+    end
 
-    saint.column :active, type: :boolean
+    saint.grid do
+      column :active, :boolean
+      column :color1, :checkbox do
+        options ['red', 'green', 'blue']
+      end
+      column :color2, :select do
+        options ['red', 'green', 'blue']
+      end
+      column :color3, :select do
+        multiple true
+        options ['red', 'green', 'blue']
+      end
+    end
 
     saint.filter :name
     saint.filter :content

@@ -15,6 +15,10 @@ module Model
     property :callback_a_test, String
     property :callback_z_test, String
 
+    property :color1, String
+    property :color2, String
+    property :color3, String
+
     property :content, Text
     property :active, Integer
   end

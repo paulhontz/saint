@@ -267,17 +267,20 @@ module Saint
     # set the template to be used when filter rendered.
     # for now :string and :select templates available.
     # 
-    # if second arg is an hash, it will be treated as options for rendered html element,
-    # e.g. !{multiple: true} or !{class: 'some-css-class'}
+    # if second arg is an hash, it will be treated as options for rendered html element.
     #
     # this method also accepts an block.
     # if block returns a positive value,
     # returned value will be used at rendering.
     # normally, it should return an string for :string type
-    # and an hash for :select type.
-    # IMPORTANT: if block returns nil, filter ui are not displayed at all.
+    # and an hash or array for :select type.
     #
-    # @example add an drop-down filter containing rounds of selected edition
+    # @example pass drop-down options as argument
+    #    saint.filter :color do
+    #      type :select, options: ['red', 'green', 'blue']
+    #    end
+    #
+    # @example pass drop-down options using a block
     #    saint.filter :round_id do
     #      logic :eql
     #      label 'Please select Edition'
@@ -291,16 +294,18 @@ module Saint
     #    end
     #
     #    # this will looking for on edition_id in HTTP params and when it is available,
-    #    # it will draw an drop-down selector for rounds of selected edition.
+    #    # will draw an drop-down selector for rounds of selected edition.
     #
-    # @example draw and drop-down selector that allow to select multiple options and has an custom css style
+    # @example draw and drop-down selector that allow to select multiple options
     #
-    #    saint.filter :author_id do
-    #      type :select, multiple: true, style: "width: 100px;"
+    #    saint.filter :author_id, Model::Author do
+    #      type :select, multiple: true
     #    end
     #
     # @param [Symbol] type
     # @param [Hash] opts
+    # @option opts [true] multiple
+    # @option opts [Hash, Array] options
     # @param [Proc] &proc
     def type type = nil, opts = {}, &proc
       return @type_tpl if type.nil?
@@ -340,7 +345,7 @@ module Saint
     # use this method to define column to be used by ORM
     #
     # @example instruct ORM to use #name instead of #country_name
-    #    saint.column :country_name, Model::Country do
+    #    saint.filter :country_name, Model::Country do
     #      column :name
     #    end
     def column column = nil
@@ -532,9 +537,6 @@ module Saint
     # render filter into UI representation
     def html xhr = false
       @xhr = xhr
-      if proc = @setup.type_proc
-        return unless @type_values = self.instance_exec(&proc)
-      end
       @view_api.render_partial @setup.type_tpl
     end
 
@@ -558,7 +560,14 @@ module Saint
     # get options for drop-down selector
     def drop_down_options
 
-      return @type_values if @type_values
+      options = @setup.type_opts[:options]
+      (proc = @setup.type_proc) && (options = self.instance_exec(&proc))
+      if options
+        if options.is_a?(Array)
+          options = Hash[options.zip options]
+        end
+        return options if options.is_a?(Hash)
+      end
       return {} unless @setup.remote_model
 
       values, filters = Hash.new, Hash.new

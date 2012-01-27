@@ -59,7 +59,7 @@ Saint will use all non ID columns when rendering association UI.
 
 You can use #column inside block to instruct Saint about what columns to include and how to render them.
 
-The syntax is same as when defining Saint columns by #saint.column
+The syntax is same as when defining Saint columns by `saint.column`
 
 *Example:* display only name and email when rendering authors assoc UI
 

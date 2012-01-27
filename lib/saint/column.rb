@@ -1,96 +1,29 @@
 module Saint
   class SaintColumn
 
-    OPTS = [
-        # if set to true, item wont be saved if field is empty.
-        :required,
+    attr_reader :id, :name, :type, :grid
+    attr_reader :row, :scope
 
-        # :multiple allow to select multiple options on drop-down selectors.
-        # :size indicates how much lines to display for select-multiple columns.
-        :multiple, :size,
+    def initialize name, type = nil, opts = {}, &proc
 
-        # string used to join values for checkbox and select-multiple columns.
-        # by default a coma will be used.
-        :join_with,
+      # by default, all columns are shown on all pages and saved to db.
+      @summary = true
+      @crud = true
+      @save = true
 
-        # options to be used on select, radio and checkbox selectors.
-        :options,
-
-        # set value to be used when value for given column is nil.
-        # for selectable columns, default option will be auto-selected,
-        # on text columns, default text will be displayed.
-        :default,
-
-        # By default, Saint will use capitalized name for label:
-        #
-        #   saint.column :name
-        #   # HTML: <fieldset><legend>Name</legend>...
-        #
-        # To have an custom label, use :label option:
-        #
-        #   saint.column :name, label: "Author's Name"
-        #   # HTML: <fieldset><legend>Author's Name</legend>...
-        :label,
-
-        # search/group columns by tags
-        :tag,
-
-        # make current column a part of a grid
-        :grid,
-
-        # set width/height for used grid
-        :grid_width, :grid_height,
-
-        # css
-        :width, :height, :css_style, :css_class,
-
-        # use a custom layout for current column.
-        # also see {Saint::ClassApi#column_layout}, which set layout for all columns
-        :layout,
-
-        # use default layout but add this css style
-        :layout_style,
-
-        # use default layout but add this css class
-        :layout_class
-    ]
-    OPTS.each { |o| attr_reader o }
-
-    attr_reader :id, :name, :type, :proc, :summary, :crud, :save
-
-    def initialize node_or_node_instance, name, opts = {}
-
-      if node_or_node_instance.instance_of?(::Saint::InstanceApi)
-        @node, @node_instance = node_or_node_instance.class, node_or_node_instance
-      else
-        @node, @node_instance = node_or_node_instance, nil
-      end
-
-      @proc = opts[:proc]
-      @id = '%s_%s' % [name, Digest::MD5.hexdigest(@proc.to_s)]
-      @name = name.to_sym
+      proc && self.instance_exec(&proc)
 
       # default type is string
-      @type = opts.fetch :type, :string
+      @type = type || :string
 
-      # should the column be shown on Summary pages? true by default
-      @summary = opts.fetch :summary, true
-      # should the column be shown on Crud pages? true by default
-      @crud = opts.fetch :crud, true
-      # should the column used when object persisted to db? true by default
-      @save = opts.fetch :save, true
-      # plain columns not saved to db
-      @save = false if plain?
+      # use rb_wrapper only if it is required
+      @rbw = opts.fetch :rbw, false
 
-      OPTS.each { |v| self.instance_variable_set(:"@#{v}", opts[v]) }
+      # is current column a part of a grid
+      @grid = opts.fetch :grid, nil
 
-      if @options
-        if @options.is_a?(Array)
-          @options = Hash[@options.zip(@options.map { |o| Saint::Inflector.titleize(o) })]
-        else
-          raise('options should be either an Hash or an Array') unless @options.is_a?(Hash)
-        end
-      end
+      @id = '%s_%s' % [name, Digest::MD5.hexdigest(@proc.to_s)]
+      @name = name.to_sym
 
       @label ||= Saint::Inflector.titleize(@name)
 
@@ -107,12 +40,161 @@ module Saint
       ]
     end
 
-    def join_with
-      @join_with || ','
+    # should the column be shown on Summary pages?
+    # true by default
+    def summary *args
+      @summary = args.first if args.size > 0
+    end
+
+    # true when column shown on Summary pages
+    def summary?
+      @scope ? @scope == :summary : @summary
+    end
+
+    # should the column be shown on Crud pages?
+    # true by default
+    def crud *args
+      @crud = args.first if args.size > 0
+    end
+
+    # true when column shown on CRUD pages
+    def crud?
+      @scope ? @scope == :crud : @crud
+    end
+
+    # should the column be used when object persisted to db?
+    # true by default
+    def save *args
+      @save = args.first if args.size > 0
+    end
+
+    def save?
+      plain? ? false : @save
+    end
+
+    # if set to true, item wont be saved if field is empty.
+    # false by default
+    def required *args
+      @required = args.first if args.size > 0
     end
 
     def required?
       @required
+    end
+
+    # should the select-multiple drop-downs allow multiple options selection?
+    # false by default
+    def multiple *args
+      @multiple = args.first if args.size > 0
+      @multiple
+    end
+
+    # indicates how much lines to display for select-multiple columns.
+    # nil by default
+    def size size = nil
+      @size = size.to_i if size
+      @size
+    end
+
+    # string used to join values for checkbox and select-multiple columns.
+    # a coma will be used by default
+    def join_with str = nil
+      @join_with = str if str
+      @join_with || ', '
+    end
+
+    # options to be used on select, radio and checkbox selectors
+    def options options = nil
+      if options
+        if options.is_a?(Array)
+          options = Hash[options.zip(options.map { |o| Saint::Inflector.titleize(o) })]
+        else
+          raise('options should be either an Hash or an Array') unless options.is_a?(Hash)
+        end
+        @options = options
+      end
+      @options
+    end
+
+    # set value to be used when value for given column is nil.
+    # for selectable columns, default option will be auto-selected,
+    # on text columns, default text will be displayed.
+    def default value = nil
+      @default = value if value
+      @default
+    end
+
+    # By default, Saint will use capitalized name for label:
+    #
+    #    saint.column :name
+    #    # HTML: <fieldset><legend>Name</legend>...
+    #
+    # To have an custom label, use #label inside block:
+    #
+    #    saint.column :name do
+    #      label "Author's Name"
+    #    end
+    #    # HTML: <fieldset><legend>Author's Name</legend>...
+    def label label = nil
+      @label = label if label
+      @label
+    end
+
+    # search/group columns by tags
+    def tag tag = nil
+      @tag = tag if tag
+      @tag
+    end
+
+    # set width/height for used grid
+    def grid_width val = nil
+      @grid_width = val if val
+      @grid_width
+    end
+
+    def grid_height val = nil
+      @grid_height = val if val
+      @grid_height
+    end
+
+    # css
+    def width val = nil
+      @width = val if val
+      @width
+    end
+
+    def height val = nil
+      @height = val if val
+      @height
+    end
+
+    def css_style val = nil
+      @css_style = val if val
+      @css_style
+    end
+
+    def css_class val = nil
+      @css_class = val if val
+      @css_class
+    end
+
+    # use a custom layout for current column.
+    # also see {Saint::ClassApi#column_layout}, which set layout for all columns
+    def layout val = nil
+      @layout = val if val
+      @layout
+    end
+
+    # use default layout but add this css style
+    def layout_style val = nil
+      @layout_style = val if val
+      @layout_style
+    end
+
+    # use default layout but add this css class
+    def layout_class val = nil
+      @layout_class = val if val
+      @layout_class
     end
 
     def select?
@@ -139,27 +221,6 @@ module Saint
       @type == :rte
     end
 
-    class ScopeHelper
-
-      attr_reader :name
-
-      def initialize name
-        @name = name.to_sym
-      end
-
-      def summary?
-        @name == :summary
-      end
-
-      def crud?
-        @name == :crud
-      end
-
-      def == v
-        v == @name
-      end
-    end
-
     # alias for `value row, :crud'
     def crud_value row
       value row, :crud
@@ -170,37 +231,61 @@ module Saint
       value row, :summary
     end
 
-    # extract, modify if needed and return value for current column
+    private
+    # if block given, this method will set a proc to be executed when column value requested.
+    # proc meaning is to modify given value, depending on given scope, and return modified version.
+    # if proc returns nil, original value will be used.
+    #
+    # given block will receive an single argument - current value.
+    # block should modify value, if needed, and return it.
+    # given block will have access to following helper methods:
+    # *  #summary? - true if column is currently shown on Summary pages
+    # *  #crud? - true if column is currently shown on CRUD pages
+    # *  #row - current row object
+    # *  #scope - one of :summary or :crud
+    #
+    # block is executed inside currently running controller,
+    # so it have access to any of #http, #view, #admin Api methods.
+    #
+    # if row and scope given, this method will extract, modify if needed,
+    # and return value for current column
     #
     # @param [Object] row
     # @param [Symbol] scope
-    def value row, scope
+    # @param [Proc] proc
+    def value row = nil, scope = nil, &proc
 
+      if proc
+        return @value_proc = proc
+      else
+        raise ArgumentError unless row && scope
+      end
+
+      # extracting value
       value = row[@name]
-      scope = ScopeHelper.new scope
 
-      if @options && scope.summary?
+      @row, @scope = row, scope
+      
+      if @options && summary?
         value = @options[value]
       end
 
-      if boolean? && scope.summary?
+      if boolean? && summary?
         value = Saint::Utils::BOOLEAN_OPTIONS[value]
       end
 
-      if @proc && val = (@node_instance || @node).instance_exec(value, scope, row, &@proc)
+      if @value_proc && val = self.instance_exec(value, &@value_proc)
         value = val
       end
+      @row, @scope = nil, nil
 
       # passwords are not wrapped
       return value if password?
 
-      # if rb_wrapper is enabled for current node, wrap value accordingly.
-      # it will be unwrapped when saved to db.
-      if rb_wrapper = @node.saint.rbw
-        value = rb_wrapper.wrap(value)
-      end
+      @rbw && value = @rbw.wrap(value)
       value
     end
+
 
   end
 end

@@ -165,14 +165,9 @@ module Saint
       else
         args = @header_args
         if row && args.size == 0
-          # no snippets defined, so using first 3 non-id columns
+          # no snippets defined, so using first non-id column
           orm = Saint::ORM.new(@node.saint.model)
-          orm.properties.each do |p|
-            next if (p == :id) || (p.to_s =~ /_id$/i)
-            break if args.size == 3
-            args << p
-          end
-          args = ['#' % args.join(', #')]
+          args = [orm.properties.select { |p| false if p == :id || p.to_s =~ /_id$/i }.compact.first]
         end
         args.each do |a|
           (s = column_format(a, row)) && s.strip.size > 0 && header << s

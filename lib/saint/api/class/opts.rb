@@ -148,7 +148,7 @@ module Saint
 
         saint.grid do
 
-          column :name, label: 'Option', type: :plain do |val, scp, row|
+          column :name, label: 'Option', type: :plain do
             if row && opt = pool.opts[row.name]
               context = {
                   name: Saint::Inflector.titleize(row.name),
@@ -158,8 +158,8 @@ module Saint
             end
           end
 
-          column :value, type: nil do |val, scope, row|
-            case scope.name
+          column :value, type: nil do
+            case scope
               when :crud
                 if opt = pool.opts[row.name]
                   context = {
