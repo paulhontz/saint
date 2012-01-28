@@ -197,7 +197,7 @@ More on Associative Filters
 
 **order**
 
-Saint will display association items in the order they was extracted.
+By default, Saint will order association items by remote primary key.<br/>
 To have a custom order, use `order` inside filter block:
 
     saint.filter :author_id, Model::Author do

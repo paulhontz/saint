@@ -155,7 +155,6 @@ module Saint
       end
 
       @type_opts = Hash.new
-      @order = Hash.new
 
       # orm should support all this methods.
       @logic_map = {
@@ -412,11 +411,14 @@ module Saint
     # @param [Symbol] column
     # @param [Symbol] direction
     def order column = nil, direction = :asc
-      return @order unless column
-      unless [:asc, :desc].include?(direction)
-        raise "direction should be one of :asc or :desc"
+      if column
+        raise "Column should be a Symbol,
+          #{column.class} given" unless column.is_a?(Symbol)
+        raise "Unknown direction #{direction}.
+          Should be one of :asc, :desc" unless [:asc, :desc].include?(direction)
+        (@order ||= Hash.new)[column] = direction
       end
-      @order[column] = direction
+      @order || {remote_pkey => :desc}
     end
 
     # by default, remote_pkey is :id.

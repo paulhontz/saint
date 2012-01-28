@@ -22,7 +22,7 @@
 
   </tr>
 
-  <% items_counter = 0
+  <% items_counter = @pager.items + 1
      items.each do |remote_item|
          remote_id = remote_item[@relation.remote_pkey]
          update_relation_action = :assoc__has_n__update_remote_item
@@ -38,7 +38,7 @@
         <% if level == 0 -%>
             <td style="text-align: center;">
               <a href="<%= remote_node ? remote_node.http.route(:edit, remote_id) : 'javascript:void(0);' %>" target="_blank">
-                <%= (items_counter += 1) + @pager.page_number * @relation.ipp %>
+                <%= (items_counter -= 1) - @pager.page_number * saint.ipp %>
               </a>
             </td>
             <% unless readonly -%>

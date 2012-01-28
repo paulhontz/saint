@@ -10,7 +10,7 @@
     <% end -%>
   </tr>
 
-  <% items_counter = 0
+  <% items_counter = @pager.items + 1
      items.each do |row|
          row_id = row[saint.pkey]
          edit_url = http.route(:edit, row_id, @pager.query_string)
@@ -24,7 +24,7 @@
           <input type="checkbox" name="rows[]" value="<%= row_id %>" <%= 'disabled' if children.size > 0 %> />
           <% if level == 0 -%>
               <a href="<%= edit_url %>" class="saint-button" style="font-size: 12px;">
-                <%= (items_counter += 1) + @pager.page_number * saint.ipp %>
+                <%= (items_counter -= 1) - @pager.page_number * saint.ipp %>
               </a>
           <% end -%>
         </td>

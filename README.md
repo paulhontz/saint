@@ -123,9 +123,9 @@ To exclude some column, set :summary option to false:
 
 **Order**
 
-Saint will extract and display model items in the order ORM returns them.
+By default, items are arranged by primary key, in descending order.
 
-`saint.order` allow to display items in the desired way:
+`saint.order` allow to arrange items in desired way:
 
     saint.order :date, :desc
     saint.order :name

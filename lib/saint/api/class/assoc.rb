@@ -198,7 +198,6 @@ module Saint
 
       @ipp = 10
       @filters = Array.new
-      @order = Hash.new
       @columns = Hash.new
 
       @local_pkey = @local_node.saint.pkey
@@ -486,7 +485,10 @@ module Saint
       end
     end
 
-    # the order to be used when items extracted.
+    # the order to be used when displaying items.
+    # by default, if remote node defined, it will use there order,
+    # otherwise, it will arrange items by remote pkey in descending order.
+    # use this method to set custom order.
     # call it multiple times to order by multiple columns/directions.
     #
     # @example order pages by date, newer first
@@ -499,16 +501,14 @@ module Saint
     # @param [Symbol] column
     # @param [Symbol] direction, :asc or :desc
     def order column = nil, direction = :asc
-
-      return @order unless column
-
-      raise "Column should be a Symbol,
+      if column
+        raise "Column should be a Symbol,
           #{column.class} given" unless column.is_a?(Symbol)
-
-      raise "Unknown direction #{direction}.
+        raise "Unknown direction #{direction}.
           Should be one of :asc, :desc" unless [:asc, :desc].include?(direction)
-
-      @order[column] = direction
+        (@order ||= Hash.new)[column] = direction
+      end
+      @order || (remote_node.saint.order if remote_node) || {remote_pkey => :desc}
     end
 
     # self-explanatory

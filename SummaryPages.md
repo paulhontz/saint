@@ -27,7 +27,8 @@ Defaulted to 10
 
 ###Order
 
-Defaulted to model's order
+By default, items are arranged by primary key, in descending order.<br/>
+Use `saint.order` to arrange items in a custom order.
 
     saint.order :date, :desc
     saint.order :name, :asc

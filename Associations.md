@@ -181,6 +181,9 @@ dynamic filters will override the static ones.
 
 Use `order` with a column and direction to modify the default extracting order.
 
+By default, if remote node defined, items will be extracted by order defined at remote node,<br/>
+otherwise, items will be extracted by remote primary key, in descending order.
+
 *Example:* order games by date, newest first
 
     class Team

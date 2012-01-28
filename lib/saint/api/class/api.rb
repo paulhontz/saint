@@ -4,8 +4,6 @@ module Saint
     include Saint::Utils
     include Saint::Inflector
 
-    attr_reader :pkey
-
     # initializing the configuration Api for given node.
     #
     # @param [Object] node
@@ -13,7 +11,7 @@ module Saint
 
       @node = node
       @ipp = Saint.ipp
-      @order = Hash.new
+      @pkey = :id
       @header_args, @header_opts = [], {}
 
       @create, @update, @delete = true, true, true
@@ -37,14 +35,46 @@ module Saint
     #   should be an valid ORM model. for now only DataMapper ORM supported.
     # @param [Symbol] pkey
     #   the model primary key, `:id`
-    def model model = nil, pkey = :id
+    def model model = nil, pkey = nil
       if configurable? && model
-        @model, @pkey = model, pkey
+        @model = model
+        @pkey = pkey if pkey
         # adding CRUD methods to node
         Saint::CrudExtender.new @node
         Saint::ORMUtils.finalize
       end
       @model
+    end
+
+    # define primary key.
+    # also can be defined by passing it as second argument to {#model}
+    #
+    # @param [Symbol] key
+    def pkey key = nil
+      @pkey = key if configurable? && key
+      @pkey
+    end
+
+    # set the order to be used when items extracted.
+    # by default, Saint will arrange items by primary key, in descending order.
+    # this method is aimed to override default order.
+    # call it multiple times to order by multiple columns/directions.
+    #
+    # @example
+    #    saint.order :date, :desc
+    #    saint.order :name, :asc
+    #
+    # @param [Symbol] column
+    # @param [Symbol] direction, `:asc`, `:desc`
+    def order column = nil, direction = :asc
+      if column && configurable?
+        raise "Column should be a Symbol,
+          #{column.class} given" unless column.is_a?(Symbol)
+        raise "Unknown direction #{direction}.
+          Should be one of :asc, :desc" unless [:asc, :desc].include?(direction)
+        (@order ||= Hash.new)[column] = direction
+      end
+      @order || {pkey => :desc}
     end
 
     # self-explanatory
@@ -54,28 +84,6 @@ module Saint
     end
 
     alias :ipp :items_per_page
-
-    # the order to be used when items extracted.
-    # call it multiple times to order by multiple columns/directions
-    #
-    # @example
-    #    saint.order :date, :desc
-    #    saint.order :name, :asc
-    #
-    # @param [Symbol] column
-    # @param [Symbol] direction, `:asc`, `:desc`
-    def order column = nil, direction = :asc
-
-      return @order unless column
-
-      raise "Column should be a Symbol,
-          #{column.class} given" unless column.is_a?(Symbol)
-
-      raise "Unknown direction #{direction}.
-          Should be one of :asc, :desc" unless [:asc, :desc].include?(direction)
-
-      @order[column] = direction if configurable?
-    end
 
     # define the header to be displayed in UI.
     # header is defaulted to pluralized class name.

@@ -7,11 +7,12 @@ module Saint
     SIDE_PAGES = 5
     ITEMS_PER_PAGE = 10
 
-    attr_reader :pages, :page_label, :page_number, :html
+    attr_reader :items, :pages, :page_label, :page_number, :html
 
     def initialize page = 1, items = ITEMS_PER_PAGE, items_per_page = ITEMS_PER_PAGE
 
-      @pages = (items.to_f / items_per_page.to_f).ceil
+      @items = items
+      @pages = (@items.to_f / items_per_page.to_f).ceil
       @pages = 1 if @pages < 1
 
       @page_label = page.to_i
