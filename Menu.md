@@ -5,7 +5,7 @@ Any class including `Saint::Api` will be automatically included in menu.
 Label
 ---
 
-Menu label is defaulted to node's header, set by `saint.header`.
+Menu label is defaulted to node's header, set by `saint.header`
 
 Use `label` to override this:
 
