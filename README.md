@@ -1,5 +1,4 @@
-Saint - Simple Admin Interface
----
+#Quick Start
 
 Saint allow developers to easily manage existing ORM models(currently only DataMapper supported).
 
@@ -11,7 +10,7 @@ It is aimed to automatize the backend building process, by creating **Summary** 
 
 Before any setup, let Saint know the model to be managed.
 
-**Model to be managed:**
+**Define Model:**
 
     class PageModel
         include DataMapper::Resource
@@ -20,25 +19,13 @@ Before any setup, let Saint know the model to be managed.
     end
 {:lang='ruby'}
 
-**Saint setup:**
+**Setup Controller:**
 
     class Page
         include Saint::Api
         http.map :pages
         saint.model PageModel
         saint.column :name
-    end
-{:lang='ruby'}
-
-Saint expects given model to have :id as primary key, but allow to set a custom key,
-by passing it as second argument or by using `saint.pkey`:
-
-    class Page
-        include Saint::Api
-
-        saint.model Model::Page, :uid
-        # or
-        saint.pkey :uid
     end
 {:lang='ruby'}
 
@@ -50,123 +37,96 @@ by passing it as second argument or by using `saint.pkey`:
 {:lang='ruby'}
 
 
-###CRUD Pages
+#Columns
 
-Aimed to edit columns and associations.
+Saint allow to build HTML columns of various types and options using pure Ruby code.
 
-**Columns**
-
-Saint allow to draw HTML columns of various types and options using pure Ruby code.
-
-Text field:
+**Text**
 
     saint.column :name
-    # UI output: <input type="text" name=":name" />
 {:lang='ruby'}
 
-Textarea field:
+<div class="screenshot-container">
+<img src="http://saintrb.org/screenshots/columns/page-name.png" class="screenshot" />
+</div>
+
+**Textarea**
 
     saint.column :about, :text
-    # UI output: <textarea name="about" style="width: 100%;"></textarea>
 {:lang='ruby'}
 
-To have some column excluded from CRUD pages, set :crud option to false:
+<div class="screenshot-container">
+<img src="http://saintrb.org/screenshots/columns/page-meta_title.png" class="screenshot" />
+</div>
 
-    saint.column :date do
-        crud false
+**Select**
+
+    saint.column :status, :select do
+        options: 1 => :Active, 0 => :Suspended
     end
 {:lang='ruby'}
 
+<div class="screenshot-container">
+<img src="http://saintrb.org/screenshots/columns/select.png" class="screenshot" />
+</div>
+
 [More on Columns](http://saintrb.org/Columns.md)
 
-**Associations**
+
+#Associations
 
 Saint does support *"belongs to"*, *"has N"* and *"has N through"* associations.
 
+*Example:* Game belongs to Edition
+
     class Game
-        include Saint::Api
-
-        saint.model Model::Game
-
-        # game belongs to edition
         saint.belongs_to :edition, Model::Edition
+    end
+{:lang='ruby'}
 
-        # game has N goals
+*Example:*  Game has N Goals
+
+    class Game
         saint.has_n :goals, Model::Goal
+    end
+{:lang='ruby'}
 
-        # game has N scorers(players), through PlayersScorers model
+*Example:* Game has N Scorers(Players), through PlayersScorers model
+
+    class Game
         saint.has_n :scorers, Model::Player, Model::PlayersScorers
     end
 {:lang='ruby'}
 
-There are also tree association, when some item may belong to another item of same model.
-
-    saint.is_tree
-
 [More on Associations](http://saintrb.org/Associations.md)
 
-[More on CRUD pages](http://saintrb.org/CRUDPages.md)
+#Filters
 
-###Summary pages
+**Text Filters**
 
-**Columns**
+    saint.filter :name
+    saint.filter :about
+{:lang='ruby'}
 
-All the columns defined above, will be displayed on Summary pages,
-in the order they was defined.
+*Note:* for filter to work, it should use a earlier defined column or association.
 
-To exclude some column, set :summary option to false:
+**Dropdown Filters**
 
-    saint.column :date do
-        summary false
+    saint.filter :active do
+        type :select, options: {1 => 'Yes', 0 => 'No'}
     end
 {:lang='ruby'}
 
-**Order**
+**Associative Filters**
 
-By default, items are arranged by primary key, in descending order.
+Filter Page by Author:
 
-`saint.order` allow to arrange items in desired way:
-
-    saint.order :date, :desc
-    saint.order :name
-    # SQL: ORDER BY date DESC, name
+    saint.filter :author_id, Model::Author
 {:lang='ruby'}
 
-**Pagination**
+[More on Filters](http://saintrb.org/Filters.md)
 
-By default, Saint will display 10 items per page.
-
-Use `saint.items_per_page` to override this:
-
-    saint.items_per_page 50
-    # or just
-    saint.ipp 50
-{:lang='ruby'}
-
-[More on Summary pages](http://saintrb.org/SummaryPages.md)
-
-###Menu
-
-Saint will automatically build an menu containing links to all pages.
-
-Any class including `Saint::Api` will be automatically included in menu.
-
-Menu label is defaulted to node's header, set by `saint.header`:
-
-    saint.menu.label 'CMS Pages'
-    # now menu label is "CMS Pages"
-{:lang='ruby'}
-
-To have menu displayed, simply call `Saint::Menu.new.render` in your layout:
-
-    <body>
-        <%= Saint::Menu.new.render %>
-        ...
-    </body>
-
-[More on Menus](http://saintrb.org/Menu.md)
-
-###File Manager
+#File Manager
 
 Saint comes with a built-in file manager.
 
@@ -187,7 +147,7 @@ Simply let Saint know the full path to folder and it will turn a class into a fu
 [More on File Manager](http://saintrb.org/FileManager.md)
 
 
-###Opts Manager
+#Opts Manager
 
 Saint also has an built-in Opts Manager, which is a simple UI for editing predefined options.
 
@@ -222,21 +182,3 @@ Options defined inside Opts Manager can be accessed by `opts` Api.
 {:lang='ruby'}
 
 [More on Opts Manager](http://saintrb.org/OptsManager.md)
-
-###rb_wrapper
-
-If you use :rte type for some column and the content contains the tags
-that conflicts with editor, you can replace that tags when displaying content in editor
-and restore them when content saved to db.
-
-Saint allow to do this seamlessly:
-
-    saint.rb_wrapper true
-
-With rb_wrapper enabled, Saint will replace tags as follows:
-
-*   <%== code %> will be converted to :!{:== code :}:
-*   <%= code %> will be converted to :!{:= code :}:
-*   <% code %> will be converted to :!{: code :}:
-
-All tags will be restored when content saved to db.

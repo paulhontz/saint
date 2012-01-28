@@ -225,6 +225,25 @@ Proc will be executed inside node instance,
 so it will have access to http/view/node/saint api.
 
 
+###rb_wrapper
+
+If you use :rte type for some column and the content contains the tags
+that conflicts with editor, you can replace that tags when displaying content in editor
+and restore them when content saved to db.
+
+Saint allow to do this seamlessly:
+
+    saint.rb_wrapper true
+
+With rb_wrapper enabled, Saint will replace tags as follows:
+
+*   <%== code %> will be converted to :!{:== code :}:
+*   <%= code %> will be converted to :!{:= code :}:
+*   <% code %> will be converted to :!{: code :}:
+
+All tags will be restored when content saved to db.
+
+
 ###Layouts
 
 ####Global lyouts
