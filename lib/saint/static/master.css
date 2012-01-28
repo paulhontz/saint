@@ -28,15 +28,17 @@ table {
 
 fieldset {
 
-    border: #CCCCBB solid 1px;
-    border-radius: 5px 5px 5px 5px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    -webkit-border-radius: 5px 5px 5px 5px;
-
     margin-top: 20px;
     margin-bottom: 15px;
 
     background-color: #F8F8F8;
+
+    border: #CCCCBB solid 1px;
+    
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+
 
     box-shadow: 2px 2px 8px #bbb;
     -moz-box-shadow: 2px 2px 8px #bbb;
@@ -55,13 +57,14 @@ fieldset legend {
     -moz-border-radius: 4px 4px 4px 4px;
     -webkit-border-radius: 4px 4px 4px 4px;
 
-    background-color: #FFFFFF;
-
     box-shadow: 2px 2px 15px #bbb;
     -moz-box-shadow: 2px 2px 15px #bbb;
     -webkit-box-shadow: 2px 2px 15px #bbb;
 
+    background-color: #FFFFFF;
     color: #FF0084;
+
+    font-size: 15px;
 }
 
 .saint-filter_label {

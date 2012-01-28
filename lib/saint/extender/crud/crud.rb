@@ -80,7 +80,7 @@ module Saint
 
           @elements = Hash.new
           saint.columns.select { |n, c| c.crud? }.each_value do |column|
-            @row_val = column.crud_value @row
+            @row_val = column.crud_value(@row, self)
             @element = column
             @elements[column] = column.type ?
                 saint_view.render_partial('edit/elements/%s' % @element.type) :

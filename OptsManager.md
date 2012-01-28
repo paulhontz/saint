@@ -14,7 +14,7 @@ To define a opt, use `opt` inside block:
     end
 {:lang='ruby'}
 
-**Options accepted by `opt`:**
+**Options accepted by** `opt`:
 
 *   :type - one of :string, :text, :select. defaulted to :string
 *   :default - default value. to be used until you edit it.

@@ -31,7 +31,7 @@
         <% @columns.each do |column| -%>
             <td style="padding: 10px;">
               <a href="<%= edit_url %>">
-                <%= column.summary_value(row) -%>
+                <%= column.summary_value row, self -%>
               </a>
             </td>
         <% end -%>

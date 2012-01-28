@@ -67,7 +67,7 @@
         <% else -%>
             <% @remote_columns.each do |column| -%>
                 <td>
-                  <%= column.summary_value remote_item %>
+                  <%= column.summary_value remote_item, self %>
                 </td>
             <% end -%>
         <% end -%>

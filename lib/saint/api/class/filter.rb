@@ -145,13 +145,7 @@ module Saint
       if @remote_model = remote_model
         @remote_orm = Saint::ORM.new(@remote_model)
         @remote_pkey = :id
-        @default_remote_columns = Array.new
-        @remote_orm.properties.each do |p|
-          next if (p == :id) || (p.to_s =~ /_id$/i)
-          break if @default_remote_columns.size == 2
-          @default_remote_columns << p
-        end
-
+        @default_remote_columns = [@remote_orm.properties(true).first]
         if @through_model = through_model
           @through_orm = Saint::ORM.new(@through_model)
           local_table, remote_table = @local_orm.storage_name, @remote_orm.storage_name

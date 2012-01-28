@@ -167,7 +167,7 @@ module Saint
         if row && args.size == 0
           # no snippets defined, so using first non-id column
           orm = Saint::ORM.new(@node.saint.model)
-          args = [orm.properties.select { |p| false if p == :id || p.to_s =~ /_id$/i }.compact.first]
+          args = [orm.properties(true).first]
         end
         args.each do |a|
           (s = column_format(a, row)) && s.strip.size > 0 && header << s

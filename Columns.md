@@ -6,8 +6,8 @@ Text fields
     saint.column :name
 {:lang='ruby'}
 
-<div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/screenshots/columns/page-name.png" />
+<div class="screenshot-container">
+<img src="http://saintrb.org/screenshots/columns/page-name.png" class="screenshot" />
 </div>
 
 ###:text
@@ -15,8 +15,8 @@ Text fields
     saint.column :meta_title, :text
 {:lang='ruby'}
 
-<div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/screenshots/columns/page-meta_title.png" />
+<div class="screenshot-container">
+<img src="http://saintrb.org/screenshots/columns/page-meta_title.png" class="screenshot" />
 </div>
 
 ###:rte
@@ -24,8 +24,8 @@ Text fields
     saint.column :content, :rte
 {:lang='ruby'}
 
-<div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/screenshots/columns/page-rte.png" />
+<div class="screenshot-container">
+<img src="http://saintrb.org/screenshots/columns/page-rte.png" class="screenshot" />
 </div>
 
 ###:plain
@@ -36,8 +36,8 @@ Plain columns are not saved to db.
     saint.column :option, :plain
 {:lang='ruby'}
 
-<div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/screenshots/columns/plain.png" />
+<div class="screenshot-container">
+<img src="http://saintrb.org/screenshots/columns/plain.png" class="screenshot" />
 </div>
 
 ###:password
@@ -47,8 +47,8 @@ Creates two password fields - password and password confirmation.
     saint.column :content, :password
 {:lang='ruby'}
 
-<div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/screenshots/columns/password.png" />
+<div class="screenshot-container">
+<img src="http://saintrb.org/screenshots/columns/password.png" class="screenshot" />
 </div>
 
 Selectors
@@ -61,8 +61,8 @@ Selectors
     end
 {:lang='ruby'}
 
-<div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/screenshots/columns/radio.png" />
+<div class="screenshot-container">
+<img src="http://saintrb.org/screenshots/columns/radio.png" class="screenshot" />
 </div>
 
 ###:select
@@ -72,8 +72,8 @@ Selectors
     end
 {:lang='ruby'}
 
-<div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/screenshots/columns/select.png" />
+<div class="screenshot-container">
+<img src="http://saintrb.org/screenshots/columns/select.png" class="screenshot" />
 </div>
 
 Use `multiple true` option to render an select field allowing to select multiple options.
@@ -86,8 +86,8 @@ Use `size: N` to define how much lines to display when :multiple set to true.
     end
 {:lang='ruby'}
 
-<div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/screenshots/columns/select-multiple.png" />
+<div class="screenshot-container">
+<img src="http://saintrb.org/screenshots/columns/select-multiple.png" class="screenshot" />
 </div>
 
 By default, Saint will join selected options with a coma when saved to db.<br/>
@@ -101,8 +101,8 @@ Use `join_with 'some-str'` to override this.
     end
 {:lang='ruby'}
 
-<div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/screenshots/columns/checkbox.png" />
+<div class="screenshot-container">
+<img src="http://saintrb.org/screenshots/columns/checkbox.png" class="screenshot" />
 </div>
 
 By default, Saint will join selected options with a coma when saved to db.<br/>
@@ -121,8 +121,8 @@ Renders an radio selector with 2 options: 1 => 'Yes' and 0 => 'No'
     saint.column :active, :boolean
 {:lang='ruby'}
 
-<div class="tutorial-example_picture-container">
-<img src="http://saintrb.org/screenshots/columns/boolean.png" />
+<div class="screenshot-container">
+<img src="http://saintrb.org/screenshots/columns/boolean.png" class="screenshot" />
 </div>
 
 Options

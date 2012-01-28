@@ -222,13 +222,13 @@ module Saint
     end
 
     # alias for `value row, :crud'
-    def crud_value row
-      value row, :crud
+    def crud_value row, node_instance = nil
+      value row, :crud, node_instance
     end
 
     # alias for `value row, :summary'
-    def summary_value row
-      value row, :summary
+    def summary_value row, node_instance = nil
+      value row, :summary, node_instance
     end
 
     private
@@ -253,7 +253,7 @@ module Saint
     # @param [Object] row
     # @param [Symbol] scope
     # @param [Proc] proc
-    def value row = nil, scope = nil, &proc
+    def value row = nil, scope = nil, node_instance = nil, &proc
 
       if proc
         return @value_proc = proc
@@ -264,7 +264,7 @@ module Saint
       # extracting value
       value = row[@name]
 
-      @row, @scope = row, scope
+      @row, @scope, @node_instance = row, scope, node_instance
       
       if @options && summary?
         value = @options[value]
@@ -277,7 +277,7 @@ module Saint
       if @value_proc && val = self.instance_exec(value, &@value_proc)
         value = val
       end
-      @row, @scope = nil, nil
+      @row, @scope, @node_instance = nil
 
       # passwords are not wrapped
       return value if password?
@@ -286,6 +286,10 @@ module Saint
       value
     end
 
+    # giving access to active controller's methods, like http, view and any helpers
+    def method_missing *args
+      @node_instance.send *args
+    end
 
   end
 end

@@ -30,7 +30,7 @@
                 <a href="<%= @relation.remote_node ? @relation.remote_node.http.route(:edit, remote_item[saint.pkey]) : 'javascript:void(0);' %>" target="_blank">
                   <%= @relation.remote_node ?
                               @relation.remote_node.saint.h(remote_item) :
-                              @remote_columns.map { |c| val = c.summary_value(remote_item).to_s; val.size > 0 ? val : nil }.compact.join(', ')
+                              @remote_columns.map { |c| val = c.summary_value(remote_item, self).to_s; val.size > 0 ? val : nil }.compact.join(', ')
                   %>
                 </a>
               </td>
@@ -58,7 +58,7 @@
     <% end -%>
 <% end -%>
 
-<% if xhr.nil? && remote_node && filters = remote_node.saint.filters(http.params, :html)
+<% if xhr.nil? && remote_node && filters = remote_node.saint.filters(Hash.new, :html)
        filters_route = http.route(:assoc__any__remote_items, @relation.id, @local_id, "/") -%>
     <form action="<%= filters_route %>0" id="saint_assoc_filters-<%= @relation.id %>">
       <input type="hidden" name="xhr" value="true"/>

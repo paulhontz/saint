@@ -30,7 +30,7 @@ module Saint
 
         def crud_columns columns, row
           columns.select { |n, c| c.crud? }.values.inject({}) do |map, column|
-            @element, @row_val = column, column.crud_value(row)
+            @element, @row_val = column, column.crud_value(row, self)
             html = column.type ? saint_view.render_partial('edit/elements/%s' % column.type) : @row_val
             map.update(column => html)
           end

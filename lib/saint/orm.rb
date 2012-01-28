@@ -120,8 +120,10 @@ module Saint
       model.storage_name
     end
 
-    def properties
-      model.properties.map { |p| p.name }
+    def properties skip_id_properties = false
+      properties = model.properties.map { |p| p.name }
+      return properties unless skip_id_properties
+      properties.select { |p| true unless p == :id || p.to_s =~ /_id$/i }
     end
 
     def subset subset

@@ -11,7 +11,6 @@ module Saint
           end
           remote_node = @relation.remote_node
 
-          page = http.params[Saint::Pager::VAR].to_i
           @attached = attached.to_i
           @local_id = local_id.to_i
           @rows, @rows_total = Array.new, 0
@@ -38,7 +37,7 @@ module Saint
             
             if @rows_total > 0
 
-              @pager = Saint::Pager.new(page, @rows_total, @relation.ipp)
+              @pager = Saint::Pager.new(0, @rows_total, @relation.ipp)
 
               limits = @rows_total > @relation.ipp ? saint.orm.limit(
                   @relation.ipp,
