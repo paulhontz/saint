@@ -142,15 +142,21 @@
                                          }
                                  });"
                   />
-                  <% unless remote_node.saint.belongs_to?(rel.local_model) || rel.through_model -%>
+                  <% unless remote_node.saint.belongs_to?(rel.local_model) || rel.through_model
+                     local_node_label = Saint::Inflector.singularize(saint.h)
+                  -%>
                       <div class="saint-text_note">
-                        to have created items automatically attached,
+                        You can create new <%= remote_node.saint.h %>,
+                        however, they wont be automatically attached to <strong><%= header %></strong>.
                         <br/>
-                        please consider to add
+                        To have this working, please define `belongs_to` association inside `<%= remote_node %>` class:
                         <br/>
-                    <span class="saint-text-code">
-                    saint.belongs_to(:RELATION_NAME, <%= rel.local_model %>)
-                    </span>
+
+                    <code class="saint-text-code">
+                      <%= remote_node %><br/>
+                      &nbsp;&nbsp;&nbsp;&nbsp;saint.belongs_to(:<%= local_node_label.downcase %>, <%= rel.local_model %>)<br/>
+                      end
+                    </code>
                       </div>
                   <% end -%>
               <% end -%>
