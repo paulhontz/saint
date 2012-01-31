@@ -7,14 +7,10 @@ module Ctrl
     saint.column :email
     saint.column :password, :password
 
-    saint.column :status, :select do
-      label :Color
-      multiple true
-      options ['red', 'green', 'blue']
-      width 200
-    end
+    saint.column :status, :boolean
 
     saint.filter :name
+    saint.filter :status, :boolean
 
     saint.header :name
     saint.menu.label saint.h
@@ -22,8 +18,11 @@ module Ctrl
     saint.order :id, :desc
     saint.has_n :pages, Model::Page do
       order :id, :desc
-      column :name, label: 'Name / Author' do |val, scp, row|
-        val && (val + ((author = row.author) ? ' (%s)' % author.name : ''))
+      column :name do
+        label 'Name / Author'
+        value do |val|
+          val && (val + ((author = row.author) ? ' (%s)' % author.name : ''))
+        end
       end
     end
 

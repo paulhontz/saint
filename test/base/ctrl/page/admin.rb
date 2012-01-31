@@ -13,7 +13,7 @@ module Ctrl
     saint.header :name, ', by #author.name'
 
     saint.order :id, :desc
-    
+
     saint.grid do
       column :name
       column :label
@@ -53,11 +53,7 @@ module Ctrl
 
     saint.filter :name
     saint.filter :content
-    saint.filter :active do
-      type :select do
-        {1 => 'Yes', 0 => 'No'}
-      end
-    end
+    saint.filter :active, :boolean
 
     saint.has_n :menus, Model::Menu, Model::MenuPage do
       order :id, :desc
@@ -69,21 +65,21 @@ module Ctrl
       #readonly true
     end
 
-    saint.filter :menu, Model::Menu, Model::MenuPage
-
-    saint.filter :country_id, Model::Country do
-      option_label '#name (#authors.count authors)'
+    saint.filter :menu do
+      model Model::Menu, through: Model::MenuPage
     end
 
-    saint.filter :author_id, Model::Author do
+    saint.filter :country_id do
+      model Model::Country, label: '#name (#authors.count authors)'
+    end
+
+    saint.filter :author_id do
       multiple true
-      option_label '#name (#pages.count pages)'
+      model Model::Author, label: '#name (#pages.count pages)'
       depends_on :country_id
     end
 
-    saint.filter :name do
-      logic :like
-    end
+    saint.filter :name
 
     saint.before do |item, action|
       item.callback_a_test = action

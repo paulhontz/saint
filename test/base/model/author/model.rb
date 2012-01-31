@@ -6,6 +6,6 @@ module Model
     property :name, String
     property :email, String
     property :password, String
-    property :status, String
+    property :status, Integer
   end
 end

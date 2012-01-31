@@ -1,7 +1,7 @@
 module Saint
   class ClassApi
 
-    # add a GUI filter
+    # filters builder.
     #
     # @example filter by name
     #    saint.filter :name
@@ -9,12 +9,16 @@ module Saint
     # @example filter by author(direct association)
     #    saint.belongs_to :author, Model::Author
     #
-    #    saint.filter :author_id, Model::Author
+    #    saint.filter :author_id do
+    #      model Model::Author
+    #    end
     #
-    # @example filter by menu(through association)
+    # @example filter by menu through MenuPage model
     #    saint.has_n :menus, Model::Menu, Model::MenuPage
     #
-    #    saint.filter :menu, Model::Menu, Model::MenuPage
+    #    saint.filter :menu do
+    #      model Model::Menu, through: Model::MenuPage
+    #    end
     #
     # @example nested filters
     #
@@ -29,13 +33,16 @@ module Saint
     #
     #  saint.belongs_to :author, Model::Author
     #
-    #  saint.filter :country_id, Model::Country
-    #  saint.filter :author_id, Model::Author do
+    #  saint.filter :country_id do
+    #    model Model::Country
+    #  end
+    #  saint.filter :author_id do
+    #    model Model::Author
     #    depends_on :country_id
     #  end
     #
-    def filter column = nil, remote_model = nil, through_model = nil, &proc
-      (@filters ||= Hash.new)[column] = Filter.new(@node, column, remote_model, through_model, &proc)
+    def filter column = nil, type = nil, opts = {}, &proc
+      (@filters ||= Hash.new)[column] = Filter.new(@node, column, type, opts, &proc)
     end
 
     # if there are an filter defined for given column,
@@ -99,7 +106,7 @@ module Saint
       filters
     end
 
-    # detect if HTTP params contains values for any defined filters
+    # detect if given params contains values for any defined filters
     def filters? params
       filter = nil
       @filters.keys.each { |c| break if filter = filter?(c, params) }
@@ -113,49 +120,41 @@ module Saint
     include Saint::Utils
     include Saint::Inflector
 
-    attr_reader :id, # unique identity for each filter
-                :var, # var used in HTTP params
-                :node, # class holding filter
+    attr_reader :node, :type, :id, :var,
                 :local_pkey, # primary key of searched model
                 :local_model, :local_orm, # Model/ORM that returns filtered items to be displayed as search results.
-                :remote_model, :remote_orm, # Model/ORM that returns items to be displayed on drop-down selectors.
+                :remote_model, :remote_orm, :local_key, # Model/ORM that returns items to be displayed on drop-down selectors.
+                :remote_label, :remote_order, :remote_proc, :remote_pkey, :remote_key,
                 :through_model, :through_orm, # Model/ORM that returns primary keys for items to be displayed as search results.
-                :type_tpl, # template to be rendered. see {#type}
-                :type_opts, # options to be used when rendering filter(e.g. {multiple: true} or {style: "width: 100px;"} ). see {#type}
-                :type_proc, # an block that should return options to be used when rendering an drop-down selector. see {#type}
                 :logic, :logic_prefix, :logic_suffix # defines how the db are queried. see {#logic}
 
-    def initialize node, column, remote_model = nil, through_model = nil, &proc
+    # initialize new filter
+    #
+    # @param [Class] node
+    # @param [Symbol] column
+    # @param [Symbol] type one of `:string`, `:select`, `:boolean`
+    # @param [Hash] opts
+    # @option opts [Symbol] column
+    # @option opts [Symbol, Array] logic
+    # @option opts [String, Symbol] label
+    # @option opts [Hash, Array] options options to be used on :select type
+    # @option opts [Boolean] multiple
+    # @param [Proc] proc
+    def initialize node, column, *type_and_or_opts, &proc
 
-      @node, @column, @var = node, column, column.to_s
-      @label = titleize @var.gsub(/_id$/, '')
-
-      @id = [
-          'saint_filters', @node, remote_model, through_model, @var
-      ].map { |c| c.to_s }.join('_').gsub(/[^\w|\d|\-]/, '_').gsub(/_+/, '_')
-
+      @node, @column = node, column
       unless @local_model = @node.saint.model
-        raise "Please define model before any setup"
+        raise 'Please define model before any setup'
       end
-      @local_pkey = @node.saint.pkey
-      if @local_model.new.respond_to?(@column) || through_model
-        @local_orm = Saint::ORM.new(@local_model)
-      end
+      @type, opts = nil, {}
+      type_and_or_opts.each { |a| a.is_a?(Hash) ? opts.update(a) : @type = a }
 
-      if @remote_model = remote_model
-        @remote_orm = Saint::ORM.new(@remote_model)
-        @remote_pkey = :id
-        @default_remote_columns = [@remote_orm.properties(true).first]
-        if @through_model = through_model
-          @through_orm = Saint::ORM.new(@through_model)
-          local_table, remote_table = @local_orm.storage_name, @remote_orm.storage_name
-          @local_key = (singularize(local_table) + "_id").to_sym
-          @remote_key = (singularize(remote_table) + "_id").to_sym
-        end
-      end
+      @var = column.to_s
+      @label = titleize @var.gsub(/_id$/, '')
+      @remote_opts, @remote_order = {}, {}
+      @remote_pkey = :id
 
-      @type_opts = Hash.new
-
+      @depends_on = Array.new
       # orm should support all this methods.
       @logic_map = {
           like: ['%', '%'],
@@ -167,43 +166,178 @@ module Saint
           not: [],
       }
 
-      @depends_on = Array.new
+      if logic = opts[:logic]
+        logic(*[logic].flatten)
+      end
+      logic(:eql) if @type == :boolean
+
+      if options = opts[:options]
+        options(*[options].flatten)
+      end
+
+      label opts[:label]
+      multiple opts[:multiple]
 
       proc && self.instance_exec(&proc)
-      @type_tpl ||= :select if @remote_model
-      @type_tpl ||= :string
+      @through_model = @remote_opts[:through]
 
-      @logic ||= @type_tpl == :select ? :eql : :like
+      @type ||= @remote_model ? :select : :string
+
+      @id = ['saint_filters', @node, @column, @remote_model, @through_model].
+          map { |c| c.to_s }.compact.join('-').gsub(/[^\w|\d]/, '_').gsub(/_+/, '_')
+
+      @local_pkey = @node.saint.pkey
+      if @local_model.new.respond_to?(@column) || @through_model
+        @local_orm = Saint::ORM.new(@local_model)
+      end
+
+      remote_setup
+      remote_order_setup
+
+      @logic ||= @type == :select ? :eql : :like
       logic_setup
     end
 
-    # define what/how columns will be displayed in drop-down selector that displays remote items.
-    # by default it takes first two non id columns from remote model.
-    # however this is unsuitable in most cases.
-    # 
-    # feel free to use same syntax as per saint.header(see {Saint::ClassApi#header})
-    #
-    # @example display "name (email)" instead of defaulted "name, email"
-    #
-    #    # "saint.filter :author_id, Model::Author" will create drop-down options like:
-    #    # <option value='ID'>name, email</option>
-    #    # add "option_label '#name (#email)'" inside filter block and options will be rendered like:
-    #    # <option value='ID'>name (email)</option>
-    #
-    #    saint.filter :author_id, Model::Author do
-    #      option_label '#name (#email)'
-    #    end
-    #
-    # define multiple columns by calling this method multiple times
-    #
-    # @param [Array] *columns
-    def option_label *columns
-      columns.each { |column| (@opted_remote_columns ||= Array.new) << column }
+    # sometimes, various filters may need to use same columns.
+    # to avoid column names collisions,
+    # define the real column by using :column option or `column` method inside block.
+    def column column = nil
+      @column = column.to_sym if column
+      @column
     end
 
-    # return earlier defined remote columns or first two non id remote columns
-    def remote_columns
-      @opted_remote_columns || @default_remote_columns
+    # define how to build db query.
+    # it accepts 3 arguments: logic, prefix, suffix
+    #
+    # can also be set as option passed to `saint.filter`.
+    # value set by block will override value set by option.
+    #
+    # @example equality: column = 'val'
+    #    saint.filter :column, logic: :eql
+    #    # or
+    #    saint.filter :column do
+    #      logic :eql
+    #    end
+    #
+    # @example equality with prefix: column = 'some value' + val
+    #    saint.filter :column, logic: [:eql, 'some value']
+    #    # or
+    #    saint.filter :column do
+    #      logic :eql, 'some value'
+    #    end
+    #
+    # @example equality with suffix: column = val + 'some value'
+    #    saint.filter :column, logic: [:eql, nil, 'some value']
+    #    # or
+    #    saint.filter :column do
+    #      logic :eql, nil, 'some value'
+    #    end
+    #
+    # @example equality with prefix and suffix: column = 'prefix' + val + 'suffix'
+    #    saint.filter :column, logic: [:eql, 'prefix', 'suffix']
+    #    # or
+    #    saint.filter :column do
+    #      logic [:eql, 'prefix', 'suffix']
+    #    end
+    #
+    # @example default LIKE: column LIKE '%val%'
+    #    saint.filter :column
+    #
+    # @example column LIKE '%val'
+    #    saint.filter :column, logic: [:like, '%']
+    #    # or
+    #    saint.filter :column do
+    #      logic :like, '%'
+    #    end
+    #
+    # @example column LIKE 'val%'
+    #    saint.filter :column, logic: [:eql, nil, '%']
+    #    # or
+    #    saint.filter :column do
+    #      logic :eql, nil, '%'
+    #    end
+    #
+    # other logic types: :gt, :gte, :lt, :lte, :not
+    #
+    # @param [Symbol] logic
+    # @param [Array] *ps prefix and suffix
+    def logic logic = nil, *ps
+      if logic
+        Saint::ORMUtils.respond_to?(logic) || raise("ORM should respond to #{logic}")
+        @logic = @logic_map[logic] ? logic : @logic_map.keys.first
+        if ps.size > 0
+          @logic_prefix, @logic_suffix = ps
+        else
+          logic_setup
+        end
+      end
+      @logic
+    end
+
+    # set label for current filter.
+    # can also be set as option passed to `saint.filter`.
+    # value set by block will override value set by option.
+    def label label = nil
+      @label = label if label
+      @label
+    end
+
+    # define options for drop-down filters.
+    #
+    # @example using Hash
+    #    saint.filter :status, :select, options: {1 => 'Active', 0 => 'Suspended'}
+    #    # or
+    #    saint.filter :status, :select do
+    #        options 1 => 'Active', 0 => 'Suspended'
+    #    end
+    #
+    # @example using Array
+    #    saint.filter :color, :select, options: ['red', 'green', 'blue']
+    #    # or
+    #    saint.filter :color do
+    #        options 'red', 'green', 'blue'
+    #    end
+    #
+    # can also be set as option passed to `saint.filter`.
+    # value set by block will override value set by option.
+    def options *args
+      if (args = args.flatten).size > 0
+        if args.first.is_a?(Hash)
+          @options = args.first
+        else
+          @options = Hash[args.zip args]
+        end
+      end
+      @options || {}
+    end
+
+    # used on :select and associative filters.
+    # if set to true, drop-down selectors will allow to select multiple options
+    #
+    # can also be set as option passed to `saint.filter`.
+    # value set by block will override value set by option.
+    def multiple *args
+      @multiple = args.first if args.size > 0
+      @multiple
+    end
+
+    def multiple?
+      @multiple
+    end
+
+    # set remote model as well as middle model, remote opts and remote proc.
+    #
+    # @param [Object] model remote model
+    # @param [Hash] opts
+    # @option opts [Object] through
+    # @option opts [Symbol, Array, Hash] order
+    # @option opts [String, Symbol] label
+    # @option opts [Symbol] remote_pkey
+    # @option opts [Symbol] remote_key
+    # @option opts [Symbol] local_key
+    # @param [Proc] proc
+    def model model = nil, opts = {}, &proc
+      @remote_model, @remote_opts, @remote_proc = model, opts, proc
     end
 
     # building nested filters.
@@ -257,202 +391,6 @@ module Saint
       @dependant_filters
     end
 
-    # set the template to be used when filter rendered.
-    # for now :string and :select templates available.
-    # 
-    # if second arg is an hash, it will be treated as options for rendered html element.
-    #
-    # this method also accepts an block.
-    # if block returns a positive value,
-    # returned value will be used at rendering.
-    # normally, it should return an string for :string type
-    # and an hash or array for :select type.
-    #
-    # @example pass drop-down options as argument
-    #    saint.filter :color do
-    #      type :select, options: ['red', 'green', 'blue']
-    #    end
-    #
-    # @example pass drop-down options using a block
-    #    saint.filter :round_id do
-    #      logic :eql
-    #      label 'Please select Edition'
-    #      type :select do
-    #        values = {'' => 'Any Round'}
-    #        if val = filter?(:edition_id)
-    #          DB::Round.all(edition_id: val).each { |r| values[r.id] = round.name }
-    #        end
-    #        values
-    #      end
-    #    end
-    #
-    #    # this will looking for on edition_id in HTTP params and when it is available,
-    #    # will draw an drop-down selector for rounds of selected edition.
-    #
-    # @example draw and drop-down selector that allow to select multiple options
-    #
-    #    saint.filter :author_id, Model::Author do
-    #      type :select, multiple: true
-    #    end
-    #
-    # @param [Symbol] type
-    # @param [Hash] opts
-    # @option opts [true] multiple
-    # @option opts [Hash, Array] options
-    # @param [Proc] &proc
-    def type type = nil, opts = {}, &proc
-      return @type_tpl if type.nil?
-      @type_tpl = type
-      @type_opts.update opts
-      @type_proc = proc if proc
-    end
-
-    # turn an associative filter into an select-multiple drop-down.
-    # also can be used on :select filters.
-    # examples here works identically.
-    #
-    # @example declare :multiple via option
-    #    saint.filter :color do
-    #      type :select, multiple: true do
-    #        # some hash
-    #      end
-    #    end
-    #
-    # @example declare :multiple via method
-    #    saint.filter :color do
-    #      multiple true
-    #      type :select do
-    #        # some hash
-    #      end
-    #    end
-    #
-    def multiple *args
-      @type_opts[:multiple] = true
-    end
-
-    def multiple?
-      @type_opts[:multiple]
-    end
-
-    # sometimes used column should be just an informative label.
-    # use this method to define column to be used by ORM
-    #
-    # @example instruct ORM to use #name instead of #country_name
-    #    saint.filter :country_name, Model::Country do
-    #      column :name
-    #    end
-    def column column = nil
-      @column = column if column
-      @column
-    end
-
-    # define how to build db query.
-    # it accepts 3 arguments: logic, prefix, suffix
-    #
-    # @example equality: column = 'val'
-    #    saint.logic :eql
-    #
-    # @example equality with prefix: column = 'some value' + val
-    #    saint.logic :eql, 'some value'
-    #
-    # @example equality with suffix: column = val + 'some value'
-    #    saint.logic :eql, nil, 'some value'
-    #
-    # @example equality with prefix and suffix: column = 'prefix' + val + 'suffix'
-    #    saint.logic :eql, 'prefix', 'suffix'
-    #
-    # @example default LIKE: column LIKE '%val%'
-    #    saint.logic :like
-    #
-    # @example column LIKE '%val'
-    #    saint.logic :like, '%'
-    #
-    # @example column LIKE 'val%'
-    #    saint.logic :eql, nil, '%'
-    #
-    # other logic types: :gt, :gte, :lt, :lte, :not
-    #
-    # @param [Symbol] logic
-    # @param [Array] *ps prefix and suffix
-    def logic logic = nil, *ps
-      if logic
-        Saint::ORMUtils.respond_to?(logic) || raise("ORM should respond to #{logic}")
-        @logic = @logic_map[logic] ? logic : @logic_map.keys.first
-        if ps.size > 0
-          @logic_prefix, @logic_suffix = ps
-        else
-          logic_setup
-        end
-      end
-      @logic
-    end
-
-    # filter remote items.
-    # 
-    # @example display in drop-down selector only active regions
-    #    saint.filter :region_id, Model::Region do
-    #      filter active: 1
-    #    end
-    #
-    # @param [Hash] filters
-    def filter filters = {}, &proc
-      filters() << [filters, proc]
-    end
-
-    # return earlier defined filters
-    def filters
-      @filters ||= []
-    end
-
-    # set the order for remote items displayed as options of drop-down selector.
-    # relevant for drop-down filters.
-    # order can be specified multiple times.
-    #
-    # @param [Symbol] column
-    # @param [Symbol] direction
-    def order column = nil, direction = :asc
-      if column
-        raise "Column should be a Symbol,
-          #{column.class} given" unless column.is_a?(Symbol)
-        raise "Unknown direction #{direction}.
-          Should be one of :asc, :desc" unless [:asc, :desc].include?(direction)
-        (@order ||= Hash.new)[column] = direction
-      end
-      @order || {remote_pkey => :desc}
-    end
-
-    # by default, remote_pkey is :id.
-    # use this method to define custom pkey
-    #
-    # @param [Symbol] key
-    def remote_pkey key = nil
-      @remote_pkey = key if key
-      @remote_pkey
-    end
-
-    # valuable for through filters.
-    # it defines keys in through table.
-    #
-    # @param [Symbol] key
-    def local_key key = nil
-      @local_key = key if key
-      @local_key
-    end
-
-    # (see #local_key)
-    def remote_key key = nil
-      @remote_key = key if key
-      @remote_key
-    end
-
-    # label to be displayed in UI
-    #
-    # @param [String] label
-    def label label = nil
-      @label = label if label
-      @label
-    end
-
     # build the query string from given var and logic
     #
     # @param [String] var
@@ -470,6 +408,40 @@ module Saint
 
     def logic_setup
       @logic_prefix, @logic_suffix = @logic_map[@logic][0], @logic_map[@logic][1]
+    end
+
+    def remote_setup
+      return unless @remote_model
+
+      @remote_orm = Saint::ORM.new(@remote_model)
+      @remote_pkey = @remote_opts.fetch :remote_pkey, :id
+      @remote_label = [@remote_opts.fetch(:label, @remote_orm.properties(true).first)].flatten
+
+      if @through_model
+        @local_key = @remote_opts.fetch :local_key, (singularize(@local_orm.storage_name) + "_id").to_sym
+        @remote_key = @remote_opts.fetch :remote_key, (singularize(@remote_orm.storage_name) + "_id").to_sym
+        @through_orm = Saint::ORM.new(@through_model)
+      end
+    end
+
+    def remote_order_setup
+      return unless @remote_model
+      return unless order = @remote_opts[:order]
+
+      @remote_order = {@remote_pkey => :desc}
+      case
+        when order.is_a?(Hash)
+          @remote_order = order.keys.inject({}) do |o, c|
+            d = order[c]
+            raise('Direction should be one of :asc or :desc, %s [%s] given' % [d, d.class]) unless [:asc, :desc].include?(d)
+            o.update c.to_sym => d
+          end
+        when order.is_a?(Array)
+          @remote_order = order.inject({}) { |o, c| o.update c.to_sym => :asc }
+        when order.is_a?(Symbol), order.is_a?(String)
+          @remote_order = {order.to_sym => :asc}
+      end
+      @remote_order
     end
 
   end
@@ -533,7 +505,7 @@ module Saint
     # render filter into UI representation
     def html xhr = false
       @xhr = xhr
-      @view_api.render_partial @setup.type_tpl
+      @view_api.render_partial @setup.type
     end
 
     # get HTTP value for given filter.
@@ -556,24 +528,15 @@ module Saint
     # get options for drop-down selector
     def drop_down_options
 
-      options = @setup.type_opts[:options]
-      (proc = @setup.type_proc) && (options = self.instance_exec(&proc))
-      if options
-        if options.is_a?(Array)
-          options = Hash[options.zip options]
-        end
-        return options if options.is_a?(Hash)
+      options = @setup.options
+      options = Hash[options.zip options] if options.is_a?(Array)
+      unless options.is_a?(Hash)
+        raise ':options should be an Array or an Hash, %s given' % options.class
       end
-      return {} unless @setup.remote_model
+      return options unless @setup.remote_model
 
-      values, filters = Hash.new, Hash.new
-      @setup.filters.each do |filter|
-        static_filters, proc = filter
-        filters.update(static_filters) if static_filters.is_a?(Hash)
-        if proc && dynamic_filters = self.instance_exec(&proc)
-          filters.update(dynamic_filters) if dynamic_filters.is_a?(Hash)
-        end
-      end
+      filters = (@setup.remote_proc && self.instance_exec(&@setup.remote_proc)) || {}
+
       @depends_on.select { |f, v| v }.each_pair do |f, v|
         v = [f.logic_prefix, v, f.logic_suffix].compact.join
         filters.update(f.remote_orm.send(f.logic, f.column, v))
@@ -584,15 +547,16 @@ module Saint
       # build drop-down with empty options
       return {} if @setup.depends_on.size > 0 && filters.size == 0
 
-      order = @setup.remote_orm.order(@setup.order)
+      options = Hash.new
+      order = @setup.remote_orm.order(@setup.remote_order)
       (@setup.remote_orm.filter(filters.merge(order))[0] || []).each do |remote_item|
-        value = @setup.remote_columns.map do |c|
+        value = @setup.remote_label.map do |c|
           val = Saint::Utils.column_format c, remote_item
           val.size > 0 ? val : nil
         end.compact.join(", ")
-        values[remote_item.send(@setup.remote_pkey)] = value
+        options[remote_item.send(@setup.remote_pkey)] = value
       end
-      values
+      options
     end
 
     # fetch HTTP value for current filter

@@ -143,20 +143,23 @@
                                  });"
                   />
                   <% unless remote_node.saint.belongs_to?(rel.local_model) || rel.through_model
-                     local_node_label = Saint::Inflector.singularize(saint.h)
+                         local_node_label = Saint::Inflector.singularize(saint.h)
                   -%>
                       <div class="saint-text_note">
                         You can create new <%= remote_node.saint.h %>,
-                        however, they wont be automatically attached to <strong><%= header %></strong>.
+                        however, they wont be automatically attached to
+                        <strong><%= header %></strong>.
                         <br/>
-                        To have this working, please define `belongs_to` association inside `<%= remote_node %>` class:
+                        To have this working, please define `belongs_to`
+                        association inside `<%= remote_node %>` class:
                         <br/>
 
-                    <code class="saint-text-code">
-                      <%= remote_node %><br/>
-                      &nbsp;&nbsp;&nbsp;&nbsp;saint.belongs_to(:<%= local_node_label.downcase %>, <%= rel.local_model %>)<br/>
-                      end
-                    </code>
+                        <code class="saint-text-code">
+                          <%= remote_node %><br/>
+                          &nbsp;&nbsp;&nbsp;&nbsp;saint.belongs_to(:<%= local_node_label.downcase %>
+                          , <%= rel.local_model %>)<br/>
+                          end
+                        </code>
                       </div>
                   <% end -%>
               <% end -%>
@@ -213,8 +216,8 @@
 
     <div id="saint-tabs-actions-master">
 
-      <% if saint.update -%>
-          <div style="width: 100%; ">
+      <div style="width: 100%; ">
+        <% if saint.update -%>
 
             <div class="saint-crud_button-container">
 
@@ -248,14 +251,14 @@
                     Delete</a>
               <% end -%>
             </div>
-            <div class="saint-crud_button-container">
-              <a href="<%= http.route(@pager.query_string) %>" class="saint-button saint-crud_button">
-                Summary</a>
+        <% end -%>
 
+        <div class="saint-crud_button-container">
+          <a href="<%= http.route(@pager.query_string) %>" class="saint-button saint-crud_button">
+            Summary</a>
+        </div>
 
-            </div>
-          </div>
-      <% end -%>
+      </div>
     </div>
   </div>
 </div>

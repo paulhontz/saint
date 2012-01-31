@@ -42,8 +42,8 @@ module Saint
               saint.orm.first(saint.pkey => @row_id) :
               saint.orm.new
           unless @row
-            error = "Item not found"
-            error = saint_view.render_partial("error") if @errors.size > 0
+            error = 'Item not found'
+            error = saint_view.render_partial('error') if @errors.size > 0
             http.halt error, status: 500
           end
 
