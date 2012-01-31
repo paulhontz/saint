@@ -37,7 +37,7 @@ module Saint
             
             if @rows_total > 0
 
-              @pager = Saint::Pager.new(0, @rows_total, @relation.ipp)
+              @pager = Saint::Pager.new(http.params[Saint::Pager::VAR].to_i, @rows_total, @relation.ipp)
 
               limits = @rows_total > @relation.ipp ? saint.orm.limit(
                   @relation.ipp,
@@ -46,6 +46,7 @@ module Saint
               order = saint.orm.order(@relation.order)
 
               filters = orm_filters.merge(limits).merge(order)
+              p filters
               @remote_items, @errors = assoc__any__filters(:filter, filters)
 
               if @errors.size == 0

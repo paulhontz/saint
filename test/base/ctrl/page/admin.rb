@@ -5,9 +5,6 @@ module Ctrl
 
     opts Ctrl::Options
 
-    http.before do
-    end
-
     saint.rb_wrapper
 
     saint.header :name, ', by #author.name'

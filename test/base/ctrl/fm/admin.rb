@@ -3,7 +3,7 @@ module Ctrl
 
     saint.menu do
       label 'File Manager'
-      position 1000
+      position -1000
       void true
     end
 

@@ -228,7 +228,7 @@ module Saint
         @remote_key ||= :id
       end
 
-      @id = [@type, @name, @local_node, @local_model, @remote_node].
+      @id = [@type, @name, @local_node, @local_model, @remote_node, Digest::MD5.hexdigest(proc.to_s)].
           map { |c| c.to_s }.join('_').gsub(/[^\w|\d]/, '_').gsub(/_+/, '_')
 
       ::Saint.relations[@id] = self

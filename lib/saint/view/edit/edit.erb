@@ -6,23 +6,22 @@
   <tr>
     <td style="width: 33%; text-align: left;">
       <% if @prev_item -%>
-          <a href="<%= http.route(:edit, @prev_item.send(saint.pkey), @pager.query_string) %>" class="saint-link">
+          <a href="<%= http.route(:edit, @prev_item.send(saint.pkey), @pager.query_string(@prev_item_page)) %>" class="saint-link">
             &laquo; <%= factory_header ? 'prev' : saint.h(@prev_item, label: nil) %>
           </a>
       <% end -%>
     </td>
     <td style="width: 33%; vertical-align: top; text-align: center;">
 
-      <h3 style="color: #808080;">
-        <%= header %>
-      </h3>
+      <h3 style="color: #808080;"><%= header %></h3>
 
       <div class="saint-flash_alert"><%= http.flash[:alert] %></div>
 
     </td>
     <td style="width: 33%; text-align: right;">
-      <% if @next_item -%>
-          <a href="<%= http.route(:edit, @next_item.send(saint.pkey), @pager.query_string) %>" class="saint-link">
+      <% if @next_item
+             next_item_id = @next_item.send(saint.pkey) -%>
+          <a href="<%= http.route(:edit, next_item_id, @pager.query_string(@next_item_page)) %>" class="saint-link">
             <%= factory_header ? 'next' : saint.h(@next_item, label: nil) %> &raquo;
           </a>
       <% end -%>

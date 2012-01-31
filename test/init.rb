@@ -6,6 +6,7 @@ require 'mongo'
 require 'digest'
 require 'json'
 require 'yaml'
+require 'ap'
 
 Dir[File.expand_path('../extend/**/*.rb', __FILE__)].each { |f| require f }
 require File.expand_path('../config/config', __FILE__)
