@@ -46,7 +46,6 @@ module Saint
               order = saint.orm.order(@relation.order)
 
               filters = orm_filters.merge(limits).merge(order)
-              p filters
               @remote_items, @errors = assoc__any__filters(:filter, filters)
 
               if @errors.size == 0
