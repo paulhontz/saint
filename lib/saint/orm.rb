@@ -100,7 +100,7 @@ module Saint
       row.reload if row.dirty?
       row.save if row.new?
       data_set.merge(@subset).each_pair { |k, v| row[k] = v }
-      return db(__method__, row) { row.save; row } if row.valid?
+      return db(:save, row) { row.save; row } if row.valid?
       [nil, row.errors]
     end
 
@@ -157,8 +157,8 @@ module Saint
       begin
 
         if row
-          before.select { |c| [operation, '*'].include?(c[0]) }.each do |c|
-            scope.instance_exec row, operation, &c[1]
+          before.select { |o, p| [operation, '*'].include?(o) }.each_value do |p|
+            scope.instance_exec row, operation, &p
           end
         end
 
@@ -166,8 +166,8 @@ module Saint
 
         unless operation == :delete
           if row
-            after.select { |c| [operation, '*'].include?(c[0]) }.each do |c|
-              scope.instance_exec row, operation, &c[1]
+            after.select { |o, p| [operation, '*'].include?(o) }.each_value do |p|
+              scope.instance_exec row, operation, &p
             end
           end
         end
