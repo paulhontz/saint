@@ -50,8 +50,8 @@ Saint.tree_colors 'FFF8DC', 'FFEBCD', 'FAF0E6', 'FAEBD7', 'F5F5F5',
                   'F5F5DC', 'FFFFF0', 'FFF5EE', 'FFFAF0'
 
 %w[
+utils.rb
 inflector/**/*rb
-utils/**/*rb
 extender/**/*rb
 api/**/*rb
 *rb

@@ -246,7 +246,7 @@ module Saint
     # see {Saint::ClassApi#column}
     def column name, type = nil, &proc
       @default_columns = nil
-      column = ::Saint::SaintColumn.new(name, type, &proc)
+      column = ::Saint::Column.new(name, type, &proc)
       @columns[column.name] = column
     end
 
@@ -269,7 +269,7 @@ module Saint
       if @columns.size == 0
         # seems remote node not defined, using 1st non-id remote column
         if column = @remote_orm.properties(true).first
-          column = ::Saint::SaintColumn.new(column)
+          column = ::Saint::Column.new(column)
           @columns[column.name] = column
         end
       end

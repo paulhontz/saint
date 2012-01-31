@@ -1,6 +1,6 @@
 <% remote_node = @relation.remote_node
    tree = remote_node && remote_node.saint.is_tree?
-   local_item_children = tree ?
+   local_item_children = tree && @local_item ?
            @local_item.send(tree[:has_n].children).inject({}) { |children, child| children.update(child[@relation.local_pkey] => child) } :
            {}
 -%>

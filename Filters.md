@@ -14,6 +14,25 @@ Dropdown Filters
     saint.filter :color, :select, options: ['red', 'green', 'blue',]
 {:lang='ruby'}
 
+or
+
+    saint.filter :color, :select do
+        options 'red', 'green', 'blue'
+    end
+{:lang='ruby'}
+
+    saint.filter :type, :select, options: {0 => :Static, 1 => :Dynamic}
+{:lang='ruby'}
+
+or
+
+    saint.filter :type, :select do
+        options 0 => :Static, 1 => :Dynamic
+    end
+{:lang='ruby'}
+
+
+
 Boolean Filters
 ---
 

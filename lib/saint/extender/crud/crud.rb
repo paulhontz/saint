@@ -131,21 +131,17 @@ module Saint
             if @errors.size == 0
               if (row_id = row_id.to_i) > 0
                 @row, @errors = saint.orm.first(saint.pkey => row_id)
+                ds.each_pair { |c, v| @row[c] = v }
               else
                 @row, @errors = saint.orm.new(ds)
               end
 
-              if @row && @errors.size == 0
-                ds.each_pair { |c, v| @row[c] = v } if row_id > 0
-                @row, @errors = saint.orm.save @row
+              if @errors.size == 0
+                @row, @errors = saint.orm.save(@row)
               end
             end
           else
             @errors = ['Update capability disabled by admin']
-          end
-
-          unless @row
-            @errors = ['Unknown error occurred']
           end
 
           if @errors.size > 0
