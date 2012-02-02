@@ -4,16 +4,16 @@
 	margin:			0;
 	padding:		0;
 	list-style:		none;
-    background-color: #3E4349;
+    background-color: #333;
     border-radius: 0 0 5px 5px;
     -moz-border-radius: 0 0 5px 5px;
     -webkit-border-radius: 0 0 5px 5px;
 }
 .saint-menu-top {
 	line-height:	1.0;
-    box-shadow: 3px 3px 25px #808080;
-    -moz-box-shadow: 3px 3px 25px #808080;
-    -webkit-box-shadow: 3px 3px 25px #808080;
+    box-shadow: 3px 3px 25px #888;
+    -moz-box-shadow: 3px 3px 25px #888;
+    -webkit-box-shadow: 3px 3px 25px #888;
 }
 .saint-menu-top ul {
 	position:		absolute;

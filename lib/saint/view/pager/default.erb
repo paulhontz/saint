@@ -1,8 +1,8 @@
 <% if @pages > 1 %>
-    <table style="margin-left: auto; margin-right: auto;">
+    <table style="margin-left: auto; margin-right: auto; display: inline;">
       <tr>
         <% if @page_min > 1 -%>
-            <td style="white-space: nowrap;">
+            <td style="white-space: nowrap; color: #DDD;">
               <a href="<%= link_page 1 %>" class="saint-button">1</a>
               ...
             </td>
@@ -22,7 +22,7 @@
             </td>
         <% end -%>
         <% if @page_max < @pages -%>
-            <td style="white-space: nowrap;">
+            <td style="white-space: nowrap; color: #DDD;">
               ...
               <a href="<%= link_page @pages %>" class="saint-button"><%= @pages %></a>
             </td>

@@ -148,28 +148,34 @@ module Saint
 
         saint.grid do
 
-          column :name, label: 'Option', type: :plain do
-            if row && opt = pool.opts[row.name]
-              context = {
-                  name: Saint::Inflector.titleize(row.name),
-                  details: opt['details']
-              }
-              saint_view.render_view('opts/about', context)
+          column :name, :plain do
+            label 'Option'
+            value do
+              if row && opt = pool.opts[row.name]
+                context = {
+                    name: Saint::Inflector.titleize(row.name),
+                    details: opt['details']
+                }
+                saint_view.render_view('opts/about', context)
+              end
             end
           end
 
-          column :value, type: nil do
-            case scope
-              when :crud
-                if opt = pool.opts[row.name]
-                  context = {
-                      row: row,
-                      options: opt['options']
-                  }
-                  saint_view.render_view('opts/%s' % opt['type'], context)
-                end
-              when :summary
-                row.value
+          column :value, :plain do
+            save true
+            value do
+              case scope
+                when :crud
+                  if opt = pool.opts[row.name]
+                    context = {
+                        row: row,
+                        options: opt['options']
+                    }
+                    saint_view.render_view('opts/%s' % opt['type'], context)
+                  end
+                when :summary
+                  row.value
+              end
             end
           end
         end

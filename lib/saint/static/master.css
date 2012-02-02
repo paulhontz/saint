@@ -34,11 +34,10 @@ fieldset {
     background-color: #F8F8F8;
 
     border: #CCCCBB solid 1px;
-    
+
     border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
     -webkit-border-radius: 5px 5px 5px 5px;
-
 
     box-shadow: 2px 2px 8px #bbb;
     -moz-box-shadow: 2px 2px 8px #bbb;
@@ -65,6 +64,18 @@ fieldset legend {
     color: #FF0084;
 
     font-size: 15px;
+}
+
+.saint-summary-toolbar-bottom {
+    position: fixed;
+    bottom: 0;
+    background-color: #333;
+    color: #DDD;
+    width: 100%;
+    height: 45px;
+    box-shadow: 0 -5px 20px #888;
+    -moz-box-shadow: 0 -5px 20px #888;
+    -webkit-box-shadow: 0 -5px 20px #888;
 }
 
 .saint-filter_label {

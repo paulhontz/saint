@@ -237,15 +237,6 @@ If that's not the case, use :remote_pkey option as follow:
 Associative Filters - Options
 ---
 
-**:through**
-
-Allow to define joining model.
-
-    saint.filter :menu do
-        model Model::Menu, through: Model::MenuPage, local_key: :p_id, remote_key: :m_id
-    end
-{:lang='ruby'}
-
 **:order**
 
 By default, Saint will order remote items by remote primary key.<br/>
@@ -359,6 +350,50 @@ Then we simply do like follow:
     end
 {:lang='ruby'}
 
+
+**:through**
+
+Allow to define joining model.
+
+    saint.filter :menu do
+        model Model::Menu, through: Model::MenuPage, local_key: :p_id, remote_key: :m_id
+    end
+{:lang='ruby'}
+
+**:via**
+
+The relation name by which the remote model will communicate to local model.
+
+*Example:* filter pages by authors name
+
+    class Page
+        saint.filter :author_name, :string do
+            model Model::Author, via: :pages
+            column :name
+        end
+    end
+{:lang='ruby'}
+
+Saint will send the relation name, defined by `via` option, to each found author,
+building by this a list of pages to be displayed.
+
+The logic is as simple as:
+
+    pages = []
+    found_authors.each do |author|
+        author.pages.each { |page| pages << page }
+    end
+{:lang='ruby'}
+
+As you could note, ORM relation should be defined prior to use it in Saint filters.<br/>
+For DataMapper, it is as simple as:
+
+    class Model::Author
+        has n, :pages
+    end
+{:lang='ruby'}
+
+
 More on Filters
 ---
 
@@ -436,7 +471,7 @@ To have a custom label, use `label` inside filter block:
 {:lang='ruby'}
 
 
-**:column**
+**column**
 
 Sometimes, various filters may need to use same columns.
 

@@ -19,6 +19,10 @@ module Saint
       {column.like => val}
     end
 
+    def ~ column, val = nil
+      {column => /#{Regexp.escape val}/i}
+    end
+
     def gt column, val = nil
       {column.gt => val}
     end

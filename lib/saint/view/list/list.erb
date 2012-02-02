@@ -18,21 +18,6 @@
     </fieldset>
 <% end -%>
 
-<table style="width: 100%;">
-  <tr>
-    <% if saint.create -%>
-        <td style="width: 5%;">
-          <a href="<%= http.route(:edit, @pager.query_string) %>" class="saint-button" style="width: 100px;">
-            New
-          </a>
-        </td>
-    <% end -%>
-    <td>
-      <%= @pager.html %>
-    </td>
-  </tr>
-</table>
-
 <div class="saint-tabs">
 
   <ul>
@@ -56,23 +41,13 @@
 
   </ul>
 
-  <div id="saint-tabs-master">
+  <div id="saint-tabs-master" style="margin-bottom: 50px;">
 
     <% if master_tab -%>
         <%= self.instance_exec @rows, @pager, &master_tab.proc %>
     <% else -%>
 
-        <form action="<%= http.route(:delete) %>" method="post">
-          <input type="hidden" name="redirect_to" value="<%= http.route(@pager.query_string) %>"/>
-
-          <%= saint_view.render_partial('list/list-partial', items: @rows, level: 0, color: nil) %>
-
-          <% if saint.delete && @pager.items > 0 -%>
-              <div style="margin-top: 40px; margin-bottom: 20px;">
-                <input type="submit" value="remove selected" onclick="return confirm('This will remove selected items. This action CAN NOT be undone! Continue?');" class="saint-button"/>
-              </div>
-          <% end -%>
-        </form>
+        <%= saint_view.render_partial('list/list-partial', items: @rows, level: 0, color: nil) %>
 
     <% end -%>
   </div>
@@ -82,5 +57,25 @@
         <%= self.instance_exec @rows, @pager, &tab.proc %>
       </div>
   <% end -%>
+
+</div>
+
+<div class="saint-summary-toolbar-bottom">
+
+  <div style="display: inline-block; white-space: nowrap; margin-top: 5px; margin-left: 5px;">
+    <% if saint.create -%>
+        <a href="<%= http.route(:edit, @pager.query_string) %>" class="saint-button">
+          new
+        </a>
+    <% end -%>
+  
+    <% if saint.delete && @pager.items > 0 -%>
+        <input type="submit" value="remove selected" onclick="return confirm('This will remove selected items. This action CAN NOT be undone! Continue?');" class="saint-button"/>
+    <% end -%>
+  </div>
+
+  <div style="display: inline-block; float: right; margin-right: 50px; margin-top: 3px;">
+    <%= @pager.html %>
+  </div>
 
 </div>

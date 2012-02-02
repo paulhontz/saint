@@ -82,11 +82,16 @@
             <% end -%>
         <% end -%>
 
-        <% @remote_columns.each do |column| -%>
+        <% @remote_columns.each do |column|
+            value = column.summary_value remote_item, self -%>
             <td>
-              <a href="<%= remote_node ? remote_node.http.route(:edit, remote_id) : 'javascript:void(0);' %>" target="_blank" class="saint-link">
-                <%= column.summary_value remote_item, self %>
-              </a>
+              <% if remote_node -%>
+                  <a href="<%= remote_node.http.route(:edit, remote_id) %>" target="_blank" class="saint-link">
+                    <%= value %>
+                  </a>
+              <% else -%>
+                  <%= value %>
+              <% end -%>
             </td>
         <% end -%>
 

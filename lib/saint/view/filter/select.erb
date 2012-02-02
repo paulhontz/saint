@@ -1,47 +1,55 @@
-<% options = drop_down_options
-   data_placeholder = nil
-   if @depends_on.size > 0
-       data_placeholder = @depends_on.values.select { |v| v }.size > 0 ?
-               '%s %s' % [options.size, options.size == 1 ? @setup.label : pluralize(@setup.label)] :
-               '%s required' % @depends_on.keys.map { |f| f.label }.join(' or ')
+<% if (options = drop_down_options).is_a?(Hash)
+       data_placeholder = nil
+       if @depends_on.size > 0
+           data_placeholder = @depends_on.values.select { |v| v }.size > 0 ?
+                   '%s %s' % [options.size, options.size == 1 ? @setup.label : pluralize(@setup.label)] :
+                   '%s required' % @depends_on.keys.map { |f| f.label }.join(' or ')
 
-   end
+       end
 -%>
 
-<% if @xhr -%>
-    <script type="text/javascript" src="<%= Saint::FileServer["ui.js"] %>"></script>
+    <% if @xhr -%>
+        <script type="text/javascript" src="<%= Saint::FileServer["ui.js"] %>"></script>
+    <% else -%>
+        <span id="<%= @id %>">
+    <% end -%>
+
+    <div class="saint-filter_label">
+      <%= label -%>
+    </div>
+
+    <select name="<%= @setup.query_string %>" id="<%= @id %>-input" class="saint-ui-chosen"
+            data-placeholder="<%= data_placeholder %>"
+            <%= 'multiple="true"' if @setup.multiple? %>
+            style="width: 200px;"
+            onchange="<% if (dependant_filters =  @setup.dependant_filters).size > 0 -%>
+                    $('<%= dependant_filters.map{|f| "##{f.id + @seed}-input"}.join(',') %>').remove();
+                    var query_string = $(this).closest('form').serialize();
+                    <% dependant_filters.each do |filter| -%>
+                    $.get( '<%= @setup.node.http.route(:filter, filter.column, @seed) %>',
+                            query_string,
+                            function(response){ $('#<%= filter.id + @seed %>').html(response); }
+                            );
+                    <% end -%>
+                    <% end -%>
+            ">
+      <option value=""></option>
+      <% options.each_pair do |value, label|
+          selected = (@val == value) || (@val.is_a?(Array) && @val.include?(value.to_s))
+      -%>
+          <option value="<%= value %>" <%= 'selected' if selected %>>
+            <%= label %>
+          </option>
+      <% end -%>
+    </select>
+    <% unless @xhr -%>
+        </span>
+    <% end -%>
 <% else -%>
-    <span id="<%= @id %>">
-<% end -%>
-
-<div class="saint-filter_label">
-  <%= label -%>
-</div>
-
-<select name="<%= @setup.query_string %>" id="<%= @id %>-input" class="saint-ui-chosen"
-        data-placeholder="<%= data_placeholder %>"
-        <%= 'multiple="true"' if @setup.multiple? %>
-        style="width: 200px;"
-        onchange="<% if (dependant_filters =  @setup.dependant_filters).size > 0 -%>
-                $('<%= dependant_filters.map{|f| "##{f.id + @seed}-input"}.join(',') %>').remove();
-                var query_string = $(this).closest('form').serialize();
-                <% dependant_filters.each do |filter| -%>
-                $.get( '<%= @setup.node.http.route(:filter, filter.column, @seed) %>',
-                        query_string,
-                        function(response){ $('#<%= filter.id + @seed %>').html(response); }
-                        );
-                <% end -%>
-                <% end -%>
-        ">
-  <option value=""></option>
-  <% options.each_pair do |value, label|
-      selected = (@val == value) || (@val.is_a?(Array) && @val.include?(value.to_s))
-  -%>
-      <option value="<%= value %>" <%= 'selected' if selected %>>
-        <%= label %>
-      </option>
-  <% end -%>
-</select>
-<% unless @xhr -%>
-    </span>
+    <a href="javascript:void(0);" onclick="$('#<%= @id %>-error_dialog').dialog({title: 'Filter Errors - <%= @setup.label %>', modal: true, width: '40%'});">
+      view errors
+    </a>
+    <div id="<%= @id %>-error_dialog" style="display: none;">
+      <%= options %>
+    </div>
 <% end -%>

@@ -112,7 +112,7 @@ module Saint
       # by default, all columns are shown on all pages and saved to db.
       @summary = true
       @crud = true
-      @save = true
+      @save = true unless type == :plain
 
       proc && self.instance_exec(&proc)
 
@@ -172,7 +172,7 @@ module Saint
     end
 
     def save?
-      plain? ? false : @save
+      plain? && @save.nil? ? false : @save
     end
 
     # if set to true, item wont be saved if field is empty.

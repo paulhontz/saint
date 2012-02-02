@@ -9,6 +9,7 @@ module Ctrl
 
     saint.header :name, ', by #author.name'
 
+    saint.ipp 100
     saint.order :id, :desc
 
     saint.grid do

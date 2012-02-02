@@ -121,24 +121,25 @@ module Saint
     include Saint::Inflector
 
     attr_reader :node, :type, :id, :var,
-                :local_pkey, # primary key of searched model
+                :local_key, :local_pkey, # primary key of searched model
                 :local_model, :local_orm, # Model/ORM that returns filtered items to be displayed as search results.
-                :remote_model, :remote_orm, :local_key, # Model/ORM that returns items to be displayed on drop-down selectors.
+                :remote_model, :remote_orm, # Model/ORM that returns items to be displayed on drop-down selectors.
                 :remote_label, :remote_order, :remote_proc, :remote_pkey, :remote_key,
+                :remote_associate_via, # define the ORM relation name through which remote model is associated with local model
                 :through_model, :through_orm, # Model/ORM that returns primary keys for items to be displayed as search results.
+                :through_remote_key, :through_local_key,
                 :logic, :logic_prefix, :logic_suffix # defines how the db are queried. see {#logic}
 
     # initialize new filter
     #
     # @param [Class] node
     # @param [Symbol] column
-    # @param [Symbol] type one of `:string`, `:select`, `:boolean`
-    # @param [Hash] opts
-    # @option opts [Symbol] column
-    # @option opts [Symbol, Array] logic
-    # @option opts [String, Symbol] label
-    # @option opts [Hash, Array] options options to be used on :select type
-    # @option opts [Boolean] multiple
+    # @param type_and_or_opts
+    # @option type_and_or_opts [Symbol] column
+    # @option type_and_or_opts [Symbol, Array] logic
+    # @option type_and_or_opts [String, Symbol] label
+    # @option type_and_or_opts [Hash, Array] options options to be used on :select type
+    # @option type_and_or_opts [Boolean] multiple
     # @param [Proc] proc
     def initialize node, column, *type_and_or_opts, &proc
 
@@ -158,6 +159,7 @@ module Saint
       # orm should support all this methods.
       @logic_map = {
           like: ['%', '%'],
+          :~ => [],
           eql: [],
           gt: [],
           gte: [],
@@ -192,7 +194,7 @@ module Saint
       end
 
       remote_setup
-      remote_order_setup
+      remote_setup__order
 
       @logic ||= @type == :select ? :eql : :like
       logic_setup
@@ -330,6 +332,7 @@ module Saint
     # @param [Object] model remote model
     # @param [Hash] opts
     # @option opts [Object] through
+    # @option opts [Symbol] via
     # @option opts [Symbol, Array, Hash] order
     # @option opts [String, Symbol] label
     # @option opts [Symbol] remote_pkey
@@ -416,15 +419,16 @@ module Saint
       @remote_orm = Saint::ORM.new(@remote_model)
       @remote_pkey = @remote_opts.fetch :remote_pkey, :id
       @remote_label = [@remote_opts.fetch(:label, @remote_orm.properties(true).first)].flatten
+      @remote_associate_via = @remote_opts.fetch :via, nil
 
       if @through_model
-        @local_key = @remote_opts.fetch :local_key, (singularize(@local_orm.storage_name) + "_id").to_sym
-        @remote_key = @remote_opts.fetch :remote_key, (singularize(@remote_orm.storage_name) + "_id").to_sym
+        @through_local_key = @remote_opts.fetch :local_key, (singularize(@local_orm.storage_name) + "_id").to_sym
+        @through_remote_key = @remote_opts.fetch :remote_key, (singularize(@remote_orm.storage_name) + "_id").to_sym
         @through_orm = Saint::ORM.new(@through_model)
       end
     end
 
-    def remote_order_setup
+    def remote_setup__order
       return unless @remote_model
       return unless order = @remote_opts[:order]
 
@@ -450,6 +454,7 @@ module Saint
 
     include Saint::Inflector
     include Saint::Utils
+    include Saint::ExtenderUtils
     include Rack::Utils
 
     attr_reader :val, :depends_on
@@ -473,25 +478,38 @@ module Saint
       @view_api.scope self
     end
 
-    # return orm filters
+    # return ORM filters
     def orm
 
-      return {} unless @setup.local_orm && @setup.column && @val
+      default_filters = Hash.new
+      
+      return default_filters unless @val
 
-      val = @val.is_a?(Array) ?
-          @val.map { |v| v if v.size > 0 }.compact :
-          [@setup.logic_prefix, @val, @setup.logic_suffix].compact.join
-
-      return {} unless val.size > 0
-
-      if @setup.through_orm
-        # val is effectively the remote item pkey
-        local_keys = []
-        if remote_keys = @setup.through_orm.filter(@setup.remote_key => val)[0]
-          remote_keys.each { |r| local_keys << r.send(@setup.local_key) }
-        end
-        return @setup.local_orm.eql(@setup.local_pkey, local_keys)
+      if @val.is_a?(Array)
+        val = @val.select { |v| v.size > 0 }
+        return default_filters unless val.size > 0
+      else
+        val = [@setup.logic_prefix, @val, @setup.logic_suffix].join
+        return default_filters unless val.size > [@setup.logic_prefix, nil, @setup.logic_suffix].join.size
       end
+
+      local_keys = []
+      if @setup.remote_orm && @setup.remote_associate_via
+        if remote_keys = @setup.remote_orm.filter(@setup.column => val)[0]
+          remote_keys.each do |r|
+            r.send(@setup.remote_associate_via).each do |o|
+              local_keys << o.send(@setup.local_pkey)
+            end
+          end
+        end
+      end
+      if @setup.through_orm
+        if remote_keys = @setup.through_orm.filter(@setup.through_remote_key => val)[0]
+          remote_keys.each { |r| local_keys << r.send(@setup.through_local_key) }
+        end
+      end
+      return {@setup.local_pkey => local_keys} if local_keys.size > 0
+      return default_filters unless @setup.local_orm
       @setup.local_orm.send(@setup.logic, @setup.column, val)
     end
 
@@ -549,7 +567,12 @@ module Saint
 
       options = Hash.new
       order = @setup.remote_orm.order(@setup.remote_order)
-      (@setup.remote_orm.filter(filters.merge(order))[0] || []).each do |remote_item|
+      remote_items, @errors = @setup.remote_orm.filter(filters.merge(order))
+      if @errors.size > 0
+        @errors << 'ORM Filters: %s' % @setup.node.http.escape_html(filters.inspect)
+        return saint_view.render_partial('error')
+      end
+      remote_items.each do |remote_item|
         value = @setup.remote_label.map do |c|
           val = Saint::Utils.column_format c, remote_item
           val.size > 0 ? val : nil
