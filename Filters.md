@@ -44,7 +44,7 @@ Associative Filters
 
 Simply filter by author:
 
-    saint.filter :author_id
+    saint.filter :author_id do
         model Model::Author
     end
 {:lang='ruby'}
@@ -62,7 +62,7 @@ There are two ways to solve this.
 
 Create an dropdown selector containing only active authors.
 
-    saint.filter :author_id
+    saint.filter :author_id do
         model Model::Author do
             active: 1
         end
@@ -147,7 +147,7 @@ Nesting level is unlimited.
 
 Following example above, we can narrow down the countries as well:
 
-    saint.filter :country_name, :string
+    saint.filter :country_name, :string do
         model Model::Country
         column :name
     end
@@ -245,28 +245,28 @@ To have a custom order, use :order option.
 *Example:* order by name, ascending:
 
     saint.filter :author_id do
-        model, Model::Author, order :name
+        model Model::Author, order :name
     end
 {:lang='ruby'}
 
 *Example:* order by name and date, both ascending:
 
     saint.filter :author_id do
-        model, Model::Author, order [:name, :date]
+        model Model::Author, order [:name, :date]
     end
 {:lang='ruby'}
 
 *Example:* order by date, descending:
 
     saint.filter :author_id do
-        model, Model::Author, order {:date => :desc}
+        model Model::Author, order {:date => :desc}
     end
 {:lang='ruby'}
 
 *Example:* order by name(ascending) and by date(descending):
 
     saint.filter :author_id do
-        model, Model::Author, order {:name => :asc, :date => :desc}
+        model Model::Author, order {:name => :asc, :date => :desc}
     end
 {:lang='ruby'}
 
@@ -472,7 +472,7 @@ Return items with "foo" name:
 
 Search by regex(postgres)
 
-    saint.filter :name, logic: '~', '^'
+    saint.filter :name, logic: ['~', '^']
     # SQL: SELECT FROM page WHERE "name" ~ '^foo'
 {:lang='ruby'}
 

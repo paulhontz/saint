@@ -197,7 +197,7 @@ otherwise, items will be extracted by remote primary key, in descending order.
 
     class Page
         saint.belongs_to :author, Model::Author do
-            order: :name
+            order :name
         end
     end
 {:lang='ruby'}
