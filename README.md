@@ -62,9 +62,7 @@ Saint allow to build HTML columns of various types and options using pure Ruby c
 
 **Select**
 
-    saint.column :status, :select do
-        options: 1 => :Active, 0 => :Suspended
-    end
+    saint.column :status, :select, options: {1 => :Active, 0 => :Suspended}
 {:lang='ruby'}
 
 <div class="screenshot-container">
@@ -113,16 +111,16 @@ Saint does support *"belongs to"*, *"has N"* and *"has N through"* associations.
 
 **Dropdown Filters**
 
-    saint.filter :active do
-        type :select, options: {1 => 'Yes', 0 => 'No'}
-    end
+    saint.filter :active, :select, options: {1 => 'Yes', 0 => 'No'}
 {:lang='ruby'}
 
 **Associative Filters**
 
 Filter Page by Author:
 
-    saint.filter :author_id, Model::Author
+    saint.filter :author_id do
+        model Model::Author
+    end
 {:lang='ruby'}
 
 [More on Filters](http://saintrb.org/Filters.md)
