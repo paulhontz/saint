@@ -1,5 +1,5 @@
 #DataMapper::Model.raise_on_save_failure = true
-#DataMapper::Logger.new(STDOUT, :debug)
+DataMapper::Logger.new(STDOUT, :debug)
 
 DataMapper.setup :default, '%s://%s:%s@%s:%s/%s' % Cfg.db.values_at(:type, :user, :pass, :host, :port, :name)
 

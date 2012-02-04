@@ -1,14 +1,9 @@
 module Saint
 
-  module ORMFilters
+  module ORMQuery
 
-    def limit limit, offset = nil
-      {limit: limit}.merge(offset ? {offset: offset} : {})
-    end
-
-    def order map = {}
-      order = map.keys.map { |c| c.send(map[c]) }.compact
-      order.size > 0 ? {order: order} : {}
+    def sql operator, column, val
+      {conditions: ['%s %s ?' % [column, operator], val]}
     end
 
     def eql column, val = nil
@@ -17,10 +12,6 @@ module Saint
 
     def like column, val = nil
       {column.like => val}
-    end
-
-    def ~ column, val = nil
-      {column => /#{Regexp.escape val}/i}
     end
 
     def gt column, val = nil
@@ -43,12 +34,26 @@ module Saint
       {column.not => val}
     end
 
+    def limit limit, offset = nil
+      {limit: limit}.merge(offset ? {offset: offset} : {})
+    end
+
+    def order map = {}
+      order = map.keys.map { |c| c.send(map[c]) }.compact
+      order.size > 0 ? {order: order} : {}
+    end
+
   end
 
   module ORMUtils
     class << self
 
-      include ORMFilters
+      include ORMQuery
+
+      def quote_column column, model
+        property = model.properties.select { |p| p.name == column }.first
+        model.repository(model.repository_name).adapter.property_to_column_name(property, false)
+      end
 
       def finalize
         DataMapper.finalize
@@ -58,7 +63,7 @@ module Saint
 
   module ORMMixin
 
-    include ORMFilters
+    include ORMQuery
 
     attr_reader :model
 
@@ -120,8 +125,8 @@ module Saint
       db(__method__) { model.all(filters.merge @subset).destroy! }
     end
 
-    def storage_name
-      model.storage_name
+    def quote_column column
+      ORMUtils.quote_column column, model
     end
 
     def properties skip_id_properties = false

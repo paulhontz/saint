@@ -212,16 +212,12 @@ module Saint
       end
 
       if @type == :has_n
-
-        local_table = local_orm.storage_name
-
         if @through_model
-          remote_table = @remote_orm.storage_name
-          @local_key ||= (singularize(local_table) + "_id").to_sym
-          @remote_key ||= (singularize(remote_table) + "_id").to_sym
+          @local_key ||= foreign_key @local_model
+          @remote_key ||= foreign_key @remote_model
         else
           @local_key ||= :id
-          @remote_key ||= (singularize(local_table) + "_id").to_sym
+          @remote_key ||= foreign_key @local_model
         end
       else
         @local_key ||= foreign_key(name)

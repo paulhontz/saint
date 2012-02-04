@@ -41,7 +41,8 @@ module Saint
     #    depends_on :country_id
     #  end
     #
-    def filter column = nil, type = nil, opts = {}, &proc
+    def filter column, type = nil, opts = {}, &proc
+      return unless @node.http.configurable?
       (@filters ||= Hash.new)[column] = Filter.new(@node, column, type, opts, &proc)
     end
 
@@ -120,11 +121,11 @@ module Saint
     include Saint::Utils
     include Saint::Inflector
 
-    attr_reader :node, :type, :id, :var,
-                :local_key, :local_pkey, # primary key of searched model
+    attr_reader :node, :type, :id, :var, :column_quoted,
+                :local_pkey, # primary key of searched model
                 :local_model, :local_orm, # Model/ORM that returns filtered items to be displayed as search results.
                 :remote_model, :remote_orm, # Model/ORM that returns items to be displayed on drop-down selectors.
-                :remote_label, :remote_order, :remote_proc, :remote_pkey, :remote_key,
+                :remote_label, :remote_order, :remote_proc, :remote_pkey,
                 :remote_associate_via, # define the ORM relation name through which remote model is associated with local model
                 :through_model, :through_orm, # Model/ORM that returns primary keys for items to be displayed as search results.
                 :through_remote_key, :through_local_key,
@@ -159,7 +160,6 @@ module Saint
       # orm should support all this methods.
       @logic_map = {
           like: ['%', '%'],
-          :~ => [],
           eql: [],
           gt: [],
           gte: [],
@@ -189,8 +189,9 @@ module Saint
           map { |c| c.to_s }.compact.join('-').gsub(/[^\w|\d]/, '_').gsub(/_+/, '_')
 
       @local_pkey = @node.saint.pkey
-      if @local_model.new.respond_to?(@column) || @through_model
+      if (is_local_filter = @local_model.new.respond_to?(@column)) || @through_model
         @local_orm = Saint::ORM.new(@local_model)
+        @column_quoted = @local_orm.quote_column(@column) if is_local_filter
       end
 
       remote_setup
@@ -203,16 +204,23 @@ module Saint
     # sometimes, various filters may need to use same columns.
     # to avoid column names collisions,
     # define the real column by using :column option or `column` method inside block.
+    # worth to note that if remote model defined,
+    # column will be used to search through remote items,
+    # and local model will use only local pkey to fetch local items.
     def column column = nil
       @column = column.to_sym if column
       @column
     end
 
     # define how to build db query.
-    # it accepts 3 arguments: logic, prefix, suffix
+    # it accepts 3 arguments: logic, prefix, suffix.
     #
     # can also be set as option passed to `saint.filter`.
     # value set by block will override value set by option.
+    #
+    # builtin operators: :like, :eql, :gt, :gte, :lt, :lte, :not
+    #
+    # you can also use your own operator, by passing a string as first argument.
     #
     # @example equality: column = 'val'
     #    saint.filter :column, logic: :eql
@@ -259,12 +267,32 @@ module Saint
     #      logic :eql, nil, '%'
     #    end
     #
-    # other logic types: :gt, :gte, :lt, :lte, :not
+    # @example SELECT ... WHERE name ILIKE '%[value]%'
+    #    saint.filter :name, logic: 'ILIKE'
+    #    # or
+    #    saint.filter :name do
+    #      logic 'ILIKE'
+    #    end
+    #
+    # @example SELECT ... WHERE name ~ '^[value]'
+    #    saint.filter :name, logic: ['~', '^']
+    #    # or
+    #    saint.filter :name do
+    #      logic '~', '^'
+    #    end
+    #
+    # @example SELECT ... WHERE name ~ '[value]$'
+    #    saint.filter :name, logic: ['~', '', '$']
+    #    # or
+    #    saint.filter :name do
+    #      logic '~', '', '$'
+    #    end
     #
     # @param [Symbol] logic
     # @param [Array] *ps prefix and suffix
     def logic logic = nil, *ps
-      if logic
+      return @logic unless logic
+      if logic.is_a?(Symbol)
         Saint::ORMUtils.respond_to?(logic) || raise("ORM should respond to #{logic}")
         @logic = @logic_map[logic] ? logic : @logic_map.keys.first
         if ps.size > 0
@@ -272,8 +300,10 @@ module Saint
         else
           logic_setup
         end
+      else
+        @logic = logic
+        @logic_prefix, @logic_suffix = ps
       end
-      @logic
     end
 
     # set label for current filter.
@@ -331,15 +361,15 @@ module Saint
     #
     # @param [Object] model remote model
     # @param [Hash] opts
+    # @option opts [String, Symbol] label
+    # @option opts [Symbol, Array, Hash] order
     # @option opts [Object] through
     # @option opts [Symbol] via
-    # @option opts [Symbol, Array, Hash] order
-    # @option opts [String, Symbol] label
-    # @option opts [Symbol] remote_pkey
+    # @option opts [Symbol] pkey
     # @option opts [Symbol] remote_key
     # @option opts [Symbol] local_key
     # @param [Proc] proc
-    def model model = nil, opts = {}, &proc
+    def model model, opts = {}, &proc
       @remote_model, @remote_opts, @remote_proc = model, opts, proc
     end
 
@@ -407,23 +437,32 @@ module Saint
       self.class.query_string @var, @logic, multiple?
     end
 
+    def string?
+      @type == :string
+    end
+
     private
 
     def logic_setup
-      @logic_prefix, @logic_suffix = @logic_map[@logic][0], @logic_map[@logic][1]
+      case
+        when @logic.is_a?(Symbol)
+          @logic_prefix, @logic_suffix = *@logic_map[@logic]
+        when @logic.is_a?(String)
+          @logic_prefix, @logic_suffix = *@logic_map[:like] if @logic =~ /like/i
+      end
     end
 
     def remote_setup
       return unless @remote_model
 
       @remote_orm = Saint::ORM.new(@remote_model)
-      @remote_pkey = @remote_opts.fetch :remote_pkey, :id
+      @remote_pkey = @remote_opts.fetch :pkey, :id
       @remote_label = [@remote_opts.fetch(:label, @remote_orm.properties(true).first)].flatten
-      @remote_associate_via = @remote_opts.fetch :via, nil
+      @remote_associate_via = @remote_opts.fetch :via, tableize(demodulize @local_model)
 
       if @through_model
-        @through_local_key = @remote_opts.fetch :local_key, (singularize(@local_orm.storage_name) + "_id").to_sym
-        @through_remote_key = @remote_opts.fetch :remote_key, (singularize(@remote_orm.storage_name) + "_id").to_sym
+        @through_local_key = @remote_opts.fetch :local_key, foreign_key(@local_model)
+        @through_remote_key = @remote_opts.fetch :remote_key, foreign_key(@remote_model)
         @through_orm = Saint::ORM.new(@through_model)
       end
     end
@@ -482,8 +521,9 @@ module Saint
     def orm
 
       default_filters = Hash.new
-      
+
       return default_filters unless @val
+      return default_filters if @setup.dependant_filters.size > 0
 
       if @val.is_a?(Array)
         val = @val.select { |v| v.size > 0 }
@@ -494,23 +534,24 @@ module Saint
       end
 
       local_keys = []
-      if @setup.remote_orm && @setup.remote_associate_via
-        if remote_keys = @setup.remote_orm.filter(@setup.column => val)[0]
-          remote_keys.each do |r|
-            r.send(@setup.remote_associate_via).each do |o|
-              local_keys << o.send(@setup.local_pkey)
-            end
+
+      if @setup.remote_orm && @setup.remote_associate_via && @setup.string?
+        (@setup.remote_orm.filter(orm_filters val)[0]||[]).each do |r|
+          r.send(@setup.remote_associate_via).each do |o|
+            local_keys << o.send(@setup.local_pkey)
           end
         end
       end
+
       if @setup.through_orm
-        if remote_keys = @setup.through_orm.filter(@setup.through_remote_key => val)[0]
-          remote_keys.each { |r| local_keys << r.send(@setup.through_local_key) }
+        (@setup.through_orm.filter(@setup.through_remote_key => val)[0]||[]).each do |r|
+          local_keys << r.send(@setup.through_local_key)
         end
       end
+
       return {@setup.local_pkey => local_keys} if local_keys.size > 0
       return default_filters unless @setup.local_orm
-      @setup.local_orm.send(@setup.logic, @setup.column, val)
+      orm_filters val
     end
 
     # return HTTP query
@@ -542,6 +583,15 @@ module Saint
     end
 
     private
+
+    # build orm filters
+    def orm_filters val
+      if @setup.logic.is_a?(Symbol)
+        Saint::ORMUtils.send @setup.logic, @setup.column, val
+      else
+        Saint::ORMUtils.sql @setup.logic, @setup.column_quoted, val
+      end
+    end
 
     # get options for drop-down selector
     def drop_down_options
@@ -576,7 +626,7 @@ module Saint
         value = @setup.remote_label.map do |c|
           val = Saint::Utils.column_format c, remote_item
           val.size > 0 ? val : nil
-        end.compact.join(", ")
+        end.compact.join(', ')
         options[remote_item.send(@setup.remote_pkey)] = value
       end
       options

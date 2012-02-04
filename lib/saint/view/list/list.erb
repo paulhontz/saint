@@ -46,9 +46,10 @@
     <% if master_tab -%>
         <%= self.instance_exec @rows, @pager, &master_tab.proc %>
     <% else -%>
-
-        <%= saint_view.render_partial('list/list-partial', items: @rows, level: 0, color: nil) %>
-
+        <form id="saint-forms-summary-delete" action="<%= http.route(:delete) %>" method="post">
+          <input type="hidden" name="redirect_to" value="<%= http.route(@pager.query_string) %>"/>
+          <%= saint_view.render_partial('list/list-partial', items: @rows, level: 0, color: nil) %>
+        </form>
     <% end -%>
   </div>
 
@@ -60,21 +61,21 @@
 
 </div>
 
-<div class="saint-summary-toolbar-bottom">
+<div class="saint-toolbar-bottom">
 
-  <div style="display: inline-block; white-space: nowrap; margin-top: 5px; margin-left: 5px;">
+  <div class="saint-toolbar-bottom-column">
     <% if saint.create -%>
         <a href="<%= http.route(:edit, @pager.query_string) %>" class="saint-button">
-          new
-        </a>
+          New</a>
     <% end -%>
-  
+
     <% if saint.delete && @pager.items > 0 -%>
-        <input type="submit" value="remove selected" onclick="return confirm('This will remove selected items. This action CAN NOT be undone! Continue?');" class="saint-button"/>
+        <a onclick="if(confirm('This will remove selected items. This action CAN NOT be undone! Continue?')){$('#saint-forms-summary-delete').submit();}" href="javascript:void(0);" class="saint-button">
+          Delete</a>
     <% end -%>
   </div>
 
-  <div style="display: inline-block; float: right; margin-right: 50px; margin-top: 3px;">
+  <div class="saint-toolbar-bottom-right_column">
     <%= @pager.html %>
   </div>
 

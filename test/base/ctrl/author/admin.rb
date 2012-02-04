@@ -9,7 +9,7 @@ module Ctrl
 
     saint.column :status, :boolean
 
-    saint.filter :name
+    saint.filter :name, logic: 'like'
     saint.filter :status, :boolean
 
     saint.header :name

@@ -227,10 +227,10 @@ use `model` with :local_key and :remote_key options.
 
 Also, Saint expects your remote model(`Model::Menu`) to have :id as primary key.
 
-If that's not the case, use :remote_pkey option as follow:
+If that's not the case, use :pkey option as follow:
 
     saint.filter :menu do
-        model Model::Menu, through: Model::MenuPage, remote_pkey: :uid
+        model Model::Menu, through: Model::MenuPage, pkey: :uid
     end
 {:lang='ruby'}
 
@@ -315,13 +315,13 @@ More syntax sugar:
     # Jack has no country, so second argument ignored
 {:lang='ruby'}
 
-**:remote_pkey**
+**:pkey**
 
 By default, Saint will use :id for primary key of remote model.<br/>
-You can use :remote_pkey option to set a custom key:
+You can use :pkey option to set a custom key:
 
     saint.filter :author_id do
-        model Model::Author, remote_pkey: :uid
+        model Model::Author, pkey: :uid
     end
 {:lang='ruby'}
 
@@ -364,18 +364,32 @@ Allow to define joining model.
 
 The relation name by which the remote model will communicate to local model.
 
+By default, Saint will use pluralized model name.
+
 *Example:* filter pages by authors name
 
     class Page
         saint.filter :author_name, :string do
-            model Model::Author, via: :pages
+            model Model::Author
             column :name
         end
     end
+    # here Saint will use :pages
+    
+    class PagesModel
+        saint.filter :author_name, :string do
+            model AuthorModel, via: :pages
+            column :name
+        end
+    end
+    # here Saint would use :page_models by default,
+    # but as this is incorrect relations name,
+    # we set it by `via` method.
+    
 {:lang='ruby'}
 
 Saint will send the relation name, defined by `via` option, to each found author,
-building by this a list of pages to be displayed.
+building a list of pages to be displayed.
 
 The logic is as simple as:
 
@@ -401,14 +415,14 @@ Any option below can be set by pass it as argument to `saint.filter` as well as 
 
 **logic**
 
-By default, db query will be built using LIKE logic.
+By default, Saint will use LIKE operator for searches.
 
-Use `logic` inside filter block to override this.
+Use :logic option or `logic` method inside filter block to override this.
 
-It accepts 3 arguments: logic, prefix, suffix.<br/>
+It accepts 3 arguments: operator, prefix, suffix.<br/>
 Both prefix and suffix will be accordingly concatenated to searched value.
 
-Available logics:
+Builtin operators:
 
 *   :like
 *   :eql
@@ -417,6 +431,8 @@ Available logics:
 *   :lt
 *   :lte
 *   :not
+
+Beside this, you can use any operator by passing it as string.
 
 Return names containing "foo":
 
@@ -444,7 +460,7 @@ Return names ending in "foo":
     # SQL: SELECT FROM page WHERE name LIKE '%foo'
 {:lang='ruby'}
 
-Return items having name equal to "foo":
+Return items with "foo" name:
 
     saint.filter :name, logic: :eql
     #or
@@ -452,6 +468,24 @@ Return items having name equal to "foo":
         logic :eql
     end
     # SQL: SELECT FROM page WHERE name = 'foo'
+{:lang='ruby'}
+
+Search by regex(postgres)
+
+    saint.filter :name, logic: '~', '^'
+    # SQL: SELECT FROM page WHERE "name" ~ '^foo'
+{:lang='ruby'}
+
+Case insensitive LIKE(postgres)
+
+    saint.filter :name, logic: 'ILIKE'
+    # SQL: SELECT FROM page WHERE "name" ILIKE '%foo%'
+{:lang='ruby'}
+
+Search by regex(mysql)
+
+    saint.filter :name, logic: ['REGEXP', nil, '$']
+    # SQL: SELECT FROM page WHERE `name` REGEXP 'foo$'
 {:lang='ruby'}
 
 **label**

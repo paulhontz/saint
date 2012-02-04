@@ -9,11 +9,14 @@ module Ctrl
 
     saint.header :name, ', by #author.name'
 
-    saint.ipp 100
     saint.order :id, :desc
 
     saint.grid do
-      column :name
+      column :name do
+        value do |val|
+          summary? ? [val, row.author ? ', by %s' % row.author.name : nil].join : val
+        end
+      end
       column :label
     end
 
@@ -78,6 +81,11 @@ module Ctrl
     end
 
     saint.filter :name
+
+    saint.filter :author_name, :string do
+      model Model::Author
+      column :name
+    end
 
     saint.before do |item, action|
       item.callback_a_test = action
