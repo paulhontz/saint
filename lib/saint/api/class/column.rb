@@ -8,14 +8,10 @@ module Saint
     #    saint.column :name
     #
     # @example show the :date only on CRUD pages
-    #    saint.column :date do
-    #      summary false
-    #    end
+    #    saint.column :date, summary: false
     #
     # @example drop-down selector
-    #    saint.column :color, :select do
-    #      options ['red', 'green', 'blue']
-    #    end
+    #    saint.column :color, :select, options: ['red', 'green', 'blue']
     #
     # @example display date in human format on summary pages
     #    saint.column :date do
@@ -32,12 +28,14 @@ module Saint
     #    end
     #
     # @param [Symbol] name
-    # @param [Symbol] type
+    # @param [Symbol, Hash] *type_and_or_opts
     # @param [Proc] &proc
-    def column name, type = nil, &proc
+    def column name, *type_and_or_opts, &proc
       return unless configurable?
       @grid && @grid_columns += 1
-      column = ::Saint::Column.new(name, type, rbw: @node.saint.rbw, grid: @grid, &proc)
+      type, opts = nil, {}
+      type_and_or_opts.each { |a| a.is_a?(Hash) ? opts.update(a) : type = a }
+      column = ::Saint::Column.new(name, type, opts.merge(rbw: @node.saint.rbw, grid: @grid), &proc)
       columns[column.name] = column
     end
 
@@ -104,26 +102,69 @@ module Saint
 
   class Column
 
+    OPTS = [
+        :summary, :crud, :save,
+        :label, :tag, :rbw,
+        :options, :multiple, :size, :join_with, :required, :default,
+        :width, :height, :css_style, :css_class,
+        :layout, :layout_style, :layout_class,
+        :grid_width, :grid_height
+    ]
+
     attr_reader :id, :name, :type, :grid
+
+    # helpers for value related proc.
+    # @example
+    #    saint.column :name do
+    #      value { |val| scope == :summary ? "#{val}, created on #{row.date}" : val }
+    #    end
     attr_reader :row, :scope
 
+    # build new column
+    #
+    # @param [Symbol] name
+    # @param [Symbol] type
+    # @param [Hash] opts
+    # @options opts [Boolean] summary
+    # @options opts [Boolean] crud
+    # @options opts [Boolean] save
+    # @options opts [Symbol, String] label
+    # @options opts [Symbol] tag
+    # @options opts [Boolean] rbw
+    # @options opts [Hash, Array] options
+    # @options opts [Boolean] multiple
+    # @options opts [Integer] size
+    # @options opts [String] join_with
+    # @options opts [Boolean] required
+    # @options opts [Symbol, String] default
+    # @options opts [Integer, String] width
+    # @options opts [Integer, String] height
+    # @options opts [String] css_style
+    # @options opts [String, Symbol] css_class
+    # @options opts [Symbol, String] layout
+    # @options opts [String] layout_style
+    # @options opts [Symbol, String] layout_class
+    # @options opts [Integer, String] grid_width
+    # @options opts [Integer, String] grid_height
+    # @param [Proc] &proc
     def initialize name, type = nil, opts = {}, &proc
 
+      OPTS.each do |opt|
+        opts.has_key?(opt) && instance_variable_set('@%s' % opt, opts[opt])
+      end
+      
+      proc && instance_exec(&proc)
+      
       # by default, all columns are shown on all pages and saved to db.
-      @summary = true
-      @crud = true
-      @save = true unless type == :plain
-
-      proc && self.instance_exec(&proc)
+      instance_variable_defined?(:@summary) || @summary = true
+      instance_variable_defined?(:@crud) || @crud = true
+      instance_variable_defined?(:@save) || @save = (type == :plain ? false : true)
 
       # default type is string
       @type = type || :string
 
-      # use rb_wrapper only if it is required
-      @rbw = opts.fetch :rbw, false
-
       # is current column a part of a grid
-      @grid = opts.fetch :grid, nil
+      @grid = opts[:grid]
 
       @id = '%s_%s' % [name, Digest::MD5.hexdigest(@proc.to_s)]
       @name = name.to_sym
@@ -192,11 +233,8 @@ module Saint
       @multiple
     end
 
-    # indicates how much lines to display for select-multiple columns.
-    # nil by default
-    def size size = nil
-      @size = size.to_i if size
-      @size
+    def multiple?
+      @multiple
     end
 
     # string used to join values for checkbox and select-multiple columns.
@@ -204,6 +242,13 @@ module Saint
     def join_with str = nil
       @join_with = str if str
       @join_with || ', '
+    end
+
+    # indicates how much lines to display for select-multiple columns.
+    # nil by default
+    def size size = nil
+      @size = size.to_i if size
+      @size
     end
 
     # options to be used on select, radio and checkbox selectors

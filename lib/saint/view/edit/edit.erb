@@ -15,8 +15,6 @@
 
       <h3 style="color: #808080;"><%= header %></h3>
 
-      <div class="saint-flash_alert"><%= http.flash[:alert] %></div>
-
     </td>
     <td style="width: 33%; text-align: right;">
       <% if @next_item
@@ -221,6 +219,10 @@
       <% end -%>
     </div>
 
+  </div>
+
+  <div class="saint-toolbar-bottom-column" style="margin-left: 100px;">
+    <div class="saint-flash_alert"><%= http.flash[:alert] %></div>
   </div>
 
   <div class="saint-toolbar-bottom-right_column">

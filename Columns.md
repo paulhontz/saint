@@ -56,6 +56,8 @@ Selectors
 
 ###:radio
 
+    saint.column :status, :radio, options: {1 => :Active, 0 => :Suspended}
+    # or
     saint.column :status, :radio do
         options 1 => :Active, 0 => :Suspended
     end
@@ -67,8 +69,10 @@ Selectors
 
 ###:select
 
+    saint.column :status, :select, options: {1 => :Active, 0 => :Suspended}
+    # or
     saint.column :status, :select do
-        options: 1 => :Active, 0 => :Suspended
+        options 1 => :Active, 0 => :Suspended
     end
 {:lang='ruby'}
 
@@ -80,6 +84,8 @@ Use `multiple true` option to render an select field allowing to select multiple
 
 Use `size: N` to define how much lines to display when :multiple set to true.
 
+    saint.column :color, :select, multiple: true, options: ['red', 'green', 'blue']
+    # or
     saint.column :color, :select do
         multiple true
         options ['red', 'green', 'blue']
@@ -96,6 +102,8 @@ Use `join_with 'some-str'` to override this.
 
 ###:checkbox
 
+    saint.column :color, :checkbox, options: ['red', 'green', 'blue']
+    # or
     saint.column :color, :checkbox do
         options ['red', 'green', 'blue']
     end
@@ -108,6 +116,8 @@ Use `join_with 'some-str'` to override this.
 By default, Saint will join selected options with a coma when saved to db.<br/>
 Use `join_with 'some-str'` to override this:
 
+    saint.column :color, :checkbox, options: ['red', 'green', 'blue'], join_with: '/'
+    # or
     saint.column :color, :checkbox do
         options ['red', 'green', 'blue']
         join_with '/'
@@ -135,6 +145,8 @@ Options accepted by `saint.column` block:
 Sets default value for a column.<br/>
 Accepts: [String, Integer]
 
+    saint.column :some_column, default: 'some value'
+    # or
     saint.column :some_column do
         default 'some value'
     end
@@ -147,21 +159,15 @@ Accepts: [String, Integer]
 Options to be used when rendering :checkbox, :radio and :select columns.<br/>
 Accepts: [Hash, Array]
 
-    saint.column :contact_me_by, :select do
-        options [:Phone, :Email]
-    end
+    saint.column :contact_me_by, :select, options: [:Phone, :Email]
     # HTML: <option value="Phone">Phone</option>
     #       <option value="Email">Email</option>
 
-    saint.column :status, :radio do
-        options 1 => :Active, 0 => :Suspended
-    end
+    saint.column :status, :radio, options: {1 => :Active, 0 => :Suspended}
     # HTML: <input type="radio" name="status" value="1" />Active
     #       <input type="radio" name="status" value="0" />Suspended
     
-    saint.column :color, :checkbox do
-        options ['red', 'green', 'blue']
-    end
+    saint.column :color, :checkbox, options: ['red', 'green', 'blue']
     # HTML: <input type="checkbox" name="color[]" value="red" />Red
     #       <input type="checkbox" name="color[]" value="green" />Green
     #       <input type="checkbox" name="color[]" value="blue" />Blue
@@ -194,6 +200,8 @@ Accepts: [String, Symbol]
     saint.column :name
     # Label to be used: Name
 
+    saint.column :name, label: "Author's Name"
+    # or
     saint.column :name do
         label "Author's Name"
     end
@@ -205,6 +213,8 @@ Accepts: [String, Symbol]
 Instruct UI to exclude column from Summary pages.<br/>
 Accepts: [false]
 
+    saint.column :some_column, summary: false
+    # or
     saint.column :some_column do
         summary false
     end
@@ -215,6 +225,8 @@ Accepts: [false]
 Instruct UI to exclude column from CRUD pages.<br/>
 Accepts: [false]
 
+    saint.column :some_column, crud: false
+    # or
     saint.column :some_column do
         crud false
     end
@@ -225,6 +237,8 @@ Accepts: [false]
 Instruct Saint to exclude column from attributes when saving item to db.<br/>
 Accepts: [false]
 
+    saint.column :some_column, save: false
+    # or
     saint.column :some_column do
         save false
     end
@@ -235,6 +249,8 @@ Accepts: [false]
 Instruct Saint to cancel save operation and return an error if field is empty.<br/>
 Accepts: [true]
 
+    saint.column :some_column, required: true
+    # or
     saint.column :some_column do
         required true
     end

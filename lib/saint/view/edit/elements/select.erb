@@ -1,7 +1,7 @@
 <% if options = @element.options
        values = (@row_val||'').split(@element.join_with)
 -%>
-    <select style="<%= @element.css_style %>" class="<%= @element.css_class %>"
+    <select style="<%= @element.css_style %>" class="<%= @element.css_class %> saint-ui-chosen"
             name="<%= @element.name %><%= '[]' if @element.multiple %>"
             <%= 'multiple' if @element.multiple %>
             size="<%= @element.size || 1 %>">

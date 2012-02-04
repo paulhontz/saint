@@ -1,4 +1,3 @@
-<span class="saint-flash_alert"><%= http.flash[:alert] %></span>
 
 <% if filters = saint.filters(:html) -%>
     <fieldset>
@@ -73,6 +72,10 @@
         <a onclick="if(confirm('This will remove selected items. This action CAN NOT be undone! Continue?')){$('#saint-forms-summary-delete').submit();}" href="javascript:void(0);" class="saint-button">
           Delete</a>
     <% end -%>
+  </div>
+
+  <div class="saint-toolbar-bottom-column" style="margin-left: 100px;">
+    <div class="saint-flash_alert"><%= http.flash[:alert] %></div>
   </div>
 
   <div class="saint-toolbar-bottom-right_column">

@@ -5,7 +5,7 @@ module Ctrl
 
     opts Ctrl::Options
 
-    saint.rb_wrapper
+    saint.rb_wrapper true
 
     saint.header :name, ', by #author.name'
 

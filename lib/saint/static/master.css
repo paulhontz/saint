@@ -66,6 +66,10 @@ fieldset legend {
     font-size: 15px;
 }
 
+.saint-ui-chosen {
+    width: 100px;
+}
+
 .saint-filter_label {
     font-size: 80%;
     color: #808080;
@@ -105,7 +109,7 @@ fieldset legend {
 }
 
 .saint-flash_alert {
-    color: #8b0000;
+    color: #DDD;
 }
 
 .saint-error {

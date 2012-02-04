@@ -41,8 +41,10 @@ module Saint
     #    depends_on :country_id
     #  end
     #
-    def filter column, type = nil, opts = {}, &proc
-      return unless @node.http.configurable?
+    def filter column, *type_and_or_opts, &proc
+      return unless configurable?
+      type, opts = nil, {}
+      type_and_or_opts.each { |a| a.is_a?(Hash) ? opts.update(a) : type = a }
       (@filters ||= Hash.new)[column] = Filter.new(@node, column, type, opts, &proc)
     end
 
@@ -142,14 +144,12 @@ module Saint
     # @option type_and_or_opts [Hash, Array] options options to be used on :select type
     # @option type_and_or_opts [Boolean] multiple
     # @param [Proc] proc
-    def initialize node, column, *type_and_or_opts, &proc
+    def initialize node, column, type = nil, opts = {}, &proc
 
-      @node, @column = node, column
+      @node, @column, @type = node, column, type
       unless @local_model = @node.saint.model
         raise 'Please define model before any setup'
       end
-      @type, opts = nil, {}
-      type_and_or_opts.each { |a| a.is_a?(Hash) ? opts.update(a) : @type = a }
 
       @var = column.to_s
       @label = titleize @var.gsub(/_id$/, '')
