@@ -84,11 +84,12 @@ Use `multiple true` option to render an select field allowing to select multiple
 
 Use `size: N` to define how much lines to display when :multiple set to true.
 
-    saint.column :color, :select, multiple: true, options: ['red', 'green', 'blue']
+    saint.column :color, :select, size: 2, multiple: true, options: ['red', 'green', 'blue']
     # or
     saint.column :color, :select do
+        size 2
         multiple true
-        options ['red', 'green', 'blue']
+        options 'red', 'green', 'blue'
     end
 {:lang='ruby'}
 
@@ -105,7 +106,7 @@ Use `join_with 'some-str'` to override this.
     saint.column :color, :checkbox, options: ['red', 'green', 'blue']
     # or
     saint.column :color, :checkbox do
-        options ['red', 'green', 'blue']
+        options 'red', 'green', 'blue'
     end
 {:lang='ruby'}
 
@@ -119,7 +120,7 @@ Use `join_with 'some-str'` to override this:
     saint.column :color, :checkbox, options: ['red', 'green', 'blue'], join_with: '/'
     # or
     saint.column :color, :checkbox do
-        options ['red', 'green', 'blue']
+        options 'red', 'green', 'blue'
         join_with '/'
     end
 {:lang='ruby'}
