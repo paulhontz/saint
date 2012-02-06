@@ -262,12 +262,12 @@ module Saint
       @saint_view
     end
 
-    def remove_capability capability
-      @capabilities[capability] = nil
+    def remove_capability cap
+      @capabilities[cap] = nil
     end
 
-    def check_capability capability
-      @capabilities[capability]
+    def check_capability cap
+      @capabilities[cap]
     end
 
   end
