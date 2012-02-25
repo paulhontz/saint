@@ -52,12 +52,12 @@
                        <% saint.columns.select { |n,c| c.password? }.each_value do |column| -%>
                        <%= "if($('##{column.id}').val() != $('##{column.id}_confirm').val()) {alert('Values mismatch for #{column.label} field'); return false;}" %>
                        <% end -%>
-                       Saint.submit_valid_form('<%= form_id %>',function(status, message){
+                       Saint.submit_valid_form('<%= form_id %>',function(response){
                                <% if @row_id > 0 -%>
                                Saint.update_container('saint-crud-header', '<%= http.route(:head) %>/' + status);
-                               Saint.ui_alert(message);
+                               Saint.ui_alert(response.message);
                                <% else -%>
-                               Saint.ui_alert(message + '<br/>Reloading...', {
+                               Saint.ui_alert(response.message + '<br/>Reloading...', {
                                        time: 1000,
                                        after_close: function(){window.location = '<%= http.route :edit %>/' + status + '/<%= @pager.query_string %>';}
                                        });
@@ -79,8 +79,8 @@
             <a href="javascript:void(0);"
                class="btn btn-warning"
                onclick="if(confirm('This action can not be undone! Continue?')){
-                       Saint.valid_get('<%= http.route(:delete, @row_id) %>',function(status, message){
-                               Saint.ui_alert(message + '<br/>Reloading...', {
+                       Saint.valid_get('<%= http.route(:delete, @row_id) %>',function(response){
+                               Saint.ui_alert(response.message + '<br/>Reloading...', {
                                        time: 1000,
                                        after_close: function(){window.location = '<%= http.route @pager.query_string %>';}
                                        });

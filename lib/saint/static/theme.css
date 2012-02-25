@@ -185,6 +185,11 @@ fieldset legend {
     text-decoration: none;
 }
 
+.saint-fm-window {
+    white-space: nowrap;
+    overflow: auto;
+}
+
 .saint-fm-node-container {
     color: inherit;
     width: 100%;

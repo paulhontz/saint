@@ -280,7 +280,7 @@ module Saint
 
     private
     def configurable?
-      Presto::App.configurable?
+      @node.node.configurable?
     end
 
     def remove_capability cap

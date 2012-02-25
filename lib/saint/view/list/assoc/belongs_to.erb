@@ -10,15 +10,15 @@
         <%= "function update_relation_#{@relation.id}(val, element_id) {" %>
         Saint.valid_get(
                 '<%= @relation.local_node.http.route(:save, @local_id) + "?" + @relation.local_key.to_s %>=' + val,
-                function(status, message) {
-                    Saint.update_value('<%= @relation.id %>-element', status);
+                function(response) {
+                    Saint.update_value('<%= @relation.id %>-element', response.status);
                     Saint.update_container('saint-crud-header', '<%= http.route :head, @local_id %>');
                     Saint.update_container('<%= @relation.id %>0', '<%= @relation.local_node.http.route(:assoc__any__remote_items, @relation.id , @local_id, 0) %>');
-                    Saint.ui_alert(message);
+                    Saint.ui_alert(response.message);
                 },
-                function(m) {
+                function(response) {
                     $('#' + element_id).attr('checked', false);
-                    Saint.ui_alert(m);
+                    Saint.ui_alert(response.message);
                 }
         );
         <%= "}" %>

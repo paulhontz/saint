@@ -35,8 +35,8 @@
           <% if saint.delete && @pager.items > 0 -%>
               <a href="javascript:void(0);" class="btn btn-warning"
                  onclick="if(confirm('This will remove selected items. This action CAN NOT be undone! Continue?')){
-                         Saint.submit_valid_form('saint-forms-summary-delete', function(status, message){
-                                 Saint.ui_alert(message + '<br/>Reloading...', {
+                         Saint.submit_valid_form('saint-forms-summary-delete', function(response){
+                                 Saint.ui_alert(response.message + '<br/>Reloading...', {
                                          time: 1000,
                                          after_close: function(){window.location = '<%= http.route @pager.query_string %>';}
                                          });

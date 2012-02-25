@@ -1,5 +1,4 @@
 $(function() {
-
     $(".saint-button").button();
     $(".saint-ui-resizable").resizable();
     $(".saint-ui-resizable-horizontal").resizable({

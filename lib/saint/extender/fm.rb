@@ -34,7 +34,7 @@ module Saint
 
         define_method :index do
           @nodes = fm_nodes.values
-          view.render_layout saint_view.render_partial('fm/home')
+          saint_view.render_layout saint_view.render_partial('fm/home')
         end
       end
     end
@@ -47,8 +47,8 @@ module Saint
         include Presto::Utils
         include Saint::Utils
 
-        http.before :index, :create, :save, :rename, :delete, :resize do |*path|
-          @path = normalize_path(File.join(*path), true)
+        http.before :index, :create, :save, :rename, :move, :delete, :resize do |*path|
+          @path = normalize_path(File.join(*path.map { |s| http.unescape(s) }), true)
           @index_request_uri = http.route(:index, @path, http.get_params)
           @__meta_title__ = 'FileManager | %s | %s' % [saint.label, @path]
           @roots = roots
@@ -59,7 +59,7 @@ module Saint
           @active_dir, @active_file = nil
           scan
           @path.split('/').each { |dir| scan dir }
-          view.render_layout saint_view.render_partial('fm/index')
+          saint_view.render_layout saint_view.render_partial('fm/index')
         end
 
         define_method :create do |*path|
@@ -143,19 +143,21 @@ module Saint
         end
 
         define_method :move do
-          src, dst = http.params.values_at('src', 'dst').map { |v| normalize_path v }
+          src, dst, current = http.params.values_at('src', 'dst', 'current').map { |v| normalize_path http.unescape(v.to_s) }
           begin
             FileUtils.mv(root.path + src, root.path + dst)
-            json = {status: 1, message: 'Item moved'}
+            status, message = 1, 'Item moved'
+            current_path = root.path + current
+            redirect_to = http.route(::File.file?(current_path) || ::File.directory?(current_path) ? current : dst)
           rescue => e
-            @errors = ["Can not move #{File.basename(src)}", e.to_s]
-            json = {status: 0, message: saint_view.render_partial('error')}
+            @errors = ["Can not move %s" % File.basename(src), e.to_s]
+            status, message = 0, saint_view.render_partial('error')
           end
-          json.to_json
+          {status: status, message: message, redirect_to: redirect_to}.to_json
         end
 
         define_method :resize do |*path|
-          
+
           errors, alert_var = [], :file_alert
           final_path, final_file = '', ''
           file = normalize_path http.params['file']
@@ -222,13 +224,13 @@ module Saint
         define_method :save do |*path|
           begin
             file = root.path + normalize_path(http.params['file'], true)
-            ::File.open(file, 'w:UTF-8') { |f| f << Saint::Utils.normalize_string(http.post_params['content']) }
-            http.flash[:file_alert] = "File successfully saved at #{current_time}"
+            ::File.open(file, 'w:utf-8') { |f| f << Saint::Utils.normalize_string(http.post_params['content']) }
+            status, message = 1, 'File successfully saved'
           rescue => e
             @errors = ["File Not Saved", e.to_s]
-            http.flash[:file_alert] = saint_view.render_partial("error")
+            status, message = 0, saint_view.render_partial("error")
           end
-          http.redirect @index_request_uri
+          {status: status, message: message}.to_json
         end
 
         define_method :scan do |dir = nil|
@@ -282,7 +284,7 @@ module Saint
 
                 if node[:editable?]
                   node[:content] = begin
-                    Saint::Utils.normalize_string ::File.open(file_path, 'r:UTF-8').read
+                    Saint::Utils.normalize_string ::File.open(file_path, 'r:binary').read
                   rescue => e
                     "Unable to read file: #{e}"
                   end

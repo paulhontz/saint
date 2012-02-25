@@ -7,9 +7,9 @@
         <% end -%>
 
         $(".saint-fmui-draggable").draggable({
+            helper: 'clone',
             revert: true,
-            scroll: false,
-            zIndex: 100000
+            scroll: false
         });
         $(".saint-fmui-droppable").droppable({
             greedy: true,
@@ -20,9 +20,9 @@
                 var src = $(ui.draggable).attr('title');
                 if (src == dst) return false;
                 Saint.valid_get(
-                        '<%= http.route(:move) %>?src=' + src + '&dst=' + dst,
-                        function(s, m) {
-                            window.location.reload();
+                        '<%= http.route(:move) %>?src=' + src + '&dst=' + dst + '&current=<%= node ? node[:path] : nil %>',
+                        function(response) {
+                            window.location = response.redirect_to;
                         }
                 )
             }
@@ -87,7 +87,7 @@
         <div class="modal-footer">
           <button class="btn" onclick="window.location = '<%= http.path %>';">Close</button>
           <% if node[:content] -%>
-              <button onclick="$('#<%= node[:uniq] %>-edit-form').submit();" class="btn btn-info">
+              <button onclick="Saint.submit_valid_form('<%= node[:uniq] %>-edit-form');" class="btn btn-info">
                 Save
               </button>
           <% end -%>
@@ -101,67 +101,60 @@
 
   <% end -%>
 
-  <div style="overflow-x: auto; overflow-y: hidden;" id="saint-fm-window" class="saint-fm-window">
+  <div id="saint-fm-window" class="saint-fm-window">
 
-    <table>
-      <tr>
-        <td style="vertical-align: top;">
-          <div class="saint-fm-node-column saint-ui-resizable">
-            <% @roots.each do |root| -%>
-                <div class="<%= 'saint-fm-active_dir' if saint.label == root.saint.label %> saint-selectable"
-                     ondblclick="window.location = '<%= root.http.route %>';">
-                  <img src="<%= Saint::FileServer['vendor/icons/Oxygen/16/folder.png'] %>"/>
-                  <%= root.saint.menu.label %>
+    <div class="inline topped">
+      <div class="saint-fm-node-column">
+        <% @roots.each do |root| -%>
+            <div class="<%= 'saint-fm-active_dir' if saint.label == root.saint.label %> saint-selectable"
+                 ondblclick="window.location = '<%= root.http.route %>';">
+              <img src="<%= Saint::FileServer['vendor/icons/Oxygen/16/folder.png'] %>"/>
+              <%= root.saint.menu.label %>
+            </div>
+        <% end -%>
+      </div>
+    </div>
+
+    <% @dirs.each do |dir| -%>
+        <div class="inline topped">
+
+          <div class="saint-fmui-droppable saint-fm-node-column" title="<%== dir[:path] %>">
+
+            <% dir[:nodes][:dirs].each do |node|
+                fm_class = ''
+                fm_class = 'saint-fm-selected_dir' if node[:selected_dir?]
+                fm_class = 'saint-fm-active_dir' if node[:active_dir?] -%>
+
+                <div title="<%== node[:path] %>" id="<%= node[:uniq] %>"
+                     class="saint-fm-dir saint-selectable saint-fmui-draggable saint-fmui-droppable <%= fm_class %>"
+                     ondblclick="window.location = '<%= http.route(node[:path]) %>';">
+
+                  <img style="border: 0;" src="<%= node[:icon] %>"/>
+                  <%= node[:name] %>
+                  &nbsp;&nbsp;&nbsp;&nbsp;
+
                 </div>
             <% end -%>
-          </div>
-        </td>
-        <% @dirs.each do |dir| -%>
-            <td style="vertical-align: top;">
 
-              <div class="saint-ui-resizable saint-fmui-droppable saint-fm-node-column" title="<%== dir[:path] %>">
-                <% dir[:nodes][:dirs].each do |node|
-                    fm_class = ''
-                    fm_class = 'saint-fm-selected_dir' if node[:selected_dir?]
-                    fm_class = 'saint-fm-active_dir' if node[:active_dir?] -%>
+            <% dir[:nodes][:files].each do |node| -%>
+                <div id="<%= node[:uniq] %>"
+                     class="saint-selectable saint-fmui-draggable saint-fm-file"
+                     title="<%== node[:path] %>"
+                     ondblclick="window.location = '<%= http.path + '?file=' + node[:path] %>';">
 
-                    <div title="<%== node[:path] %>" id="<%= node[:uniq] %>"
-                         class="saint-fm-dir saint-selectable saint-fmui-draggable saint-fmui-droppable <%= fm_class %>"
-                         ondblclick="window.location = '<%= http.route(node[:path]) %>';">
-
-                      <img style="border: 0;" src="<%= node[:icon] %>"/>
-                      <%= node[:name] %>
-                      &nbsp;&nbsp;&nbsp;&nbsp;
-
-                    </div>
-                <% end -%>
-
-                <% dir[:nodes][:files].each do |node| -%>
-                    <div id="<%= node[:uniq] %>" style="cursor: default;"
-                         class="saint-selectable saint-fmui-draggable saint-fm-file"
-                         title="<%== node[:path] %>"
-                         ondblclick="window.location = '<%= http.path + '?file=' + node[:path] %>';">
-                      <table class="saint-fm-node-container">
-                        <tr>
-                          <td class="saint-fm-node-file">
-                            <img src="<%= node[:icon] %>" class="saint-fm-node-icon"/>
-                            <%= node[:name] %>
-                            <span class="saint-fm-node-size">
+                  <img src="<%= node[:icon] %>" class="saint-fm-node-icon"/>
+                  <%= node[:name] %>
+                  <span class="saint-fm-node-size">
                               - <%= node[:size] %>
-                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                             </span>
-                          </td>
-                        </tr>
-                      </table>
-                    </div>
-                <% end -%>
 
-              </div>
-            </td>
-        <% end -%>
+                </div>
+            <% end -%>
 
-      </tr>
-    </table>
-
+          </div>
+        </div>
+    <% end -%>
   </div>
+
 </div>

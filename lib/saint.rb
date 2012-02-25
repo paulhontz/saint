@@ -1,4 +1,4 @@
-require '../../presto/lib/presto' unless Object.const_defined?(:Presto)
+require 'presto' unless Object.const_defined?(:Presto)
 require 'digest'
 require 'erubis'
 require 'json'
