@@ -1,7 +1,8 @@
 module Saint
   class Pager
 
-    include ::Rack::Utils
+    include Rack::Utils
+    include Saint::Utils
 
     VAR = "saint-page"
     SIDE_PAGES = 5
@@ -50,18 +51,15 @@ module Saint
 
       return if opts[:skip_render]
 
-      engine = Presto::View::Api.new
-      engine.scope self
-      engine.engine Saint.view.engine
-      engine.root '%s/pager/' % Saint.view.root
-
-      @html = engine.render_partial(@opts[:template] || :default)
+      @html = saint_view.render_partial(::File.join('pager', (@opts[:template] || :default).to_s))
       self
     end
 
     # returns query string including page var
-    def query_string page = nil
-      link_page(page || @page_label, @query_string)
+    def query_string *page_or_params
+      page, params = @page_label, {}
+      page_or_params.each { |a| a.is_a?(Hash) ? params.update(a) : page = a }
+      link_page(page, '%s%s%s' % [@query_string, ('&' if params.size > 0), build_nested_query(params)])
     end
 
     # returns query string without page var
@@ -71,7 +69,7 @@ module Saint
 
     def link_page page, route = nil
       route ||= @route
-      route.to_s.sub("[__"+VAR+"__]", page.to_s)
+      route.to_s.sub('[__%s__]' % VAR, page.to_s)
     end
 
   end

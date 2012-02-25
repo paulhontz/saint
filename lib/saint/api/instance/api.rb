@@ -14,11 +14,23 @@ module Saint
     end
 
     def meta_title
-      @node_instance.http.flash[Saint::RV_META_TITLE]
+      @node_instance.instance_variable_get :@__meta_title__
     end
 
-    def method_missing m, *args
-      @node.saint.send(m, *args)
+    def assets
+      @node.saint.render_assets
+    end
+
+    def menu
+      @node.saint.render_menu
+    end
+
+    def dashboard
+      @node.saint.render_dashboard @node_instance
+    end
+
+    def method_missing *args
+      @node.saint.send *args
     end
 
   end

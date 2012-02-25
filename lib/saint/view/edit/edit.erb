@@ -1,257 +1,195 @@
 <% header = saint.h(@row)
-   factory_header = header == saint.h
-   belongs_to, has_n = saint.belongs_to, saint.has_n -%>
+   label = saint.label
+   label__singular = saint.label singular: true
+   belongs_to, has_n = (saint.belongs_to || {}), (saint.has_n || {})
+   form_id = 'saint-form-CRUD-%s-%s' % [saint.model.__id__, @row_id] -%>
 
-<table style="width: 100%;">
-  <tr>
-    <td style="width: 33%; text-align: left;">
-      <% if @prev_item -%>
-          <a href="<%= http.route(:edit, @prev_item.send(saint.pkey), @pager.query_string(@prev_item_page)) %>" class="saint-link">
-            &laquo; <%= factory_header ? 'prev' : saint.h(@prev_item, label: nil) %>
-          </a>
-      <% end -%>
-    </td>
-    <td style="width: 33%; vertical-align: top; text-align: center;">
+<div class="content">
 
-      <h3 style="color: #808080;"><%= header %></h3>
+  <div class="adaptive-nav">
+    <div class="adaptive-nav-content">
 
-    </td>
-    <td style="width: 33%; text-align: right;">
-      <% if @next_item
-             next_item_id = @next_item.send(saint.pkey) -%>
-          <a href="<%= http.route(:edit, next_item_id, @pager.query_string(@next_item_page)) %>" class="saint-link">
-            <%= factory_header ? 'next' : saint.h(@next_item, label: nil) %> &raquo;
-          </a>
-      <% end -%>
-    </td>
-  </tr>
-</table>
-
-<div class="saint-tabs" style="margin-bottom: 50px;">
-
-  <ul>
-
-    <li>
-      <a href="#saint-tabs-master">
-        <% if master_tab = saint.crud_tabs[:master] -%>
-            <%= master_tab.label %>
+      <p id="saint-crud-header">
+        <% if @row_id > 0 -%>
+            <%== header %>
         <% else -%>
-            Generic
-        <% end -%>
-      </a>
-    </li>
+          <div class="alert">
+            <%== 'Creating new %s' % label__singular %>
+          </div>
+      <% end -%>
+      </p>
 
-    <% saint.crud_tabs.reject { |id, t| id == :master }.each_value do |tab| -%>
-        <li>
-          <a href="#saint-tabs-opted-<%= tab.id %>">
-            <%= tab.label %>
+      <div class="inline">
+
+        <div class="btn-group" style="margin-right: 10px;">
+          <a href="<%= http.route(@pager.query_string) %>" class="btn">
+            <i class="icon-list"></i>
+            <%== label %>
           </a>
-        </li>
-    <% end -%>
+          <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <% @rows.each_value do |setup|
+                row, page = setup -%>
+                <li class="<%= 'active' if row.send(saint.pkey) == @row_id %>">
+                  <a href="<%= http.route :edit, row.send(saint.pkey), @pager.query_string(page) %>">
+                    <%== saint.h row, length: 20 %>
+                  </a>
+                </li>
+            <% end -%>
+          </ul>
+        </div>
 
-    <% if has_n && @row_id > 0
-           has_n.each_value do |rel| -%>
-            <li>
-              <a href="#saint-tabs-has_n-<%= rel.name %>">
-                <%= rel.label %>
+      </div>
+
+      <div class="btn-group inline">
+        <% if saint.update -%>
+            <a class="btn btn-info el-50px"
+               onclick="<% saint.columns.select { |n,c| c.rte? }.each_value do |column| -%>
+                       <%= "$('##{column.id}').val( $('##{column.id}').elrte('val') );" -%>
+                       <% end -%>
+                       <% saint.columns.select { |n,c| c.password? }.each_value do |column| -%>
+                       <%= "if($('##{column.id}').val() != $('##{column.id}_confirm').val()) {alert('Values mismatch for #{column.label} field'); return false;}" %>
+                       <% end -%>
+                       Saint.submit_valid_form('<%= form_id %>',function(status, message){
+                               <% if @row_id > 0 -%>
+                               Saint.update_container('saint-crud-header', '<%= http.route(:head) %>/' + status);
+                               Saint.ui_alert(message);
+                               <% else -%>
+                               Saint.ui_alert(message + '<br/>Reloading...', {
+                                       time: 1000,
+                                       after_close: function(){window.location = '<%= http.route :edit %>/' + status + '/<%= @pager.query_string %>';}
+                                       });
+                               <% end -%>
+                               });">
+              Save</a>
+        <% end -%>
+      </div>
+
+      <div class="btn-group inline">
+
+        <% if saint.create -%>
+            <a href="<%= http.route(:edit, @pager.query_string) %>" class="btn">
+              <i class="icon-plus"></i>
+            </a>
+        <% end -%>
+
+        <% if saint.delete -%>
+            <a href="javascript:void(0);"
+               class="btn btn-warning"
+               onclick="if(confirm('This action can not be undone! Continue?')){
+                       Saint.valid_get('<%= http.route(:delete, @row_id) %>',function(status, message){
+                               Saint.ui_alert(message + '<br/>Reloading...', {
+                                       time: 1000,
+                                       after_close: function(){window.location = '<%= http.route @pager.query_string %>';}
+                                       });
+                               });
+                       }">
+              <i class="icon-trash"></i>
+            </a>
+        <% end -%>
+
+      </div>
+
+      <div class="btn-group inline">
+        <div class="hide-if-lt-768">
+          <% if @prev
+                 row, page = @prev -%>
+              <a class="btn" rel="tooltip" title="<%== saint.h row %>"
+                 href="<%= http.route(:edit, row.send(saint.pkey), @pager.query_string(page)) %>">
+                <i class="icon-chevron-left"></i>
               </a>
-            </li>
-        <% end -%>
-    <% end -%>
-
-  </ul>
-
-  <div id="saint-tabs-master">
-
-    <% if master_tab -%>
-        <%= self.instance_exec @row, @pager, &master_tab.proc %>
-    <% else -%>
-
-        <div class="saint-error" id="saint-errors_container-<%= @row_id %>"></div>
-
-        <% saint.belongs_to && saint.belongs_to.each_value do |rel| %>
-            <div style="display: inline-block;">
-
-              <input type="button" class="saint-button" value="Click to select <%= rel.label %>"
-                     onclick="$('.saint-assoc-belongs_to-container').hide(); $('#saint-assoc-belongs_to-container-<%= rel.id %>').toggle();"
-              />
-            </div>
-        <% end -%>
-
-        <%= saint_view.render_partial('edit/assoc/belongs_to') %>
-
-        <form id="saint-form-edit-<%= @row_id %>" action="<%= http.route(:save, @row_id) %>">
-
-          <%= render_elements @elements, row: @row -%>
-
-          <% belongs_to && belongs_to.each_value do |rel| -%>
-              <input name="<%= rel.local_key %>"
-                     value="<%= @row.send(rel.local_key) || ::Saint::RV_NULL_VALUE %>"
-                     id="<%= rel.id %>-element"
-                     type="hidden"/>
+          <% else -%>
+              <a class="btn disabled"><i class="icon-chevron-left"></i></a>
           <% end -%>
 
-        </form>
+          <% if @next
+                 row, page = @next -%>
+              <a class="btn" rel="tooltip" title="<%== saint.h row %>"
+                 href="<%= http.route(:edit, row.send(saint.pkey), @pager.query_string(page)) %>">
+                <i class="icon-chevron-right"></i>
+              </a>
+          <% else -%>
+              <a class="btn disabled"><i class="icon-chevron-right"></i></a>
+          <% end -%>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <div class="tabbable">
+
+    <ul class="nav nav-tabs">
+
+      <li class="active">
+        <a href="#saint-tabs-master" data-toggle="tab">
+          <% if master_tab = saint.crud_tabs[:master] -%>
+              <%= master_tab.label %>
+          <% else -%>
+              Edit <%= saint.label singular: true %>
+          <% end -%>
+        </a>
+      </li>
+
+      <% belongs_to.each_value do |rel| %>
+          <li>
+            <a href="#<%= 'saint-tabs-associations-%s-%s' % [rel.type, rel.name] %>" data-toggle="tab">
+              Select <%= rel.label %>
+            </a>
+          </li>
+      <% end -%>
+
+      <% @row_id > 0 && has_n.each_value do |rel| -%>
+          <li>
+            <a href="#<%= 'saint-tabs-associations-%s-%s' % [rel.type, rel.name] %>" data-toggle="tab">
+              Related <%= rel.label %>
+            </a>
+          </li>
+      <% end -%>
+
+      <% saint.crud_tabs.reject { |id, t| id == :master }.each_value do |tab| -%>
+          <li>
+            <a href="#saint-tabs-opted-<%= tab.id %>" data-toggle="tab">
+              <%= tab.label %>
+            </a>
+          </li>
+      <% end -%>
+    </ul>
+  </div>
+
+  <div class="tab-content">
+
+    <div class="tab-pane active" id="saint-tabs-master">
+
+      <% if master_tab -%>
+          <%= self.instance_exec @row, @pager, &master_tab.proc %>
+      <% else -%>
+
+          <form id="<%= form_id %>" action="<%= http.route(:save, @row_id) %>">
+
+            <%= render_elements @elements, row: @row -%>
+
+            <% belongs_to.each_value do |rel| -%>
+                <input type="hidden" name="<%= rel.local_key %>" value="<%= @row.send(rel.local_key) || SaintConst::NULL_VALUE %>"
+                       id="<%= rel.id %>-element"/>
+            <% end -%>
+          </form>
+
+      <% end -%>
+
+    </div>
+
+    <%= saint_view.render_view('edit/assoc', row: @row, associations: belongs_to) %>
+    <%= saint_view.render_view('edit/assoc', row: @row, associations: has_n) if @row_id > 0 %>
+
+    <% saint.crud_tabs.reject { |id, t| id == :master }.each_value do |tab| -%>
+        <div class="tab-pane" id="saint-tabs-opted-<%= tab.id %>">
+          <%= self.instance_exec @row, @pager, &tab.proc %>
+        </div>
     <% end -%>
 
   </div>
 
-  <% has_n && @row_id > 0 && has_n.each_pair do |name, rel|
-      route = http.route(:assoc__any__remote_items, rel.id, @row_id, "/") -%>
-
-      <div id="saint-tabs-has_n-<%= name %>">
-
-        <% unless rel.readonly && rel.is_tree?
-               if (remote_node = rel.remote_node) && rel.remote_node_create_button
-                   singular_name = Saint::Inflector.singularize(Saint::Inflector.titleize(rel.label))
-                   form_id = "saint-forms-xhr-#{rel.id}-#{@row_id}" -%>
-                <div id="<%= rel.id %>-new"></div>
-                <div id="<%= rel.id %>-new-errors"></div>
-                <input type="button" class="saint-button" value="New <%= singular_name %>"
-                       onclick="$('#<%= "#{rel.id}-new" %>').dialog({
-                               title: 'New <%= singular_name %>',
-                               modal: true,
-                               width: '80%',
-                               height: 600,
-                               position: [100, 100],
-                               closeOnEscape: false,
-                               buttons: {
-                                       Save: function(){
-                                               Saint.submit_valid_form(
-                                                       '<%= form_id %>',
-                                                       '<%= rel.id %>-new-errors',
-                                                       function(response){
-                                                               $('#<%= "#{rel.id}-new" %>').dialog('close');
-                                                               Saint.update_container('<%= rel.id %>1', '<%= route + '1' %>');
-                                                               Saint.update_container('<%= rel.id %>0', '<%= route + '0' %>');
-                                                               }
-                                                       );
-                                               },
-                                       Close: function(){
-                                               $(this).dialog('close');
-                                               }
-                                       },
-                               open: function(event, ui){
-                                       Saint.update_container('<%= rel.id %>-new', '<%= remote_node.http.route(:xhr_edit, rel.remote_key => @row_id, form_id: form_id) %>');
-                                       }
-                               });"
-                />
-                <% unless remote_node.saint.belongs_to?(rel.local_model) || rel.through_model
-                       local_node_label = Saint::Inflector.singularize(saint.h)
-                -%>
-                    <div class="saint-text_note">
-                      You can create new <%= remote_node.saint.h %>,
-                      however, they wont be automatically attached to
-                      <strong><%= header %></strong>.
-                      <br/>
-                      To have this working, please define `belongs_to`
-                      association inside `<%= remote_node %>` class:
-                      <br/>
-
-                      <code class="saint-text-code">
-                        <%= remote_node %><br/>
-                        &nbsp;&nbsp;&nbsp;&nbsp;saint.belongs_to(:<%= local_node_label.downcase %>
-                        , <%= rel.local_model %>)<br/>
-                        end
-                      </code>
-                    </div>
-                <% end -%>
-            <% end -%>
-        <% end -%>
-
-        <fieldset>
-          <legend>
-            Attached <%= rel.label %>
-          </legend>
-          <div style="clear: both;"></div>
-          <div id="<%= rel.id %>1"></div>
-        </fieldset>
-
-        <% unless rel.readonly -%>
-            <fieldset>
-              <legend onclick="$('#<%= rel.id %>0').toggle();" style="cursor: pointer;">
-                Select Related <%= rel.label %>
-              </legend>
-              <div style="clear: both;"></div>
-              <div id="<%= rel.id %>0"></div>
-            </fieldset>
-        <% end -%>
-
-        <script type="text/javascript">
-            $(function() {
-                Saint.update_container('<%= rel.id %>1', '<%= route + "1" %>');
-                <% unless rel.readonly -%>
-                Saint.update_container('<%= rel.id %>0', '<%= route + "0" %>');
-                <% end -%>
-            });
-        </script>
-
-      </div>
-  <% end -%>
-
-
-  <% saint.crud_tabs.reject { |id, t| id == :master }.each_value do |tab| -%>
-      <div id="saint-tabs-opted-<%= tab.id %>">
-        <%= self.instance_exec @row, @pager, &tab.proc %>
-      </div>
-  <% end -%>
 
 </div>
-
-<div class="saint-toolbar-bottom">
-
-  <div class="saint-toolbar-bottom-column">
-
-    <div class="saint-toolbar-bottom-column">
-      <% if saint.create -%>
-          <a href="<%= http.route(:edit, @pager.query_string) %>" class="saint-button saint-crud_button">
-            New</a>
-      <% end -%>
-    </div>
-
-    <div class="saint-toolbar-bottom-column">
-      <% if saint.delete -%>
-          <a href="<%= http.route(:delete, @row_id, redirect_to: http.route(@pager.query_string)) %>"
-             class="saint-button saint-crud_button"
-             onclick="return confirm('This action can not be undone! Continue?');">
-            Delete</a>
-      <% end -%>
-    </div>
-
-  </div>
-
-  <div class="saint-toolbar-bottom-column" style="margin-left: 100px;">
-    <div class="saint-flash_alert"><%= http.flash[:alert] %></div>
-  </div>
-
-  <div class="saint-toolbar-bottom-right_column">
-
-    <div class="saint-toolbar-bottom-column">
-      <% if saint.update -%>
-          <a href="javascript:void(0);" class="saint-button saint-save_button"
-             onclick="<% saint.columns.select { |n,c| c.rte? }.each_value do |column| -%>
-                     <%= "$('##{column.id}').val( $('##{column.id}').elrte('val') );" -%>
-                     <% end -%>
-                     <% saint.columns.select { |n,c| c.password? }.each_value do |column| -%>
-                     <%= "if($('##{column.id}').val() != $('##{column.id}_confirm').val()) {alert('Values mismatch for #{column.label} field'); return false;}" %>
-                     <% end -%>
-                     Saint.submit_valid_form(
-                             'saint-form-edit-<%= @row_id %>',
-                             'saint-errors_container-<%= @row_id %>',
-                             '<%= http.route(:edit) %>/',
-                             '/<%= @pager.query_string %>'
-                             );"
-          >Save</a>
-      <% end -%>
-    </div>
-
-    <div class="saint-toolbar-bottom-column">
-      <a href="<%= http.route(@pager.query_string) %>" class="saint-button saint-crud_button">
-        Summary</a>
-    </div>
-  </div>
-
-
-</div>
-

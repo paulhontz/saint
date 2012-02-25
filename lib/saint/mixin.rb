@@ -19,6 +19,8 @@ module Saint
           @__saint_api_class__ ||= Saint::ClassApi.new(self)
         end
       end
+
+      Saint.nodes << node
     end
   end
 end

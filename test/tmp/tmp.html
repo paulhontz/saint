@@ -1,0 +1,104 @@
+<fieldset>
+    <legend>Filters</legend>
+
+    <form id="saint-forms-summary-search">
+        <div>
+        </div>
+        <div class="inline nowrap topped">
+            <div class="saint-filter_label">
+                Name
+            </div>
+            <input type="text" name="saint-filters[name][like]" value=""
+                   style="width: 200px;"
+                   onkeyup="       "
+                    />
+
+        </div>
+        <div class="inline nowrap topped">
+            <div class="saint-filter_label">Active</div>
+            <select name="saint-filters[active][eql]"
+                    id="saint_filters_Ctrl_Page_active_0b99f063f7056886bc1468cc11cb5f2a-input"
+                    data-placeholder=' any '
+                    class="saint-ui-chosen" style="width: 100px;">
+                <option value=""></option>
+                <option value="1">
+                    Yes
+                </option>
+                <option value="0">
+                    No
+                </option>
+            </select>
+
+        </div>
+        <div class="inline nowrap topped">
+
+            <div id="saint_filters_Ctrl_Page_country_id_Model_Country_0b99f063f7056886bc1468cc11cb5f2a">
+
+                <div class="saint-filter_label">
+                    Country
+                </div>
+
+                <select name="saint-filters[country_id][eql]"
+                        id="saint_filters_Ctrl_Page_country_id_Model_Country_0b99f063f7056886bc1468cc11cb5f2a-input"
+                        class="saint-ui-chosen"
+                        data-placeholder=""
+
+                        style="width: 200px;"
+                        onchange="
+                    $('#saint_filters_Ctrl_Page_author_id_Model_Author_0b99f063f7056886bc1468cc11cb5f2a-input').remove();
+                    var query_string = $(this).closest('form').serialize();
+                    $.get( '/page/filter/author_id/0b99f063f7056886bc1468cc11cb5f2a',
+                            query_string,
+                            function(response){ $('#saint_filters_Ctrl_Page_author_id_Model_Author_0b99f063f7056886bc1468cc11cb5f2a').html(response); }
+                            );
+            ">
+                    
+                </select>
+            </div>
+
+
+            <div id="saint_filters_Ctrl_Page_author_id_Model_Author_0b99f063f7056886bc1468cc11cb5f2a">
+
+                <div class="saint-filter_label">
+                    Author
+                </div>
+
+                <select name="saint-filters[author_id][eql][]"
+                        id="saint_filters_Ctrl_Page_author_id_Model_Author_0b99f063f7056886bc1468cc11cb5f2a-input"
+                        class="saint-ui-chosen"
+                        data-placeholder="Country required"
+                        multiple="true"
+                        style="width: 200px;"
+                        onchange="            ">
+                    <option value=""></option>
+                </select>
+            </div>
+
+        </div>
+        <div class="inline nowrap topped">
+            <div class="saint-filter_label">
+                Author Name
+            </div>
+            <input type="text" name="saint-filters[author_name][like]" value=""
+                   style="width: 200px;"
+                   onkeyup="       "
+                    />
+
+        </div>
+
+        <div class="inline">
+            <div class="saint-filter_label">&nbsp;</div>
+            <div class="btn-group">
+                <a href="javascript:void(0);" class="btn"
+                   onclick="$('#saint-forms-summary-search').submit();">
+                    <i class="icon-search"></i>
+                    Search
+                </a>
+                <a href="/page/" class="btn">
+                    Reset
+                </a>
+            </div>
+        </div>
+    </form>
+
+</fieldset>

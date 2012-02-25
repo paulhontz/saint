@@ -102,7 +102,7 @@ module Saint
     def save row
       @subset.each_pair { |k, v| row[k] = v }
       return db(__method__, row) { row.save; row } if row.valid?
-      [nil, row.errors]
+      [nil, dump_exception(row.errors)]
     end
 
     def update row, data_set
@@ -110,19 +110,17 @@ module Saint
       row.save if row.new?
       data_set.merge(@subset).each_pair { |k, v| row[k] = v }
       return db(:save, row) { row.save; row } if row.valid?
-      [nil, row.errors]
+      [nil, dump_exception(row.errors)]
     end
 
-    # delete first found item vy given filters
     def delete filters = {}
-      row, errors = db { model.first(filters.merge @subset) }
-      return [row, errors] if errors.size > 0
-      db(__method__, row) { row.destroy! }
-    end
-
-    # delete all found items by given filters
-    def destroy filters = {}
-      db(__method__) { model.all(filters.merge @subset).destroy! }
+      rows, errors = db { model.all(filters.merge @subset) }
+      return [nil, errors] if errors.size > 0
+      rows.map do |row|
+        break if @errors.size > 0
+        db(__method__, row) { row.destroy! }
+      end
+      [@result, @errors]
     end
 
     def quote_column column
@@ -161,7 +159,7 @@ module Saint
     private
 
     def db operation = nil, row = nil, &proc
-      errors = Array.new
+      @result, @errors = nil, Array.new
       scope = @node_instance || self
       begin
 
@@ -171,7 +169,7 @@ module Saint
           end
         end
 
-        result = proc.call
+        @result = proc.call
 
         unless operation == :delete
           if row
@@ -182,19 +180,26 @@ module Saint
         end
 
       rescue => e
-        if e.respond_to?(:each_pair)
+        @errors = dump_exception e
+      end
+      [@result, @errors]
+    end
+
+    def dump_exception e
+      errors = []
+      case
+        when e.respond_to?(:errors)
+          errors = e.errors
+        when e.respond_to?(:each_pair)
           e.each_pair do |k, v|
-            k = k.is_a?(Array) ? k.join(", ") : k.to_s
-            v = v.is_a?(Array) ? v.join(", ") : v.to_s
-            errors << [k, v].join(": ")
+            errors << [k, v].map { |o| o.respond_to?(:flatten) ? o.flatten : o }.join(': ')
           end
-        elsif e.respond_to?(:each)
-          e.each { |err| errors << err }
+        when e.respond_to?(:each)
+          errors = e
         else
           errors = [e.to_s]
-        end
       end
-      [result, errors]
+      errors.flatten
     end
 
   end

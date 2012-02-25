@@ -7,7 +7,7 @@ module Saint
         private
 
         def render_elements elements, opts = {}
-          layout = opts[:layout] || saint.column_layout
+          layout = opts[:layout] || (opts[:node]||self).saint.column_layout
           html = ''
           elements.each_pair do |el, el_html|
             if el.grid
@@ -22,16 +22,18 @@ module Saint
         end
 
         def render_grid grid_name, elements, opts = {}
-          if grid = saint.grids[grid_name]
+          if grid = (opts[:node]||self).saint.grids[grid_name]
             context = {grid: grid, elements: elements, opts: opts}
             saint_view.render_partial('edit/grid', context)
           end
         end
 
-        def crud_columns columns, row
+        def crud_columns columns, row = nil
           columns.select { |n, c| c.crud? }.values.inject({}) do |map, column|
-            @element, @row_val = column, column.crud_value(row, self)
-            html = column.type ? saint_view.render_partial('edit/elements/%s' % column.type) : @row_val
+            element, value = column, column.crud_value(row, self)
+            html = column.type ?
+                saint_view.render_partial('edit/elements/%s' % column.type, element: element, value: value) :
+                value
             map.update(column => html)
           end
         end

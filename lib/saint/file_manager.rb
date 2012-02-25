@@ -16,7 +16,7 @@ module Saint
       def root path, opts = {}
 
         node = @node
-        path = rootify_path(path)
+        path = rootify_url(path)
         unless File.directory?(path)
           puts 'Creating %s ...' % path
           FileUtils.mkdir_p path

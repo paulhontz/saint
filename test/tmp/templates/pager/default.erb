@@ -1,65 +1,35 @@
 <% if @pages > 1 %>
-    <table style="margin-left:auto; margin-right:auto;">
-
-      <tr>
-        <td>
-          1
-        </td>
-        <td>
-          <% marker = "<img src='#{Saint::FileServer['vendor/icons/Oxygen/24/first.png']}' />"
-             if @page_prev %>
-              <a href="<%= link_page 1 %>">
-                <%= marker %></a>
-          <% else %>
-              <%= marker %>
-          <% end %>
-        </td>
-        <td>
-          <% marker = "<img src='#{Saint::FileServer['vendor/icons/Oxygen/24/prev.png']}' />"
-             if @page_prev %>
-              <a href="<%= link_page @page_prev %>">
-                <%= marker %></a>
-          <% else %>
-              <%= marker %>
-          <% end %>
-        </td>
-        <td>
-          <% @page_min.upto(@page_max) do |page| %>
-
-              <% if page == @page_label %>
-                  <div class="saint-button ui-state-highlight">
-                    <%= page %>
-                  </div>
-              <% else %>
-                  <a href="<%= link_page page %>" class="saint-button">
-                    <%= page %>
-                  </a>
-              <% end %>
-
-          <% end %>
-        </td>
-        <td>
-          <% marker = "<img src='#{Saint::FileServer['vendor/icons/Oxygen/24/next.png']}' />"
-             if @page_next %>
-              <a href="<%= link_page @page_next %>">
-                <%= marker %></a>
-          <% else %>
-              <%= marker %>
-          <% end %>
-        </td>
-        <td>
-          <% marker = "<img src='#{Saint::FileServer['vendor/icons/Oxygen/24/last.png']}' />"
-             if @page_next %>
-              <a href="<%= link_page @pages %>">
-                <%= marker %></a>
-          <% else %>
-              <%= marker %>
-          <% end %>
-        </td>
-        <td>
-          <%= @pages %>
-        </td>
-      </tr>
-
-    </table>
+    <div class="btn-group inline">
+      <% if @page_min > 1 -%>
+          <a href="<%= link_page 1 %>" class="btn">
+            1
+          </a>
+          <a class="btn">...</a>
+      <% end -%>
+      <% @page_min.upto(@page_max) do |page| -%>
+          <% if page == @page_label -%>
+              <a class="btn active">
+                <%= page %>
+              </a>
+          <% else -%>
+              <a href="<%= link_page page %>" class="btn">
+                <%= page %>
+              </a>
+          <% end -%>
+      <% end -%>
+      <% if @page_max < @pages -%>
+          <a class="btn">...</a>
+          <a href="<%= link_page @pages %>" class="btn">
+            <%= @pages %>
+          </a>
+      <% end -%>
+    </div>
+    <div class="btn-group inline">
+      <a href="<%= link_page @page_label-1 %>" class="btn">
+        <i class="icon-chevron-left"></i>
+      </a>
+      <a href="<%= link_page @page_label+1 %>" class="btn">
+        <i class="icon-chevron-right"></i>
+      </a>
+    </div>
 <% end %>

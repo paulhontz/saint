@@ -1,44 +1,45 @@
-<table style="width: 100%;">
-  <tr class="ui-widget-header">
+<table class="table">
+  <thead>
+  <tr>
 
-    <td style="width: 5%"></td>
+    <th>#</th>
 
     <% @columns.each do |column| -%>
-        <td style="padding: 5px;">
+        <th style="padding: 5px;">
           <%= column.label %>
-        </td>
+        </th>
     <% end -%>
   </tr>
-
-  <% items_counter = @pager.items + 1
+  </thead>
+  <tbody>
+  <% items_counter = @pager.items 
      items.each do |row|
          row_id = row[saint.pkey]
          edit_url = http.route(:edit, row_id, @pager.query_string)
          children = saint.is_tree? ? row.send(saint.is_tree?[:has_n].children) : []
          self_color = color || Saint.tree_colors.sample
-         bg_color = color || (self_color if children.size > 0)
-  -%>
+         bg_color = color || (self_color if children.size > 0) -%>
       <tr style="<%= "background-color: ##{bg_color}" if bg_color %>" class="saint-selectable">
 
-        <td style="white-space: nowrap;">
+        <td class="nowrap" style="width: 5%;">
           <input type="checkbox" name="rows[]" value="<%= row_id %>" <%= 'disabled' if children.size > 0 %> />
           <% if level == 0 -%>
-              <a href="<%= edit_url %>" class="saint-button" style="font-size: 12px;">
+              <a href="<%= edit_url %>" class="btn btn-small">
                 <%= (items_counter -= 1) - @pager.page_number * saint.ipp %>
               </a>
           <% end -%>
         </td>
         <% @columns.each do |column| -%>
-            <td style="padding: 10px;">
+            <td>
               <a href="<%= edit_url %>">
-                <%= column.summary_value row, self -%>
+                <%== column.summary_value row, self -%>
               </a>
             </td>
         <% end -%>
       </tr>
 
       <% if children.size > 0
-             children_container_id = 'saint-list-%s-children_container' % row_id -%>
+             children_container_id = 'saint-list-%s-children_container-%s' % [row_id, level] -%>
           <tr>
             <td style="vertical-align: top; text-align: right; white-space: nowrap;">
               <a href="javascript:void(0);" onclick="$('#<%= children_container_id %>').toggle();">
@@ -54,5 +55,5 @@
       <% end -%>
 
   <% end %>
-
+  </tbody>
 </table>

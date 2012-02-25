@@ -90,25 +90,29 @@ module Saint
         has_n, belongs_to, proc = @associations[:is_tree]
         node = @node
 
-        assoc = Assoc.new(:has_n, has_n, @node, @node.saint.model) do
+        has_n_assoc = Assoc.new(:has_n, has_n, @node, @node.saint.model) do
           node node
           local_key :parent_id
           remote_key :parent_id
           children has_n
           self.instance_exec(&proc) if proc
         end
-        @has_n[has_n] = assoc
-        @is_tree[:has_n] = assoc
+        @has_n[has_n] = has_n_assoc
+        @is_tree[:has_n] = has_n_assoc
 
-        assoc = Assoc.new(:belongs_to, belongs_to, @node, @node.saint.model) do
+        belongs_to_assoc = Assoc.new(:belongs_to, belongs_to, @node, @node.saint.model) do
           node node
           local_key :parent_id
           remote_key :parent_id
           parent belongs_to
           self.instance_exec(&proc) if proc
         end
-        @belongs_to[belongs_to] = assoc
-        @is_tree[:belongs_to] = assoc
+        @belongs_to[belongs_to] = belongs_to_assoc
+        @is_tree[:belongs_to] = belongs_to_assoc
+
+        has_n_assoc.tree_counterpart belongs_to_assoc
+        belongs_to_assoc.tree_counterpart has_n_assoc
+
       end
       @is_tree
     end
@@ -561,6 +565,13 @@ module Saint
 
       def is_tree?
         @is_tree
+      end
+
+      # :tree associations consist of an :has_n assoc and an :belongs_to assoc.
+      # this method set/get the assoc in pair with which the current assoc forms the :tree assoc.
+      def tree_counterpart assoc = nil
+        @tree_counterpart = assoc if assoc
+        @tree_counterpart
       end
     end
 

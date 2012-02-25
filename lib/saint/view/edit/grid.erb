@@ -1,27 +1,26 @@
-<%= grid.opts[:header] %>
+<%= grid.opts[:header] -%>
 <table style="width: 100%;">
-  <tr>
-    <% tdn, tdc = grid.columns, 0
+  <tbody>
+  <tr class="grid-row">
+    <% tdn, tdc, last_el = grid.columns, 0, elements.keys.last
        elements.each_pair do |el, el_html|
-           width = el.grid_width ? (el.grid_width.is_a?(Numeric) ? '%spx' % el.grid_width : el.grid_width) : nil
-           height = el.grid_height ? (el.grid_height.is_a?(Numeric) ? '%spx' % el.grid_height : el.grid_height) : nil
-    -%>
+           width = el.grid_width -%>
 
-        <td style="vertical-align: top; <%= ('width: %s;' % width) if width %> <%= ('height: %s;' % height) if height %>">
+        <td class="grid-column topped" style="<%= ('width: %s;' % width) if width %>">
           <fieldset style="<%= el.layout_style %>" class="<%= el.layout_class %>">
             <legend><%= el.label %></legend>
-            <div style="clear: left;">
-              <%= el_html %>
-            </div>
+            <%= el_html %>
           </fieldset>
         </td>
 
         <% if (tdc += 1) == tdn
                tdc = 0 -%>
-            <%= '</tr><tr>' %>
+            </tr>
+            <tr>
         <% end -%>
 
     <% end -%>
-  </tr>
-</table>
-<%= grid.opts[:footer] %>
+    </tr>
+  </tbody>
+    </table>
+<%= grid.opts[:footer] -%>

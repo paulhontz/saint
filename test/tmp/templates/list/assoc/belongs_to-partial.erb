@@ -1,29 +1,32 @@
 <% remote_node = @relation.remote_node
    tree = remote_node && remote_node.saint.is_tree?
+   local_item_children = tree && @local_item ?
+           @local_item.send(tree[:has_n].children).inject({}) { |children, child| children.update(child[@relation.local_pkey] => child) } :
+           {}
 -%>
-<table width="100%">
-
-  <tr class="ui-widget-header <%= 'saint-header' if level == 0 %>">
+<table class="table">
+  <thead>
+  <tr>
     <% if level == 0 -%>
-        <td style="width: 5%;">
+        <th style="width: 5%;">
           #
-        </td>
-        <td style="width: 5%;"></td>
+        </th>
+        <th style="width: 5%;"></th>
     <% end -%>
-    <% if @relation.remote_node -%>
-        <td>
-          <%= @relation.remote_node.saint.h -%>
-        </td>
+    <% if remote_node -%>
+        <th>
+          <%= remote_node.saint.h -%>
+        </th>
     <% else -%>
         <% @remote_columns.each do |column| -%>
-            <td style="<%= 'width: ' + (90 / @remote_columns.size).ceil.to_s + '%;' %>">
+            <th style="<%= 'width: ' + (90 / @remote_columns.size).ceil.to_s + '%;' %>">
               <%= column.label %>
-            </td>
+            </th>
         <% end -%>
     <% end -%>
   </tr>
-
-  <% items_counter = 0
+  </thead>
+  <% items_counter = @pager.items + 1
      items.each do |remote_item|
          remote_item_id = remote_item[@relation.remote_pkey]
          children = tree ? remote_item.send(tree[:has_n].children) : []
@@ -34,20 +37,33 @@
         <% if level == 0 -%>
 
             <td style="text-align: center;">
-              <a href="<%= remote_node ? remote_node.http.route(:edit, remote_item_id) : 'javascript:void(0);' %>" target="_blank">
-                <%= (items_counter += 1) + @pager.page_number * @relation.ipp %>
-              </a>
+              <% n = (items_counter -= 1) - @pager.page_number * saint.ipp
+                 if remote_node %>
+                  <a href="<%= remote_node.http.route(:edit, remote_item_id) %>"
+                     class="btn" target="_blank">
+                    <%= n %>
+                  </a>
+              <% else %>
+                  <%= n %>
+              <% end %>
             </td>
 
-            <% unless @relation.readonly -%>
+            <% unless @relation.readonly
+                   active = @attached_keys_or_remote_item.respond_to?(@relation.remote_pkey) &&
+                           @attached_keys_or_remote_item.send(@relation.remote_pkey) == remote_item_id
+                   disabled = @relation.is_tree? &&
+                           (local_item_children[remote_item_id] || remote_item_id == @local_id) -%>
                 <td style="text-align: center;">
                   <% if level == 0 -%>
-                      <input type="radio" name="saint-belongs_to_selector-<%= @relation.id %>"
-                             <%= 'disabled' if (@relation.is_tree? && remote_item_id == @local_id) || (@attached_keys_or_remote_item.respond_to?(@relation.remote_pkey) && @attached_keys_or_remote_item.send(@relation.remote_pkey) == remote_item_id) %>
+                      <input type="radio"
+                             name="saint-belongs_to_selector-<%= @relation.id %>"
+                             id="saint-belongs_to_selector-<%= @relation.id %>"
+                             <%= 'checked' if active %>
+                             <%#= 'disabled' if disabled %>
                              <% if @local_id > 0 -%>
-                             onclick="if(confirm('Please confirm Select action')){ <%= "update_relation_#{@relation.id}(#{remote_item_id});" %> }else{$(this).attr('checked', false)}"
+                             onclick="if(confirm('Please confirm Select action')){ <%= "update_relation_%s('%s', 'saint-belongs_to_selector-%s');" % [@relation.id, remote_item_id, @relation.id] %> } else { $(this).attr('checked', false) }"
                              <% else -%>
-                             onclick="if(confirm('Please confirm Select action')){ Saint.update_value('<%= @relation.id %>-element', '<%= remote_item_id %>'); }else{$(this).attr('checked', false)}"
+                             onclick="Saint.update_value('<%= @relation.id %>-element', '<%= remote_item_id %>');"
                              <% end -%>
                              />
                   <% end -%>
@@ -58,13 +74,13 @@
         <% if remote_node -%>
             <td>
               <a href="<%= remote_node.http.route(:edit, remote_item_id) %>" target="_blank" class="saint-link">
-                <%= remote_node.saint.h remote_item -%>
+                <%== remote_node.saint.h remote_item, label: nil -%>
               </a>
             </td>
         <% else -%>
             <% @remote_columns.each do |column| -%>
                 <td>
-                  <%= column.summary_value remote_item %>
+                  <%== column.summary_value remote_item, self %>
                 </td>
             <% end -%>
         <% end -%>

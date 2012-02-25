@@ -1,6 +1,6 @@
-<textarea name="<%= @element.name %>" id="<%= @element.id %>" style="<%= @element.css_style %>" class="<%= @element.css_class %>"><%== @row_val || @element.default %></textarea>
+<textarea name="<%= element.name %>" id="<%= element.id %>" style="<%= element.css_style %>" class="<%= element.css_class %>"><%== value || element.default %></textarea>
 <script type="text/javascript">
     $(function() {
-        $('#<%= @element.id %>').elrte();
+        $('#<%= element.id %>').elrte();
     });
 </script>

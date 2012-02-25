@@ -4,7 +4,7 @@ Text Filters
 
     saint.filter :name
     saint.filter :about
-{:lang='ruby'}
+
 
 *Note:* for filter to work, it should use a earlier defined column or association.
 
@@ -12,24 +12,22 @@ Dropdown Filters
 ---
 
     saint.filter :color, :select, options: ['red', 'green', 'blue',]
-{:lang='ruby'}
+
 
 or
 
     saint.filter :color, :select do
         options 'red', 'green', 'blue'
     end
-{:lang='ruby'}
 
     saint.filter :type, :select, options: {0 => :Static, 1 => :Dynamic}
-{:lang='ruby'}
 
 or
 
     saint.filter :type, :select do
         options 0 => :Static, 1 => :Dynamic
     end
-{:lang='ruby'}
+
 
 
 
@@ -37,7 +35,7 @@ Boolean Filters
 ---
 
     saint.filter :active, :boolean
-{:lang='ruby'}
+
 
 Associative Filters
 ---
@@ -47,7 +45,7 @@ Simply filter by author:
     saint.filter :author_id do
         model Model::Author
     end
-{:lang='ruby'}
+
 
 This will create an dropdown selector containing all authors.
 
@@ -67,7 +65,7 @@ Create an dropdown selector containing only active authors.
             active: 1
         end
     end
-{:lang='ruby'}
+
 
 *Dynamic filters*
 
@@ -91,7 +89,7 @@ For this to work, a proc should be passed to `model`, as per example:
             end
         end
     end
-{:lang='ruby'}
+
 
 Make authors list to be empty until a country selected:
 
@@ -106,7 +104,7 @@ Make authors list to be empty until a country selected:
     end
     # country_id is never -1,
     # so authors filter is empty until a country with valid id selected.
-{:lang='ruby'}
+
 
 You can combine statical filters with dynamical ones:
 
@@ -119,7 +117,7 @@ You can combine statical filters with dynamical ones:
             filters
         end
     end
-{:lang='ruby'}
+
 
 This will display only active authors and filter authors by country when some country selected.
 
@@ -135,7 +133,7 @@ This will display only active authors and filter authors by country when some co
         model Model::Author
         depends_on :country_id
     end
-{:lang='ruby'}
+
 
 This will create 2 dropdown selectors:
 
@@ -159,7 +157,7 @@ Following example above, we can narrow down the countries as well:
         model Model::Author
         depends_on :country_id
     end
-{:lang='ruby'}
+
 
 This will create 3 fields:
 
@@ -185,7 +183,7 @@ This allow to filter authors by both country and email or any other N columns.
     saint.filter :author_id, Model::Author do
         depends_on :author_email, :country_id
     end
-{:lang='ruby'}
+
 
 This will create 3 fields:
 
@@ -209,7 +207,7 @@ To build such a filter, simply pass middle model as second argument for `model` 
             model Model::Menu, through: Model::MenuPage
         end
     end
-{:lang='ruby'}
+
 
 this will create a single dropdown with a list containing all menus.
 
@@ -223,7 +221,7 @@ use `model` with :local_key and :remote_key options.
     saint.filter :menu do
         model Model::Menu, through: Model::MenuPage, local_key: :p_id, remote_key: :m_id
     end
-{:lang='ruby'}
+
 
 Also, Saint expects your remote model(`Model::Menu`) to have :id as primary key.
 
@@ -232,7 +230,7 @@ If that's not the case, use :pkey option as follow:
     saint.filter :menu do
         model Model::Menu, through: Model::MenuPage, pkey: :uid
     end
-{:lang='ruby'}
+
 
 Associative Filters - Options
 ---
@@ -247,28 +245,28 @@ To have a custom order, use :order option.
     saint.filter :author_id do
         model Model::Author, order :name
     end
-{:lang='ruby'}
+
 
 *Example:* order by name and date, both ascending:
 
     saint.filter :author_id do
         model Model::Author, order [:name, :date]
     end
-{:lang='ruby'}
+
 
 *Example:* order by date, descending:
 
     saint.filter :author_id do
         model Model::Author, order {:date => :desc}
     end
-{:lang='ruby'}
+
 
 *Example:* order by name(ascending) and by date(descending):
 
     saint.filter :author_id do
         model Model::Author, order {:name => :asc, :date => :desc}
     end
-{:lang='ruby'}
+
 
 **:label**
 
@@ -282,7 +280,7 @@ By default, Saint will use first non ID column to build the label for dropdown o
     #       <option value="2">Alice</option>
     #       <option value="3">Bob</option>
     #       ...
-{:lang='ruby'}
+
 
 As seen, it ignores :id column, and uses :name.
 
@@ -291,7 +289,7 @@ To override this, use :label option as follow:
     saint.filter :author_id do
         model Model::Author, label: [:name, :email]
     end
-{:lang='ruby'}
+
 
 this will use name and email, separated by a coma.
 
@@ -313,7 +311,7 @@ More syntax sugar:
     #       <option value="2">Jack</option>
     #       ...
     # Jack has no country, so second argument ignored
-{:lang='ruby'}
+
 
 **:pkey**
 
@@ -323,7 +321,7 @@ You can use :pkey option to set a custom key:
     saint.filter :author_id do
         model Model::Author, pkey: :uid
     end
-{:lang='ruby'}
+
 
 **:local_key / :remote_key**
 
@@ -337,7 +335,7 @@ Lets consider following example:
             model Model::Menu, Model::MenuPage
         end
     end
-{:lang='ruby'}
+
 
 Saint will use :page_id to associate Model::Page model with Model::MenuPage model<br/>
 and :menu_id to associate Model::Menu model with Model::MenuPage model.
@@ -348,7 +346,7 @@ Then we simply do like follow:
     saint.filter :menu do
         model Model::Menu, Model::MenuPage, local_key: :pid, remote_key: :mid
     end
-{:lang='ruby'}
+
 
 
 **:through**
@@ -358,7 +356,7 @@ Allow to define joining model.
     saint.filter :menu do
         model Model::Menu, through: Model::MenuPage, local_key: :p_id, remote_key: :m_id
     end
-{:lang='ruby'}
+
 
 **:via**
 
@@ -386,7 +384,7 @@ By default, Saint will use pluralized model name.
     # but as this is incorrect relations name,
     # we set it by `via` method.
     
-{:lang='ruby'}
+
 
 Saint will send the relation name, defined by `via` option, to each found author,
 building a list of pages to be displayed.
@@ -397,7 +395,7 @@ The logic is as simple as:
     found_authors.each do |author|
         author.pages.each { |page| pages << page }
     end
-{:lang='ruby'}
+
 
 As you could note, ORM relation should be defined prior to use it in Saint filters.<br/>
 For DataMapper, it is as simple as:
@@ -405,7 +403,7 @@ For DataMapper, it is as simple as:
     class Model::Author
         has n, :pages
     end
-{:lang='ruby'}
+
 
 
 More on Filters
@@ -438,7 +436,7 @@ Return names containing "foo":
 
     saint.filter :name
     # SQL: SELECT FROM page WHERE name LIKE '%foo%'
-{:lang='ruby'}
+
 
 Return names starting with "foo":
 
@@ -448,7 +446,7 @@ Return names starting with "foo":
         logic :like, nil, '%'
     end
     # SQL: SELECT FROM page WHERE name LIKE 'foo%'
-{:lang='ruby'}
+
 
 Return names ending in "foo":
 
@@ -458,7 +456,7 @@ Return names ending in "foo":
         logic :like, '%'
     end
     # SQL: SELECT FROM page WHERE name LIKE '%foo'
-{:lang='ruby'}
+
 
 Return items with "foo" name:
 
@@ -468,25 +466,25 @@ Return items with "foo" name:
         logic :eql
     end
     # SQL: SELECT FROM page WHERE name = 'foo'
-{:lang='ruby'}
+
 
 Search by regex(postgres)
 
     saint.filter :name, logic: ['~', '^']
     # SQL: SELECT FROM page WHERE "name" ~ '^foo'
-{:lang='ruby'}
+
 
 Case insensitive LIKE(postgres)
 
     saint.filter :name, logic: 'ILIKE'
     # SQL: SELECT FROM page WHERE "name" ILIKE '%foo%'
-{:lang='ruby'}
+
 
 Search by regex(mysql)
 
     saint.filter :name, logic: ['REGEXP', nil, '$']
     # SQL: SELECT FROM page WHERE `name` REGEXP 'foo$'
-{:lang='ruby'}
+
 
 **label**
 
@@ -502,7 +500,7 @@ To have a custom label, use `label` inside filter block:
     saint.filter :name do
         label "Page Name"
     end
-{:lang='ruby'}
+
 
 
 **column**
@@ -531,7 +529,7 @@ To avoid column names collisions, define the real column by using :column option
             depends_on :author_name
         end
     end
-{:lang='ruby'}
+
 
 
 **options**
@@ -541,7 +539,7 @@ Used to define options for :select type.
 *Example:* set :options by option
 
     saint.filter :status, :select, options: {1 => 'Active', 0 => 'Suspended'}
-{:lang='ruby'}
+
 
 *Example:* set :options by block
 
@@ -556,7 +554,7 @@ Used to define options for :select type.
     saint.filter :color do
         options 'red', 'green', 'blue'
     end
-{:lang='ruby'}
+
 
 **multiple**
 

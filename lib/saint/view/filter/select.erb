@@ -11,7 +11,7 @@
     <% if @xhr -%>
         <script type="text/javascript" src="<%= Saint::FileServer["ui.js"] %>"></script>
     <% else -%>
-        <span id="<%= @id %>">
+        <div id="<%= @id %>">
     <% end -%>
 
     <div class="saint-filter_label">
@@ -43,7 +43,7 @@
       <% end -%>
     </select>
     <% unless @xhr -%>
-        </span>
+        </div>
     <% end -%>
 <% else -%>
     <a href="javascript:void(0);" onclick="$('#<%= @id %>-error_dialog').dialog({title: 'Filter Errors - <%= @setup.label %>', modal: true, width: '40%'});">

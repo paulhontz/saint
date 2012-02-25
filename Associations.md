@@ -1,3 +1,4 @@
+
 Saint does support *"belongs to"*, *"has N"* and *"has N through"* associations.
 
 Belongs to
@@ -11,7 +12,7 @@ passing as first argument the relation name and remote ORM model as second argum
     class Game
         saint.belongs_to :edition, Model::Edition
     end
-{:lang='ruby'}
+
 
 Has N
 ---
@@ -24,7 +25,7 @@ passing as first argument the relation name and remote ORM model as second argum
     class Game
         saint.has_n :goals, Model::Goal
     end
-{:lang='ruby'}
+
 
 Has N through
 ---
@@ -38,7 +39,7 @@ and middle model as third arg.
     class Game
         saint.has_n :scorers, Model::Player, Model::PlayersScorers
     end
-{:lang='ruby'}
+
 
 Tree
 ---
@@ -51,7 +52,7 @@ There are also tree association, when some item may belong to another item of sa
         saint.model Model::Page
         saint.is_tree
     end
-{:lang='ruby'}
+
 
 Options
 ---
@@ -72,7 +73,7 @@ The syntax is same as when defining Saint columns by `saint.column`
             column :email
         end
     end
-{:lang='ruby'}
+
 
 *Example:* display page name plus an extra(non ORM) column
 
@@ -84,7 +85,7 @@ The syntax is same as when defining Saint columns by `saint.column`
             end
         end
     end
-{:lang='ruby'}
+
 
 ###remote_node
 
@@ -108,7 +109,7 @@ i.e. there are no class including Saint::Api and using Model::Author as model.
 
         saint.belongs_to :author, Model::Author
     end
-{:lang='ruby'}
+
 
 In next example, both Pages and Authors are valid Saint nodes
 and `remote_node` used accordingly, so assoc UI will have filters and links,
@@ -127,14 +128,14 @@ but not "Create New" button.
             remote_node Authors
         end
     end
-{:lang='ruby'}
+
 
 To have "Create New" buttons, simply set second argument of `remote_node` to true:
     
     saint.belongs_to :author, Model::Author do
         remote_node Authors, true
     end
-{:lang='ruby'}
+
 
 ###filter
 
@@ -157,7 +158,7 @@ For static filters, simply pass a hash of columns with values:
             filter active: 1
         end
     end
-{:lang='ruby'}
+
 
 For dynamic filters, pass a proc.
 Proc will receive back the current local item, so you can create a hash using its data.
@@ -171,7 +172,7 @@ Proc will receive back the current local item, so you can create a hash using it
             end
         end
     end
-{:lang='ruby'}
+
 
 To combine static and dynamic filters, pass both a hash and a proc.
 If static and dynamic filters has same keys,
@@ -191,7 +192,7 @@ otherwise, items will be extracted by remote primary key, in descending order.
             order :date, :desc
         end
     end
-{:lang='ruby'}
+
 
 *Example:* order authors by name
 
@@ -200,7 +201,7 @@ otherwise, items will be extracted by remote primary key, in descending order.
             order :name
         end
     end
-{:lang='ruby'}
+
 
 ###items_per_page
 
@@ -215,7 +216,7 @@ Defaulted to 10
             ipp 100
         end
     end
-{:lang='ruby'}
+
 
 ###label
 
@@ -226,7 +227,7 @@ By default, saint will build the assoc label from provided name.
     class Author
         saint.has_n :pages, Model::Page
     end
-{:lang='ruby'}
+
 
 *Example:* set custom label
 
@@ -235,7 +236,7 @@ By default, saint will build the assoc label from provided name.
             label 'CMS Pages'
         end
     end
-{:lang='ruby'}
+
 
 ###readonly
 
@@ -246,7 +247,7 @@ By default, saint will build the assoc label from provided name.
             readonly true
         end
     end
-{:lang='ruby'}
+
 
 ###callbacks
 
@@ -265,7 +266,7 @@ being it create, update or delete.
             # some logic
         end
     end
-{:lang='ruby'}
+
 
 *Example:* execute a callback AFTER assoc created/updated/deleted
 
@@ -274,7 +275,7 @@ being it create, update or delete.
             # some logic
         end
     end
-{:lang='ruby'}
+
 
 Keys
 ---
@@ -306,7 +307,7 @@ The column on local model that should match the primary key of remote model.
       end
     end
     # now Model::City#cntr_id will be compared to Model::Country#id
-{:lang='ruby'}
+
 
 On has_n_through relations, local key is defaulted to name of local model suffixed by _id.
 
@@ -333,7 +334,7 @@ On has_n_through relations, local key is defaulted to name of local model suffix
       end
     end
     # now Model::Page#id will be compared to Model::MenuPage#pid
-{:lang='ruby'}
+
 
 ###remote_key
 
@@ -362,7 +363,7 @@ The column on remote model that should match the primary key of local model.
       end
     end
     # now Model::Author#id will be compared to Model::Page#auid
-{:lang='ruby'}
+
 
 On has_n_through relations, remote key is defaulted to name of remote model suffixed by _id.
 
@@ -389,4 +390,4 @@ On has_n_through relations, remote key is defaulted to name of remote model suff
       end
     end
     # now Model::Menu#id will be compared to Model::MenuPage#mid
-{:lang='ruby'}
+

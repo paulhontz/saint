@@ -1,11 +1,11 @@
-<h3>
-  Select Root
+<h3 class="alert">
+  Please Select Root
 </h3>
 
 <% @nodes.each do |node| -%>
-
-    <a href="<%= node.http.route %>" class="saint-button" style="min-width: 200px;">
-      <%= node.saint.menu.label %>
-    </a>
-
+    <div class="well">
+      <a href="<%= node.http.route %>" class="btn" style="min-width: 200px;">
+        <%= node.saint.menu.label %>
+      </a>
+    </div>
 <% end -%>

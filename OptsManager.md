@@ -1,7 +1,9 @@
+Opts Manager
+---
 
-Opts Manager is a simple UI for editing predefined options.
+A simple UI for editing predefined options.
 
-Saint nodes calling `saint.opts` will act as opts editor UI.
+Saint controllers that calling `saint.opts` will act as opts editor UI.
 
 Model should be defined before `saint.opts` called.
 
@@ -12,7 +14,7 @@ To define a opt, use `opt` inside block:
     saint.opts do
         opt :favourite_author
     end
-{:lang='ruby'}
+
 
 **Options accepted by** `opt`:
 
@@ -44,7 +46,7 @@ To define a opt, use `opt` inside block:
         #     <option value="green" selected>green</option>
         #     <option value="blue">blue</option>
     end
-{:lang='ruby'}
+
 
 Opts are persisted to database, however they are not loaded every time.
 
@@ -76,7 +78,7 @@ by passing it as first argument to `opts`.
             end
         end
     end
-{:lang='ruby'}
+
 
 After Opts Managers defned, any class may include `Saint::OptsApi` and read options via `opts` method.
 
@@ -104,4 +106,4 @@ The scenarios is a s simple as:
             end
         end
     end
-{:lang='ruby'}
+

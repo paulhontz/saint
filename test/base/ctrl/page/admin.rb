@@ -5,10 +5,11 @@ module Ctrl
 
     opts Ctrl::Options
 
-    saint.rb_wrapper true
+    #saint.menu.parent Ctrl::Author
 
-    saint.header :name, ', by #author.name'
+    saint.header :name, ', by #author.name', ', #children.count children'
 
+    saint.ipp 10
     saint.order :id, :desc
 
     saint.grid do
@@ -23,10 +24,10 @@ module Ctrl
     saint.column :url
 
     saint.grid do
-      column :meta_title, :text do
+      column :meta_title, :text, width: '60%' do
         summary false
       end
-      column :meta_description, :text do
+      column :meta_description, :text, height: 400 do
         summary false
       end
       column :meta_keywords, :text do
@@ -46,29 +47,32 @@ module Ctrl
       column :color2, :select do
         options ['red', 'green', 'blue']
       end
-      column :color3, :select do
-        multiple true
+      column :color3, :radio do
         options ['red', 'green', 'blue']
       end
     end
 
     saint.filter :name
-    saint.filter :content
+    #saint.filter :content
     saint.filter :active, :boolean
 
     saint.has_n :menus, Model::Menu, Model::MenuPage do
+      node Ctrl::Menu, true
       order :id, :desc
     end
 
     saint.is_tree
 
     saint.belongs_to :author, Model::Author do
-      #readonly true
+      node Ctrl::Author, true
+      column :name
+      column :email
+      column :status, :boolean
     end
 
-    saint.filter :menu do
-      model Model::Menu, through: Model::MenuPage
-    end
+    #saint.filter :menu do
+    #  model Model::Menu, through: Model::MenuPage
+    #end
 
     saint.filter :country_id do
       model Model::Country, label: '#name (#authors.count authors)'
@@ -79,8 +83,6 @@ module Ctrl
       model Model::Author, label: '#name (#pages.count pages)'
       depends_on :country_id
     end
-
-    saint.filter :name
 
     saint.filter :author_name, :string do
       model Model::Author
@@ -93,6 +95,10 @@ module Ctrl
 
     saint.after do |item, action|
       item.update callback_z_test: action
+    end
+
+    saint.crud_tab :blah do
+      'blah!'
     end
 
   end

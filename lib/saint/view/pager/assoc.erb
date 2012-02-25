@@ -1,37 +1,39 @@
 <% if @pages > 1 %>
-
-    <% if @page_min > 1 -%>
-        <div class="saint-pager-container-page">
-          <a onclick="Saint.pager('<%= link_page 1 %>','<%= @opts[:container_id] %>');" href="javascript:void(0);" class="saint-button saint-pager-page">
-            1</a>
-        </div>
-        <div class="saint-pager-container-dots">...</div>
-    <% end -%>
-
-    <% @page_min.upto(@page_max) do |page| -%>
-        <div class="saint-pager-container-page">
+    <div class="btn-group inline">
+      <% if @page_min > 1 -%>
+          <a onclick="Saint.pager('<%= link_page 1 %>','<%= @opts[:container_id] %>');"
+             href="javascript:void(0);" class="btn">
+            1
+          </a>
+          <a class="btn">...</a>
+      <% end -%>
+      <% @page_min.upto(@page_max) do |page| -%>
           <% if page == @page_label -%>
-              <span class="saint-button ui-state-highlight saint-pager-page">
+              <a class="btn active">
                 <%= page %>
-              </span>
+              </a>
           <% else -%>
-              <a onclick="Saint.pager('<%= link_page page %>','<%= @opts[:container_id] %>');" href="javascript:void(0);" class="saint-button saint-pager-page">
+              <a onclick="Saint.pager('<%= link_page page %>','<%= @opts[:container_id] %>');"
+                 href="javascript:void(0);" class="btn">
                 <%= page %></a>
           <% end -%>
-        </div>
-    <% end -%>
-
-    <% if @page_max < @pages -%>
-        <div class="saint-pager-container-dots">...</div>
-        <div class="saint-pager-container-page">
-          <a onclick="Saint.pager('<%= link_page @pages %>','<%= @opts[:container_id] %>');" href="javascript:void(0);" class="saint-button saint-pager-page">
-            <%= @pages %></a>
-        </div>
-    <% end -%>
-
-    <div class="saint-pager-container-arrow">
-      <a onclick="Saint.pager('<%= link_page @page_label - 1 %>','<%= @opts[:container_id] %>');" href="javascript:void(0);" class="saint-button saint-pager-arrow" style="font-size: 12px;">&lt;</a>
-      <a onclick="Saint.pager('<%= link_page @page_label + 1 %>','<%= @opts[:container_id] %>');" href="javascript:void(0);" class="saint-button saint-pager-arrow" style="font-size: 12px;">&gt;</a>
+      <% end -%>
+      <% if @page_max < @pages -%>
+          <a class="btn">...</a>
+          <a onclick="Saint.pager('<%= link_page @pages %>','<%= @opts[:container_id] %>');"
+             href="javascript:void(0);" class="btn">
+            <%= @pages %>
+          </a>
+      <% end -%>
     </div>
-
+    <div class="btn-group inline">
+      <a onclick="Saint.pager('<%= link_page @page_label - 1 %>','<%= @opts[:container_id] %>');"
+         href="javascript:void(0);" class="btn">
+        <i class="icon-chevron-left"></i>
+      </a>
+      <a onclick="Saint.pager('<%= link_page @page_label + 1 %>','<%= @opts[:container_id] %>');"
+         href="javascript:void(0);" class="btn">
+        <i class="icon-chevron-right"></i>
+      </a>
+    </div>
 <% end %>

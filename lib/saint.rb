@@ -1,4 +1,4 @@
-require 'presto' unless Object.const_defined?(:Presto)
+require '../../presto/lib/presto' unless Object.const_defined?(:Presto)
 require 'digest'
 require 'erubis'
 require 'json'
@@ -6,18 +6,25 @@ require 'mini_magick'
 
 module Saint
 
-  RV_NULL_VALUE = '::Saint::ReservedVariables.__null_value__'
-  RV_META_TITLE = '::Saint::ReservedVariables.__meta_title__'
-
   class << self
 
-    include Presto::InternalUtils
-    include Presto::View::InternalUtils
+    include Presto::Utils
+    include Presto::View::Utils
 
-    attr_accessor :menu, :relations
+    attr_accessor :menu, :relations, :nodes
 
     def root
-      @root ||= ::File.expand_path('saint', ::File.dirname(__FILE__)) + '/'
+      @root ||= ::File.join(::File.expand_path('../saint', __FILE__), '')
+    end
+
+    def root_url url = nil
+      @root_url ||= rootify_url(url) if url
+      @root_url || '/'
+    end
+
+    def ordered_nodes
+      nodes.select { |n| n.saint.menu.label unless n.saint.menu.disabled? }.
+          sort { |a, b| [b.saint.menu.position, a.saint.label] <=> [a.saint.menu.position, b.saint.label] }
     end
 
     def orm orm = nil
@@ -38,14 +45,18 @@ module Saint
     end
 
     def view
-      @view ||= Struct.new(:root, :engine, :ext).new('%s/view/' % root, :Erubis, :erb)
+      @view ||= Struct.new(:root, :engine, :ext).new(::File.join(root, 'view/'), :Erubis, 'erb')
     end
 
   end
-  self.relations = Hash.new
+  self.relations, self.nodes = Hash.new, Array.new
 end
 
-Saint.items_per_page 10
+module SaintConst
+  NULL_VALUE = '__Saint::ReservedConstants.null_value__'
+end
+
+Saint.items_per_page 25
 Saint.tree_colors 'FFF8DC', 'FFEBCD', 'FAF0E6', 'FAEBD7', 'F5F5F5',
                   'F5F5DC', 'FFFFF0', 'FFF5EE', 'FFFAF0'
 

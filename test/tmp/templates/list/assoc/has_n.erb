@@ -1,4 +1,7 @@
-<script type="text/javascript" src="<%= Saint::FileServer["ui.js"] %>"></script>
+<% if http.xhr? -%>
+    <script type="text/javascript" src="<%= Saint::FileServer["ui.js"] %>"></script>
+<% end -%>
+
 <% xhr = http.params['xhr']
    remote_node = @relation.remote_node
    @update_selector_url = http.route(:assoc__any__remote_items, @relation.id, @local_id, "/")
@@ -8,20 +11,22 @@
         <form action="<%= @update_selector_url %>0" id="saint_assoc_filters-<%= @relation.id %>">
           <input type="hidden" name="xhr" value="true"/>
           <%= filters %>
-          <div style="display: inline-block;">
+          <div class="inline topped">
             <div class="saint-filter_label">&nbsp;</div>
-            <input type="button" value="search" class="saint-button"
-                   onclick="Saint.submit_form('saint_assoc_filters-<%= @relation.id %>', '<%= @relation.id + @attached.to_s %>-partial');"
-            />
-            <input value="reset" type="button" class="saint-button"
-                   onclick="Saint.update_container('<%= @relation.id + @attached.to_s %>-partial', '<%= @update_selector_url %>0?xhr=true');"
-            />
+            <div class="btn-group">
+              <a href="javascript:void(0);" class="btn"
+                 onclick="Saint.submit_form('saint_assoc_filters-<%= @relation.id %>', '<%= @relation.id + @attached.to_s %>-partial');">
+                <i class="icon-search"></i>
+                Search</a>
+              <a href="javascript:void(0);" class="btn"
+                 onclick="Saint.update_container('<%= @relation.id + @attached.to_s %>-partial', '<%= @update_selector_url %>0?xhr=true');">
+                Reset</a>
+            </div>
           </div>
         </form>
     <% end -%>
-    <div id="<%= @relation.id %>-error_container"></div>
 
-    <div id="<%= @relation.id + @attached.to_s %>-partial">
+    <div id="<%= '%s%s-partial' % [@relation.id, @attached.to_s] %>">
       <%= @pager.html %>
       <%= saint_view.render_partial('list/assoc/has_n-partial', items: items, level: 0, color: nil) %>
     </div>

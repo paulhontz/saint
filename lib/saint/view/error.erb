@@ -1,15 +1,5 @@
-<ul id="saint-errors_dialog_container">
-  <% @errors.each do |e| %>
-      <li>
-        <% if e.is_a?(Array) -%>
-            <ul>
-              <% e.each do |error| -%>
-                  <li><%= error %></li>
-              <% end -%>
-            </ul>
-        <% else -%>
-            <%= e.to_s %>
-        <% end -%>
-      </li>
-  <% end %>
-</ul>
+<% [@errors].compact.flatten.each do |e| %>
+    <div class="saint-errors_dialog_container">
+      <%= e.to_s.gsub(/#<([^>]+)>/, '\1').sub(/\,?(\s+)?uri\:\s+\S+/i, '') %>
+    </div>
+<% end %>

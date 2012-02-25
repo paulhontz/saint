@@ -1,11 +1,15 @@
-<h3>
-  Select Root
-</h3>
+<div class="container">
 
-<% @nodes.each do |node| -%>
+  <h3>
+    Select Root
+  </h3>
 
-    <a href="<%= node.http.route %>" class="saint-button" style="min-width: 200px;">
-      <%= node.saint.menu.label %>
-    </a>
+  <% @nodes.each do |node| -%>
 
-<% end -%>
+      <a href="<%= node.http.route %>" class="saint-button" style="min-width: 200px;">
+        <%= node.saint.menu.label %>
+      </a>
+
+  <% end -%>
+
+</div>

@@ -1,4 +1,5 @@
-#Quick Start
+Quick Start
+---
 
 Saint allow developers to easily manage existing ORM models(currently only DataMapper supported).
 
@@ -17,7 +18,7 @@ Before any setup, let Saint know the model to be managed.
         property :id, Serial
         property :name, String
     end
-{:lang='ruby'}
+
 
 **Setup Controller:**
 
@@ -27,43 +28,44 @@ Before any setup, let Saint know the model to be managed.
         saint.model PageModel
         saint.column :name
     end
-{:lang='ruby'}
+
 
 **Deploy:**
 
     app = Presto::App.new
     app.mount Page
     app.run
-{:lang='ruby'}
+
 
 [Tutorial](http://demo.saintrb.org/)
 
-#Columns
+Columns
+---
 
-Saint allow to build HTML columns of various types and options using pure Ruby code.
+Saint allow to build HTML columns of various types and options using pure Ruby.
 
-**Text**
+###Text
 
     saint.column :name
-{:lang='ruby'}
+
 
 <div class="screenshot-container">
 <img src="http://saintrb.org/screenshots/columns/page-name.png" class="screenshot" />
 </div>
 
-**Textarea**
+###Textarea
 
     saint.column :about, :text
-{:lang='ruby'}
+
 
 <div class="screenshot-container">
 <img src="http://saintrb.org/screenshots/columns/page-meta_title.png" class="screenshot" />
 </div>
 
-**Select**
+###Select
 
     saint.column :status, :select, options: {1 => :Active, 0 => :Suspended}
-{:lang='ruby'}
+
 
 <div class="screenshot-container">
 <img src="http://saintrb.org/screenshots/columns/select.png" class="screenshot" />
@@ -72,47 +74,52 @@ Saint allow to build HTML columns of various types and options using pure Ruby c
 [More on Columns](http://saintrb.org/Columns.md)
 
 
-#Associations
+Associations
+---
 
-Saint does support *"belongs to"*, *"has N"* and *"has N through"* associations.
+The types of associations currently supported by Saint are:
+
+*   belongs to
+*   has N
+*   has N through
 
 *Example:* Game belongs to Edition
 
     class Game
         saint.belongs_to :edition, Model::Edition
     end
-{:lang='ruby'}
 
 *Example:*  Game has N Goals
 
     class Game
         saint.has_n :goals, Model::Goal
     end
-{:lang='ruby'}
+
 
 *Example:* Game has N Scorers(Players), through PlayersScorers model
 
     class Game
         saint.has_n :scorers, Model::Player, Model::PlayersScorers
     end
-{:lang='ruby'}
+
 
 [More on Associations](http://saintrb.org/Associations.md)
 
-#Filters
+Filters
+---
 
 **Text Filters**
 
     saint.filter :name
     saint.filter :about
-{:lang='ruby'}
+
 
 *Note:* for filter to work, it should use a earlier defined column or association.
 
 **Dropdown Filters**
 
     saint.filter :active, :select, options: {1 => 'Yes', 0 => 'No'}
-{:lang='ruby'}
+
 
 **Associative Filters**
 
@@ -121,11 +128,12 @@ Filter Page by Author:
     saint.filter :author_id do
         model Model::Author
     end
-{:lang='ruby'}
+
 
 [More on Filters](http://saintrb.org/Filters.md)
 
-#File Manager
+File Manager
+---
 
 Saint comes with a built-in file manager.
 
@@ -141,12 +149,13 @@ Simply let Saint know the full path to folder and it will turn a class into a fu
         end
 
     end
-{:lang='ruby'}
+
 
 [More on File Manager](http://saintrb.org/FileManager.md)
 
 
-#Opts Manager
+Opts Manager
+---
 
 Saint also has an built-in Opts Manager, which is a simple UI for editing predefined options.
 
@@ -178,6 +187,6 @@ Options defined inside Opts Manager can be accessed by `opts` Api.
             opts.items_per_page # available in class instances as well
         end
     end
-{:lang='ruby'}
+
 
 [More on Opts Manager](http://saintrb.org/OptsManager.md)

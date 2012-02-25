@@ -1,17 +1,10 @@
-<% values = (@row_val||'').split(@element.join_with)
-   (options = @element.options) && options.each_pair do |value, label|
-    label_id = ["saint-input-checkbox", @element.name.to_s, @row_id.to_s, value.to_s.gsub(/[^\w|\d]/im, "_")].join('-')
--%>
-    <div style="display: inline-block;">
-      <input type="checkbox"
-             name="<%= @element.name %>[]" id="<%= label_id %>" value="<%= value %>"
-             style="<%= @element.css_style %>" class="<%= @element.css_class %>"
-             <%= 'checked' if values.include?(value) -%>
-      />
-    </div>
-    <div style="display: inline-block;">
-      <label for="<%= label_id %>" style="margin-left: 10px; cursor: pointer;">
-        <%= label %>
-      </label>
-    </div>
+<% values = (value||'').split(element.join_with)
+   (options = element.options) && options.each_pair do |val, label|
+       active = values.include?(val) -%>
+    <label class="checkbox inline">
+      <input type="checkbox" name="<%= element.name %>[]" value="<%= val %>"
+             style="<%= element.css_style %>" class="<%= element.css_class %>"
+             <%= 'checked' if active -%> />
+      <%= label %>
+    </label>
 <% end -%>

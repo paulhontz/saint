@@ -1,6 +1,8 @@
 module Ctrl
   class Fm
 
+    #saint.menu.parent Ctrl::Author
+
     saint.menu do
       label 'File Manager'
       position -1000

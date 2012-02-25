@@ -1,17 +1,11 @@
-<% (options = @element.options) && options.each_pair do |value, label|
-    label_id = ["saint-input-radio", @element.name.to_s, @row_id.to_s, value.to_s.gsub(/[^\w|\d]/im, "_")].join('-')
--%>
-    <div>
-      <div style="display: inline-block;">
-        <input type="radio" name="<%= @element.name %>" id="<%= label_id %>" value="<%= value %>"
-               style="<%= @element.css_style %>" class="<%= @element.css_class %>"
-               <%= 'checked' if (@row_val == value) || (@element.required? && @row_val.nil? && options.keys.first == value) || ((@row_id == 0 || @row_id.nil?) && @element.default == value) -%>
-        />
-      </div>
-      <div style="display: inline-block;">
-        <label for="<%= label_id %>" style="margin-left: 10px; cursor: pointer;">
-          <%= label %>
-        </label>
-      </div>
-    </div>
+<% (options = element.options) && options.each_pair do |val, label|
+    active = (value == val) ||
+            (element.required? && value.nil? && options.keys.first == val) ||
+            (value.nil? && element.default == val) -%>
+    <label class="radio inline">
+      <input type="radio" name="<%= element.name %>" value="<%= val %>"
+             style="<%= element.css_style %>" class="<%= element.css_class %>"
+             <%= 'checked' if active -%> />
+      <%= label %>
+    </label>
 <% end %>

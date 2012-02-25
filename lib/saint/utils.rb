@@ -3,6 +3,21 @@ module Saint
 
     BOOLEAN_OPTIONS = {1 => 'Yes', 0 => 'No'}
 
+    def saint_view scope = self
+      unless @saint_view
+        @saint_view = Presto::ViewApi.new
+        @saint_view.engine Saint.view.engine
+        @saint_view.ext Saint.view.ext
+        @saint_view.root Saint.view.root
+      end
+      @saint_view.scope scope
+      @saint_view
+    end
+
+    def current_time
+      Time.now.strftime("%b %d, %I:%M:%S %p")
+    end
+
     # remove any non-printable chars
     def normalize_string str
       str.to_s.encode(

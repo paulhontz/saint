@@ -14,7 +14,7 @@ module Saint
       @pkey = :id
       @header_args, @header_opts = [], {}
 
-      @create, @update, @delete = true, true, true
+      @create, @update, @delete, @dashboard = true, true, true, true
 
       @associations = {
           belongs_to: Hash.new,
@@ -25,6 +25,8 @@ module Saint
 
       @before, @after = Hash.new, Hash.new
       @capabilities = {create: true, update: true, delete: true}
+
+      @view_scope = self
     end
 
     # *  setting the Api model
@@ -41,7 +43,6 @@ module Saint
         @pkey = pkey if pkey
         # adding CRUD methods to node
         Saint::CrudExtender.new @node
-        Saint::ORMUtils.finalize
       end
       @model
     end
@@ -155,19 +156,22 @@ module Saint
     #
     #    end
     #
-    # @param [Object] row `nil`
-    # @param [Hash] opts
-    # @option opts [String] :label
+    # @param [Hash] *row_or_opts
+    # @option row_or_opts [String] :label
     #   override the label set by #header
-    # @option opts [String] :join
+    # @option row_or_opts [String] :join
     #   the string to join label and header.
-    #   if not provided, " | " will be used.
+    #   if not provided, a coma will be used.
     #   if it is set to nil or false, an array of label and header snippets will be returned.
-    def h row = nil, opts = {}
-      label = @header_opts[:label] || pluralize(titleize(demodulize(@node)))
-      label = opts[:label] if opts.has_key?(:label)
-      join = opts.has_key?(:join) ? opts[:join] : ' | '
+    def h *row_or_opts
+
+      row, opts = nil, {}
+      row_or_opts.each { |a| a.is_a?(Hash) ? opts.update(a) : row = a }
+
+      label = opts.fetch :label, @header_opts[:label]
+      join = opts.fetch :join, ', '
       header = Array.new
+
       if @header_proc
         header << @header_proc.call(row).to_s
       else
@@ -181,8 +185,15 @@ module Saint
           (s = column_format(a, row)) && s.strip.size > 0 && header << s
         end
       end
-      return [label, header.join].join(label && label.size > 0 && header.size > 0 ? join : '') if join
-      [label, *header]
+
+      if join
+        h = [label, header.join].compact.join(join)
+        if length = opts[:length]
+          h = '%s...' % h[0, length] if h.size > length
+        end
+        return h
+      end
+      [label, *header].compact
     end
 
     # prohibit :create operation
@@ -243,23 +254,33 @@ module Saint
       @after
     end
 
-    private
-
-    def configurable?
-      # !@node.node.mounted? could also be used,
-      # but negations negate positiveness :)
-      @node.node.mounted? ? false : true
+    def render_assets
+      @rendered_assets ||= saint_view.render_partial 'assets'
     end
 
-    # initialize the view Api to be used by current configuration Api
-    def saint_view
-      unless @saint_view
-        @saint_view = Presto::View::Api.new
-        @saint_view.engine Saint.view.engine
-        @saint_view.root Saint.view.root
-        @saint_view.scope self
-      end
-      @saint_view
+    def render_menu
+      @rendered_menu ||= Menu.new.render
+    end
+
+    def render_dashboard scope
+      @rendered_dashboard ||= saint_view(scope).render_layout(saint_view(scope).render_partial('dashboard'))
+    end
+
+    # should the controller be displayed on dashboard?
+    def dashboard *args
+      @dashboard = args.first if args.size > 0
+      @dashboard
+    end
+
+    # get the label earlier set by `header`
+    def label opts = {}
+      l = (@label ||= ((hl = @header_opts[:label]) && hl.to_s) || pluralize(titleize(demodulize(@node))))
+      opts[:singular] ? singularize(l) : l
+    end
+
+    private
+    def configurable?
+      Presto::App.configurable?
     end
 
     def remove_capability cap

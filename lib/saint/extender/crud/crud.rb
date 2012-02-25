@@ -3,7 +3,7 @@ module Saint
 
     def initialize node
       @node = node
-      @node.send :include, Saint::ExtenderUtils
+      @node.send :include, Saint::Utils
       helpers; assoc; filter; crud
       Saint::ORMUtils.finalize
     end
@@ -29,10 +29,10 @@ module Saint
 
             @rows, @errors = saint.orm.filter(orm_filters.merge(limits).merge(order))
             @columns = summary_columns(saint.columns) if @errors.size == 0
-            http.flash[Saint::RV_META_TITLE] = saint.h
+            @__meta_title__ = saint.label
           end
           partial = @errors.size > 0 ? 'error' : 'list/list'
-          view.render_layout saint_view.render_partial(partial)
+          saint_view.render_layout saint_view.render_partial(partial)
         end
 
         def edit row_id = 0
@@ -47,91 +47,72 @@ module Saint
             http.halt error, status: 500
           end
 
-          http.flash[Saint::RV_META_TITLE] = saint.h(@row)
+          @__meta_title__ = saint.h(@row)
 
           orm_filters, http_filters = saint.filters(:orm, :http)
           @pager = Saint::Pager.new(http.params[Saint::Pager::VAR].to_i)
           @pager.paginate(query: http_filters.join('&'), skip_render: true)
 
-          if (@row_id > 0) && (rows_total = saint.orm.count(orm_filters)[0].to_i) > 0
+          @rows = Hash.new
+          if (rows_total = saint.orm.count(orm_filters)[0].to_i) > 0
             l, o = saint.ipp + 2, (@pager.page_number * saint.ipp) - 1
             limits = rows_total > saint.ipp ? saint.orm.limit(l, o < 0 ? 0 : o) : {}
             rows, errors = saint.orm.filter(orm_filters.merge(saint.orm.order(saint.order).merge(limits)))
             if rows.is_a?(Array) && rows.size > 0 && errors.size == 0
 
-              index = 0
+              index, n = 0, rows_total - o
               @rows = rows.inject({}) do |map, r|
-                index = map.size if r.id == @row_id
-                map.update map.size => r
+                id = r.send(saint.pkey)
+                index = map.size if @row_id == id
+                page = @pager.page_label
+                page -= 1 if map.size == 0
+                page += 1 if map.size == rows.size - 1 unless (n -= 1) == 0
+                map.update map.size => [r, page, n]
               end
 
-              @prev_item = @rows[index - 1]
-              @prev_item_page = @pager.page_label - 1 if index == 1
-
-              @next_item = @rows[index + 1]
-              @next_item_page = @pager.page_label + 1 if index + 1 == @rows.keys.last &&
-                  @pager.pages > @pager.page_label
+              @prev = @rows[index-1]
+              @next = @rows[index+1]
 
             end
           end
 
           @elements = crud_columns(saint.columns, @row)
-          view.render_layout saint_view.render_partial('edit/edit')
-        end
-
-        def xhr_edit row_id = 0
-
-          @row, @errors = (row_id = row_id.to_i) > 0 ?
-              saint.orm.first(saint.pkey => row_id) :
-              saint.orm.new
-
-          if @errors.size > 0
-            return saint_view.render_partial('error')
-          end
-
-          @elements = Hash.new
-          saint.columns.select { |n, c| c.crud? }.each_value do |column|
-            @row_val = column.crud_value(@row, self)
-            @element = column
-            @elements[column] = column.type ?
-                saint_view.render_partial('edit/elements/%s' % @element.type) :
-                @row_val
-          end
-          saint_view.render_partial('edit/xhr')
+          saint_view.render_layout saint_view.render_partial('edit/edit')
         end
 
         def save row_id = 0
 
+          is_new, assoc_updated = false, nil
           if saint.update
-            ds = Hash.new
+            ds, belongs_to = Hash.new, Hash.new
             saint.columns.select { |n, c| c.save? }.each_value do |column|
 
               value = http.params[column.name.to_s]
 
               # nil columns are not saved/updated
-              # to set column's value to nil, use {Saint::RV_NULL_VALUE} as column value
-
-              # exception making only checkbox columns, which can be nil
+              # to set column's value to nil, use SaintConst::NULL_VALUE as column value
               unless value
+                # exception making only checkbox columns, which can be nil
                 next unless column.checkbox?
               end
 
               # joining values for checkbox and select-multiple columns
               value = value.join(column.join_with) if value.is_a?(Array)
 
-              value = nil if value == ::Saint::RV_NULL_VALUE
+              value = nil if value == SaintConst::NULL_VALUE
 
               if value && rb_wrapper = saint.rbw
                 value = rb_wrapper.unwrap(value)
               end
               ds[column.name] = value
             end
-            if belongs_to = saint.belongs_to
-              belongs_to.each_value do |a|
-                next unless value = http.params[a.local_key.to_s]
-                value = nil if value == ::Saint::RV_NULL_VALUE
-                ds[a.local_key] = value
-              end
+
+            (saint.belongs_to||{}).each_value do |a|
+              local_key = a.local_key.to_s
+              next unless value = http.params[local_key]
+              assoc_updated = a if http.params.size == 1 && http.params.keys.first == local_key
+              value = value == SaintConst::NULL_VALUE ? nil : value.to_i
+              belongs_to[a] = value
             end
 
             @errors = []
@@ -143,11 +124,41 @@ module Saint
               if (row_id = row_id.to_i) > 0
                 @row, @errors = saint.orm.first(saint.pkey => row_id)
                 ds.each_pair { |c, v| @row[c] = v }
+
+                # avoiding infinite loops
+                is_loop = false
+                if @row && @errors.size == 0
+                  # just for convenience
+                  current_item_id  = row_id
+                  belongs_to.select { |a, v| a.is_tree? }.each_pair do |assoc, opted_parent_id|
+
+                    # fail if opted parent and current item are the same
+                    is_loop = true if current_item_id == opted_parent_id
+
+                    # fail if opted parent is a direct or nested child of current item
+                    get_nested_children = lambda do |parent_id|
+                      (assoc.local_orm.filter(assoc.local_key => parent_id)[0]||[]).each do |child|
+                        child_id = child.send(assoc.local_pkey)
+                        is_loop = true if child_id == opted_parent_id
+                        get_nested_children.call(child_id) unless is_loop
+                      end
+                    end
+                    get_nested_children.call(current_item_id) unless is_loop
+
+                  end
+                end
+                if is_loop
+                  @errors = 'Infinite loop detected'
+                else
+                  belongs_to.each_pair { |a, val| @row[a.local_key] = val }
+                end
               else
+                is_new = true
+                belongs_to.each_pair { |a, val| ds[a.local_key] = val }
                 @row, @errors = saint.orm.new(ds)
               end
 
-              if @errors.size == 0
+              if @row && @errors.size == 0
                 @row, @errors = saint.orm.save(@row)
               end
             end
@@ -156,40 +167,48 @@ module Saint
           end
 
           if @errors.size > 0
-            json = {error: saint_view.render_partial("error"), status: 0}
+            status = 0
+            message = saint_view.render_partial('error')
           else
-            alert = "Item successfully saved at " + current_time
-            http.flash[:alert] = alert
-            json = {alert: alert, status: @row[saint.pkey]}
+            status = @row[saint.pkey]
+            label = assoc_updated ? '"%s :%s" association' % [assoc_updated.type, assoc_updated.name] : saint.label(singular: true)
+            message = (is_new ? 'New %s successfully created' : '%s successfully updated') % label
           end
-          json.to_json
+          {status: status, message: message}.to_json
+        end
+
+        def head row_id
+          if row = saint.orm.first(saint.pkey => row_id.to_i)[0]
+            saint.h row
+          end
         end
 
         def delete row_id = nil
 
+          status = 0
           if saint.delete
 
-            rows = [row_id ? row_id.to_i : nil]
-            (http.post_params['rows']||Array.new).each do |id|
-              rows << id.to_i if id.to_i > 0
-            end
-            rows = rows.compact.uniq
-            rows.delete(0)
+            rows = [row_id.to_i].concat(http.post_params['rows']||[]).
+                map { |id| id.to_i }.
+                select { |id| id > 0 }.uniq
 
-            alert = 'No items selected'
+            message = 'No items selected'
             if rows.size > 0
 
               @errors = saint.orm.delete(saint.pkey => rows)[1]
 
-              alert = "%s deleted!" % saint.h
-              alert = saint_view.render_partial('error') if @errors.size > 0
+              if @errors.size > 0
+                message = saint_view.render_partial('error')
+              else
+                status = 1
+                message = '%s %s successfully deleted!' % [rows.size, saint.label(singular: rows.size == 1)]
+              end
 
             end
           else
-            alert = 'Delete capability disabled by admin'
+            message = 'Delete capability disabled by admin'
           end
-          http.flash[:alert] = alert
-          http.redirect(http.params['redirect_to'] || http.route)
+          {status: status, message: message}.to_json
         end
 
       end

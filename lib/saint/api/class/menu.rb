@@ -15,35 +15,38 @@ module Saint
                 :label,
                 :parent,
                 :children,
-                :scope,
                 :position,
                 :prefix, :suffix
 
-    def initialize node, &proc
-      @node = node
+    def initialize node = nil, &proc
+
+      if @node = node
+        @_url = @node.http.route
+        @_label = @node.saint.label
+      end
+
       @scope = :default
       @position = 0
       @children = Array.new
       self.instance_exec(&proc) if proc
     end
 
-    # label to be displayed in GUI
+    def url url = nil
+      @url = url if url
+      @url || @_url
+    end
+
+    # label to be displayed in UI
     def label label = nil
       @label = label if label
-      @label || @node.saint.h
+      @label || @_label
     end
 
     # node under which the current menu item will reside
     def parent parent = nil
       return @parent unless parent
-      @parent = parent
-      @parent.saint.menu.children << @node
-    end
-
-    # allow to have multiple menus, by putting various nodes in various menu scopes.
-    def scope scope = nil
-      @scope = scope if scope
-      @scope
+      @parent = parent.respond_to?(:saint) ? parent.saint.menu : parent
+      @parent.children << self
     end
 
     # positioning menu items, higher first

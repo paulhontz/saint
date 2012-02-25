@@ -3,7 +3,8 @@ module Saint
 
     def initialize node
 
-      fm_nodes = Array.new
+      fm_nodes = Hash.new
+      node.saint.dashboard false
       node.saint.fm.roots.each_value do |root|
 
         fm_node = node.const_set root.name, Class.new
@@ -14,39 +15,43 @@ module Saint
 
           http.map node.http.route(root.name)
           saint.header root.label
+          saint.dashboard false
           saint.menu do
             parent node
             label root.label
           end
 
         end
-        extend fm_node, root
-        fm_nodes << fm_node
+        fm_nodes[root] = fm_node
+      end
+      fm_nodes.each_pair do |root, fm_node|
+        extend fm_node, root, fm_nodes.values
       end
 
       node.class_exec do
 
-        include Saint::ExtenderUtils
+        include Saint::Utils
 
         define_method :index do
-          @nodes = fm_nodes
+          @nodes = fm_nodes.values
           view.render_layout saint_view.render_partial('fm/home')
         end
       end
     end
 
-    def extend node, root
+    def extend node, root, roots
 
       helper = Saint::FileManager::Helper.new
       node.class_exec do
 
         include Presto::Utils
-        include Saint::ExtenderUtils
+        include Saint::Utils
 
         http.before :index, :create, :save, :rename, :delete, :resize do |*path|
           @path = normalize_path(File.join(*path), true)
           @index_request_uri = http.route(:index, @path, http.get_params)
-          http.flash[Saint::RV_META_TITLE] = 'FileManager | %s | %s' % [saint.h, @path]
+          @__meta_title__ = 'FileManager | %s | %s' % [saint.label, @path]
+          @roots = roots
         end
 
         define_method :index do |*path|
@@ -141,10 +146,10 @@ module Saint
           src, dst = http.params.values_at('src', 'dst').map { |v| normalize_path v }
           begin
             FileUtils.mv(root.path + src, root.path + dst)
-            json = {status: 1}
+            json = {status: 1, message: 'Item moved'}
           rescue => e
             @errors = ["Can not move #{File.basename(src)}", e.to_s]
-            json = {status: 0, error: saint_view.render_partial("error")}
+            json = {status: 0, message: saint_view.render_partial('error')}
           end
           json.to_json
         end

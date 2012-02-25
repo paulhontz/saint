@@ -1,85 +1,106 @@
+<%= @alert -%>
 
-<% if filters = saint.filters(:html) -%>
-    <fieldset>
-      <legend>Filters</legend>
-      <div style="clear: both;">
-        <form action="">
+<div class="content">
+
+  <% if filters = saint.filters(:html) -%>
+
+      <fieldset>
+        <legend>Filters</legend>
+
+        <form id="saint-forms-summary-search">
           <%= filters %>
-          <div style="display: inline-block;">
+          <div class="inline topped">
             <div class="saint-filter_label">&nbsp;</div>
-            <input type="submit" value="Search" class="saint-button"/>
-            <a href="<%= http.route %>" class="saint-button">
-              Reset
-            </a>
+            <div class="btn-group">
+              <a href="javascript:void(0);" class="btn" onclick="$('#saint-forms-summary-search').submit();">
+                <i class="icon-search"></i>
+                Search
+              </a>
+              <a href="<%= http.route %>" class="btn">
+                Reset
+              </a>
+            </div>
           </div>
         </form>
-      </div>
-    </fieldset>
-<% end -%>
 
-<div class="saint-tabs">
-
-  <ul>
-    <li>
-      <a href="#saint-tabs-master">
-        <% if master_tab = saint.summary_tabs[:master] -%>
-            <%= master_tab.label %>
-        <% else -%>
-            <%= saint.h %>
-        <% end -%>
-      </a>
-    </li>
-
-    <% saint.summary_tabs.reject { |k, v| k == :master }.each_value do |tab| -%>
-        <li>
-          <a href="#saint-tabs-opted-<%= tab.id %>">
-            <%= tab.label %>
-          </a>
-        </li>
-    <% end -%>
-
-  </ul>
-
-  <div id="saint-tabs-master" style="margin-bottom: 50px;">
-
-    <% if master_tab -%>
-        <%= self.instance_exec @rows, @pager, &master_tab.proc %>
-    <% else -%>
-        <form id="saint-forms-summary-delete" action="<%= http.route(:delete) %>" method="post">
-          <input type="hidden" name="redirect_to" value="<%= http.route(@pager.query_string) %>"/>
-          <%= saint_view.render_partial('list/list-partial', items: @rows, level: 0, color: nil) %>
-        </form>
-    <% end -%>
-  </div>
-
-  <% saint.summary_tabs.reject { |k, v| k == :master }.each_value do |tab| -%>
-      <div id="saint-tabs-opted-<%= tab.id %>">
-        <%= self.instance_exec @rows, @pager, &tab.proc %>
-      </div>
+      </fieldset>
   <% end -%>
 
-</div>
+  <div class="adaptive-nav">
+    <div class="adaptive-nav-content">
 
-<div class="saint-toolbar-bottom">
+      <div class="inline">
+        <div class="btn-group">
 
-  <div class="saint-toolbar-bottom-column">
-    <% if saint.create -%>
-        <a href="<%= http.route(:edit, @pager.query_string) %>" class="saint-button">
-          New</a>
-    <% end -%>
+          <% if saint.delete && @pager.items > 0 -%>
+              <a href="javascript:void(0);" class="btn btn-warning"
+                 onclick="if(confirm('This will remove selected items. This action CAN NOT be undone! Continue?')){
+                         Saint.submit_valid_form('saint-forms-summary-delete', function(status, message){
+                                 Saint.ui_alert(message + '<br/>Reloading...', {
+                                         time: 1000,
+                                         after_close: function(){window.location = '<%= http.route @pager.query_string %>';}
+                                         });
+                                 })}">
+                <i class="icon-trash"></i>
+              </a>
+          <% end -%>
 
-    <% if saint.delete && @pager.items > 0 -%>
-        <a onclick="if(confirm('This will remove selected items. This action CAN NOT be undone! Continue?')){$('#saint-forms-summary-delete').submit();}" href="javascript:void(0);" class="saint-button">
-          Delete</a>
-    <% end -%>
+          <% if saint.create -%>
+              <a href="<%= http.route(:edit, @pager.query_string) %>" class="btn">
+                <i class="icon-plus"></i></a>
+          <% end -%>
+        </div>
+      </div>
+      <div class="inline">
+        <%= @pager.html %>
+      </div>
+
+    </div>
   </div>
 
-  <div class="saint-toolbar-bottom-column" style="margin-left: 100px;">
-    <div class="saint-flash_alert"><%= http.flash[:alert] %></div>
-  </div>
+  <div class="tabbable">
 
-  <div class="saint-toolbar-bottom-right_column">
-    <%= @pager.html %>
+    <ul class="nav nav-tabs">
+      <li class="active">
+        <a href="#saint-tabs-master" data-toggle="tab">
+          <% if master_tab = saint.summary_tabs[:master] -%>
+              <%= master_tab.label %>
+          <% else -%>
+              <i class="icon-list"></i>
+              <%= saint.label %>
+          <% end -%>
+        </a>
+      </li>
+
+      <% saint.summary_tabs.reject { |k, v| k == :master }.each_value do |tab| -%>
+          <li>
+            <a href="#saint-tabs-opted-<%= tab.id %>" data-toggle="tab">
+              <%= tab.label %>
+            </a>
+          </li>
+      <% end -%>
+    </ul>
+
+    <div class="tab-content">
+
+      <div class="tab-pane active" id="saint-tabs-master">
+        <% if master_tab -%>
+            <%= self.instance_exec @rows, @pager, &master_tab.proc %>
+        <% else -%>
+            <form id="saint-forms-summary-delete" action="<%= http.route(:delete) %>" method="post">
+              <input type="hidden" name="redirect_to" value="<%= http.route(@pager.query_string) %>"/>
+              <%= saint_view.render_partial('list/list-partial', items: @rows, level: 0, color: nil) %>
+            </form>
+        <% end -%>
+      </div>
+
+      <% saint.summary_tabs.reject { |k, v| k == :master }.each_value do |tab| -%>
+          <div class="tab-pane" id="saint-tabs-opted-<%= tab.id %>">
+            <%= self.instance_exec @rows, @pager, &tab.proc %>
+          </div>
+      <% end -%>
+
+    </div>
   </div>
 
 </div>

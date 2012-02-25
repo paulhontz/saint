@@ -5,11 +5,11 @@
     <% if layout -%>
         <%= layout.sub("[label]", label).sub("[field]", el_html) -%>
     <% else -%>
-        <fieldset style="<%= el.layout_style %>" class="<%= el.layout_class %>">
-          <legend><%= label %></legend>
-          <div style="clear: both;">
-              <%= el_html %>
-          </div>
-        </fieldset>
+        <div style="<%= el.layout_style %>" class="<%= el.layout_class %>">
+          <fieldset>
+            <legend><%= label %></legend>
+            <%= el_html %>
+          </fieldset>
+        </div>
     <% end -%>
 <% end -%>

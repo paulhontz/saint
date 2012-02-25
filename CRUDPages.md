@@ -1,4 +1,5 @@
-###Header
+Header
+---
 
 Defaulted to pluralized class name
 
@@ -16,7 +17,6 @@ To have a custom header for both Summary and CRUD pages, use `saint.header`:
         saint.header label: 'CMS Pages'
         # header now is "CMS Pages"
     end
-{:lang='ruby'}
 
 To have an even more useful header, use a proc.
 
@@ -27,7 +27,7 @@ The proc will receive back the current row.
     end
     # now the header on CRUD pages will be
     # CMS Pages | [page name]
-{:lang='ruby'}
+
 
 To achieve same result without a block, pass methods to be called inside block as arguments:
 
@@ -38,7 +38,7 @@ To achieve same result without a block, pass methods to be called inside block a
     saint.header :name, ', by #author.name', ', #views views'
     # now the header on CRUD pages will be
     # Pages | [page name] by [author name], [views] views
-{:lang='ruby'}
+
 
 Worth to note that if some snippet(arg) returns nil or empty string, it will be ignored:
 
@@ -47,15 +47,16 @@ Worth to note that if some snippet(arg) returns nil or empty string, it will be 
     # Pages | [page name], by [author name], [views] views
     # however, if page has no author, header will be:
     # Pages | [page name], [views] views
-{:lang='ruby'}
 
-###Labels
+
+Labels
+---
 
 By default, Saint will use capitalized name for column label:
 
     saint.column :name
     # HTML: <fieldset><legend>Name</legend>...
-{:lang='ruby'}
+
 
 To have an custom label, use :label option:
 
@@ -63,9 +64,10 @@ To have an custom label, use :label option:
         label "Author's Name"
     end
     # HTML: <fieldset><legend>Author's Name</legend>...
-{:lang='ruby'}
 
-###Grids
+
+Grids
+---
 
 By default, columns are separated by a new line.
 
@@ -77,9 +79,6 @@ Use `saint.grid` to have N columns displayed inline:
       column :meta_keywords
     end
     # [meta_title]  [meta_description]  [meta_keywords]
-{:lang='ruby'}
-
-This will place all columns on same line.
 
 To have a break line after each N columns, use :columns option:
 
@@ -90,7 +89,6 @@ To have a break line after each N columns, use :columns option:
     end
     # [meta_description] [meta_keywords]
     # [meta_title]
-{:lang='ruby'}
 
 Comprise grid in some layout:
 
@@ -99,28 +97,19 @@ Comprise grid in some layout:
         column :meta_description
         column :meta_keywords
     end
-{:lang='ruby'}
 
-Saint will render all columns using same width: (100 / columns)%
-
-To have a custom width/height for some column, use `grid_width` and `grid_height`:
+To have a custom CSS style/class for some column, use :layout_* options:
 
     saint.grid do
-        column :meta_title do
-            grid_width '50%'
-        end
-        column :meta_description do
-            grid_height 200
-        end
-        column :meta_keywords do
-            grid_height 200
-        end
+        column :meta_title, layout_style: 'width: 50%;'
+        column :meta_description, layout_class: 'some-css-class'
+        column :meta_keywords
     end
-{:lang='ruby'}
- 
+
 Numerical widht/height are converted to pixels.
 
-###Tabs
+Tabs
+---
 
 If you have to say more than Saint's default UI,
 feel free to integrate your pages directly into Saint UI.
@@ -134,7 +123,7 @@ No worry, simply write your html and create a new Saint tab for it.
     saint.crud_tab :MyCustomWYSIWYG do
         view.render_partial :template_containing_my_custom_WYSIWYG
     end
-{:lang='ruby'}
+
 
 This will create a new tab alongside ones created by Saint.
 
@@ -145,7 +134,7 @@ You can also override the Saint's master tab, by setting tab name to :master.
     saint.crud_tab :master do
         view.render_partial :template_containing_my_custom_WYSIWYG
     end
-{:lang='ruby'}
+
 
 Given block will receive back the current row and the pager,
 so you can use row's data and pager build fully fledged tabs.
@@ -172,26 +161,28 @@ so it may call any controller action.
             # do stuff and redirect to http.route(:edit, row_id)
         end
     end
-{:lang='ruby'}
 
-###Confines
+
+Restrictions
+---
 
 Prohibit create new items:
 
     saint.create false
-{:lang='ruby'}
+
 
 Prohibit update items:
 
     saint.update false
-{:lang='ruby'}
+
 
 Prohibit delete items:
 
     saint.delete false
-{:lang='ruby'}
 
-###Hooks
+
+Hooks
+---
 
 Hooks, aka callbacks, will be executed before/after given ORM action(s).<br/>
 If no actions given, callbacks will be executed before any action.
@@ -207,14 +198,14 @@ Available actions:
     saint.after :delete do
         # some logic here
     end
-{:lang='ruby'}
+
 
 *Example:* execute an callback before any action:
 
     saint.before do
         # some logic here
     end
-{:lang='ruby'}
+
 
 Proc will receive back the managed row as first argument(except `destroy` action)
 and can update it accordingly.
@@ -225,7 +216,8 @@ Proc will be executed inside node instance,
 so it will have access to http/view/node/saint api.
 
 
-###rb_wrapper
+rb_wrapper
+---
 
 If you use :rte type for some column and the content contains the tags
 that conflicts with editor, you can replace that tags when displaying content in editor
@@ -237,35 +229,53 @@ Saint allow to do this seamlessly:
 
 With rb_wrapper enabled, Saint will replace tags as follows:
 
-*   <%== code %> will be converted to :!{:== code :}:
-*   <%= code %> will be converted to :!{:= code :}:
-*   <% code %> will be converted to :!{: code :}:
+*   <%== code %> will be converted to :{:== code :}:
+*   <%= code %> will be converted to :{:= code :}:
+*   <% code %> will be converted to :{: code :}:
 
 All tags will be restored when content saved to db.
 
 
-###Layouts
+Layouts
+---
 
-####Global lyouts
+###Global lyouts
 By default, Saint use an fieldset as columns layout.
 
 Default layout for an text element looks like:
 
     <fieldset><legend>[label]</legend>[field]</fieldset>
 
-Use *saint.column_layout* to render all columns using custom layout:
+Use `saint.column_layout` to render all columns using custom layout:
 
-    saint.column_layout '<div class="column-layout">[label]: [field]</div>'
-{:lang='ruby'}
+    class News
+        saint.column_layout '<div class="column-layout">[label]: [field]</div>'
+    end
 
-####Per column layout
+Setting `column_layout` for all controllers at once:
+
+    [
+        Ctrl::Page,
+        Ctrl::News,
+        Ctrl::Articles,
+    ].each do |ctrl|
+        ctrl.column_layout '<div class="column-layout">[label]: [field]</div>'
+    end
+
+    # or
+
+    Ctrl.constants.select{|c| c.respond_to?(:saint) }.each do |ctrl|
+        ctrl.column_layout '<div class="column-layout">[label]: [field]</div>'
+    end
+
+###Per column layout
 
 Use custom layout for a specific column:
 
     saint.column :some_column do
         layout '<div class="column-layout">[label]: [field]</div>'
     end
-{:lang='ruby'}
+
 
 Use default layout with custom style/class:
 
@@ -275,9 +285,10 @@ Use default layout with custom style/class:
     saint.column :some_another_column do
         layout_class 'custom-column-layout'
     end
-{:lang='ruby'}
 
-###CSS
+
+CSS
+---
 
 **Custom width/height for specific columns:**
 
@@ -289,7 +300,7 @@ Use default layout with custom style/class:
         width '20%'
         height '10%'
     end
-{:lang='ruby'}
+
 
 Numerical widht/height are used as pixels.
 
@@ -301,4 +312,4 @@ Numerical widht/height are used as pixels.
     saint.column :some_another_column do
         css_class 'custom-column-css-class'
     end
-{:lang='ruby'}
+

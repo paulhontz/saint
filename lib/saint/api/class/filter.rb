@@ -493,7 +493,6 @@ module Saint
 
     include Saint::Inflector
     include Saint::Utils
-    include Saint::ExtenderUtils
     include Rack::Utils
 
     attr_reader :val, :depends_on
@@ -510,11 +509,6 @@ module Saint
       @setup.depends_on.each do |f|
         @depends_on[f] = extract_val(f)
       end
-
-      @view_api = Presto::View::Api.new
-      @view_api.engine Saint.view.engine
-      @view_api.root '%s/filter/' % Saint.view.root
-      @view_api.scope self
     end
 
     # return ORM filters
@@ -564,7 +558,7 @@ module Saint
     # render filter into UI representation
     def html xhr = false
       @xhr = xhr
-      @view_api.render_partial @setup.type
+      saint_view.render_partial ::File.join('filter', @setup.type.to_s)
     end
 
     # get HTTP value for given filter.

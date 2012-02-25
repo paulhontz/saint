@@ -63,7 +63,7 @@ module Saint
     end
 
     # by default, columns are delimited by line break.
-    # this method allow to puts many columns on same line.
+    # this method allow to display N columns inline.
     #
     # @example
     #    saint.grid do
@@ -78,6 +78,10 @@ module Saint
     #      column :email
     #    end
     #
+    # @param [Array] *name_and_or_opts
+    # @options name_and_or_opts [String] :header
+    # @options name_and_or_opts [String] :footer
+    # @param [Proc] &proc
     def grid *name_and_or_opts, &proc
       return unless configurable?
       name, opts = nil, Hash.new
@@ -108,10 +112,9 @@ module Saint
         :options, :multiple, :size, :join_with, :required, :default,
         :width, :height, :css_style, :css_class,
         :layout, :layout_style, :layout_class,
-        :grid_width, :grid_height
     ]
 
-    attr_reader :id, :name, :type, :grid
+    attr_reader :id, :name, :type, :grid, :grid_width
 
     # helpers for value related proc.
     # @example
@@ -144,17 +147,15 @@ module Saint
     # @options opts [Symbol, String] layout
     # @options opts [String] layout_style
     # @options opts [Symbol, String] layout_class
-    # @options opts [Integer, String] grid_width
-    # @options opts [Integer, String] grid_height
     # @param [Proc] &proc
     def initialize name, type = nil, opts = {}, &proc
 
       OPTS.each do |opt|
         opts.has_key?(opt) && instance_variable_set('@%s' % opt, opts[opt])
       end
-      
+
       proc && instance_exec(&proc)
-      
+
       # by default, all columns are shown on all pages and saved to db.
       instance_variable_defined?(:@summary) || @summary = true
       instance_variable_defined?(:@crud) || @crud = true
@@ -171,12 +172,18 @@ module Saint
 
       @label ||= Saint::Inflector.titleize(@name)
 
-      width = @width ?
-          (@width.is_a?(Numeric) ? '%spx' % @width : @width) :
-          select? || password? ? nil : '100%'
-      height = @height ?
-          (@height.is_a?(Numeric) ? '%spx' % @height : @height) :
-          nil
+      @width = '%spx' % @width if @width.is_a?(Numeric)
+      @height = '%spx' % @height if @height.is_a?(Numeric)
+
+      width, height = @width || '100%', @height
+
+      if @grid
+        @grid_width = @width
+        width = '100%'
+      end
+      
+      width = @width if select? || checkbox? || radio? || password? || boolean?
+
       @css_style = '%s %s %s' % [
           @css_style,
           ("width: %s;" % width if width),
@@ -294,18 +301,6 @@ module Saint
       @tag
     end
 
-    # set width/height for used grid
-    def grid_width val = nil
-      @grid_width = val if val
-      @grid_width
-    end
-
-    def grid_height val = nil
-      @grid_height = val if val
-      @grid_height
-    end
-
-    # css
     def width val = nil
       @width = val if val
       @width
@@ -353,6 +348,10 @@ module Saint
       @type == :checkbox
     end
 
+    def radio?
+      @type == :radio
+    end
+
     def plain?
       @type == :plain
     end
@@ -370,12 +369,12 @@ module Saint
     end
 
     # alias for `value row, :crud'
-    def crud_value row, node_instance = nil
+    def crud_value row = nil, node_instance = nil
       value row, :crud, node_instance
     end
 
     # alias for `value row, :summary'
-    def summary_value row, node_instance = nil
+    def summary_value row = nil, node_instance = nil
       value row, :summary, node_instance
     end
 
@@ -403,14 +402,10 @@ module Saint
     # @param [Proc] proc
     def value row = nil, scope = nil, node_instance = nil, &proc
 
-      if proc
-        return @value_proc = proc
-      else
-        raise ArgumentError unless row && scope
-      end
+      return @value_proc = proc if proc
 
       # extracting value
-      value = row[@name]
+      value = (row||{})[@name]
 
       @row, @scope, @node_instance = row, scope, node_instance
 

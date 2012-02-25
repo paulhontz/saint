@@ -4,7 +4,7 @@ Text fields
 ###:string
 
     saint.column :name
-{:lang='ruby'}
+
 
 <div class="screenshot-container">
 <img src="http://saintrb.org/screenshots/columns/page-name.png" class="screenshot" />
@@ -13,7 +13,7 @@ Text fields
 ###:text
 
     saint.column :meta_title, :text
-{:lang='ruby'}
+
 
 <div class="screenshot-container">
 <img src="http://saintrb.org/screenshots/columns/page-meta_title.png" class="screenshot" />
@@ -22,7 +22,7 @@ Text fields
 ###:rte
 
     saint.column :content, :rte
-{:lang='ruby'}
+
 
 <div class="screenshot-container">
 <img src="http://saintrb.org/screenshots/columns/page-rte.png" class="screenshot" />
@@ -34,7 +34,7 @@ Will only display the value, without render any field.<br/>
 Plain columns are not saved to db.
 
     saint.column :option, :plain
-{:lang='ruby'}
+
 
 <div class="screenshot-container">
 <img src="http://saintrb.org/screenshots/columns/plain.png" class="screenshot" />
@@ -45,7 +45,7 @@ Plain columns are not saved to db.
 Creates two password fields - password and password confirmation.
 
     saint.column :content, :password
-{:lang='ruby'}
+
 
 <div class="screenshot-container">
 <img src="http://saintrb.org/screenshots/columns/password.png" class="screenshot" />
@@ -61,7 +61,7 @@ Selectors
     saint.column :status, :radio do
         options 1 => :Active, 0 => :Suspended
     end
-{:lang='ruby'}
+
 
 <div class="screenshot-container">
 <img src="http://saintrb.org/screenshots/columns/radio.png" class="screenshot" />
@@ -74,7 +74,7 @@ Selectors
     saint.column :status, :select do
         options 1 => :Active, 0 => :Suspended
     end
-{:lang='ruby'}
+
 
 <div class="screenshot-container">
 <img src="http://saintrb.org/screenshots/columns/select.png" class="screenshot" />
@@ -91,7 +91,7 @@ Use `size: N` to define how much lines to display when :multiple set to true.
         multiple true
         options 'red', 'green', 'blue'
     end
-{:lang='ruby'}
+
 
 <div class="screenshot-container">
 <img src="http://saintrb.org/screenshots/columns/select-multiple.png" class="screenshot" />
@@ -108,7 +108,7 @@ Use `join_with 'some-str'` to override this.
     saint.column :color, :checkbox do
         options 'red', 'green', 'blue'
     end
-{:lang='ruby'}
+
 
 <div class="screenshot-container">
 <img src="http://saintrb.org/screenshots/columns/checkbox.png" class="screenshot" />
@@ -123,14 +123,14 @@ Use `join_with 'some-str'` to override this:
         options 'red', 'green', 'blue'
         join_with '/'
     end
-{:lang='ruby'}
+
 
 ###:boolean
 
 Renders an radio selector with 2 options: 1 => 'Yes' and 0 => 'No'
 
     saint.column :active, :boolean
-{:lang='ruby'}
+
 
 <div class="screenshot-container">
 <img src="http://saintrb.org/screenshots/columns/boolean.png" class="screenshot" />
@@ -153,7 +153,7 @@ Accepts: [String, Integer]
     end
     # for selectable columns, default option will be auto-selected.
     # on text columns, default text will be displayed for items with nil column value.
-{:lang='ruby'}
+
 
 ###options
 
@@ -172,7 +172,7 @@ Accepts: [Hash, Array]
     # HTML: <input type="checkbox" name="color[]" value="red" />Red
     #       <input type="checkbox" name="color[]" value="green" />Green
     #       <input type="checkbox" name="color[]" value="blue" />Blue
-{:lang='ruby'}
+
 
 ###multiple
 
@@ -207,7 +207,7 @@ Accepts: [String, Symbol]
         label "Author's Name"
     end
     # Label to be used: Author's Name
-{:lang='ruby'}
+
 
 ###summary
 
@@ -219,7 +219,7 @@ Accepts: [false]
     saint.column :some_column do
         summary false
     end
-{:lang='ruby'}
+
 
 ###crud
 
@@ -231,7 +231,7 @@ Accepts: [false]
     saint.column :some_column do
         crud false
     end
-{:lang='ruby'}
+
 
 ###save
 
@@ -243,7 +243,7 @@ Accepts: [false]
     saint.column :some_column do
         save false
     end
-{:lang='ruby'}
+
 
 ###required
 
@@ -255,7 +255,7 @@ Accepts: [true]
     saint.column :some_column do
         required true
     end
-{:lang='ruby'}
+
 
 ###value
 ---
@@ -278,7 +278,7 @@ So, if we want to prefix the author's name with Mr., we simply do like this:
             'Mr. %s' % value
         end
     end
-{:lang='ruby'}
+
 
 Lets say we want to prefix the author's name with Mr. only on Summary pages:
 
@@ -287,7 +287,7 @@ Lets say we want to prefix the author's name with Mr. only on Summary pages:
             summary? ? 'Mr. %s' % value : value
         end
     end
-{:lang='ruby'}
+
 
 Lets say we want to prefix the author's name with Mr. for men,  Ms. for women and empty for unknown:
 
@@ -299,4 +299,4 @@ Lets say we want to prefix the author's name with Mr. for men,  Ms. for women an
             '%s %s' % [prefix, value]
         end
     end
-{:lang='ruby'}
+

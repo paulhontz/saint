@@ -3,11 +3,13 @@ module Ctrl
 
     include Saint::Api
 
-    http.map
-    saint.menu.disabled
+    http.map :dashboard
+    saint.header label: :Dashboard
+    saint.menu.position 1_000
+    saint.dashboard false
 
     def index
-      view.render
+      saint.dashboard
     end
 
   end

@@ -1,37 +1,35 @@
 <% if @pages > 1 %>
-
-    <% if @page_min > 1 -%>
-        <div class="saint-pager-container-page">
-          <a href="<%= link_page 1 %>" class="saint-button saint-pager-page">
-            1</a>
-        </div>
-        <div class="saint-pager-container-dots">...</div>
-    <% end -%>
-    
-    <% @page_min.upto(@page_max) do |page| -%>
-        <div class="saint-pager-container-page">
+    <div class="btn-group inline">
+      <% if @page_min > 1 -%>
+          <a href="<%= link_page 1 %>" class="btn">
+            1
+          </a>
+          <a class="btn">...</a>
+      <% end -%>
+      <% @page_min.upto(@page_max) do |page| -%>
           <% if page == @page_label -%>
-              <span class="saint-button ui-state-highlight saint-pager-page">
+              <a class="btn active">
                 <%= page %>
-              </span>
+              </a>
           <% else -%>
-              <a href="<%= link_page page %>" class="saint-button saint-pager-page">
-                <%= page %></a>
+              <a href="<%= link_page page %>" class="btn">
+                <%= page %>
+              </a>
           <% end -%>
-        </div>
-    <% end -%>
-
-    <% if @page_max < @pages -%>
-        <div class="saint-pager-container-dots">...</div>
-        <div class="saint-pager-container-page">
-          <a href="<%= link_page @pages %>" class="saint-button saint-pager-page">
-            <%= @pages %></a>
-        </div>
-    <% end -%>
-    
-    <div class="saint-pager-container-arrow">
-      <a href="<%= link_page @page_label-1 %>" class="saint-button saint-pager-arrow">&lt;</a>
-      <a href="<%= link_page @page_label+1 %>" class="saint-button saint-pager-arrow">&gt;</a>
+      <% end -%>
+      <% if @page_max < @pages -%>
+          <a class="btn">...</a>
+          <a href="<%= link_page @pages %>" class="btn">
+            <%= @pages %>
+          </a>
+      <% end -%>
     </div>
-
+    <div class="btn-group inline">
+      <a href="<%= link_page @page_label-1 %>" class="btn">
+        <i class="icon-chevron-left"></i>
+      </a>
+      <a href="<%= link_page @page_label+1 %>" class="btn">
+        <i class="icon-chevron-right"></i>
+      </a>
+    </div>
 <% end %>

@@ -120,7 +120,7 @@ module Saint
       # extending current node to act as an opts editor GUI.
       @node.class_exec do
 
-        include Saint::ExtenderUtils
+        include Saint::Utils
 
         define_singleton_method :opts do
           pool

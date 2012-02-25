@@ -3,6 +3,8 @@ module Ctrl
 
     saint.model Model::Author
 
+    #saint.menu.parent Ctrl::Country
+
     saint.column :name
     saint.column :email
     saint.column :password, :password
@@ -13,10 +15,10 @@ module Ctrl
     saint.filter :status, :boolean
 
     saint.header :name
-    saint.menu.label saint.h
 
     saint.order :id, :desc
     saint.has_n :pages, Model::Page do
+      node Ctrl::Page, true
       order :id, :desc
       column :name do
         label 'Name / Author'
@@ -26,7 +28,10 @@ module Ctrl
       end
     end
 
-    saint.belongs_to :country, Model::Country
+    saint.belongs_to :country, Model::Country do
+      node Ctrl::Country, true
+      # other setup
+    end
 
   end
 end

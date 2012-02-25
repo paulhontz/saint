@@ -1,0 +1,238 @@
+div {
+    /*border-right: 1px solid gray;*/
+    /*border-bottom: 1px solid gray;*/
+    /*margin: 2px;*/
+}
+
+body {
+    padding-top: 60px;
+}
+
+table {
+    font-size: inherit;
+}
+
+fieldset {
+    padding-top: 10px;
+}
+
+fieldset legend {
+    margin: 0;
+    padding: 0;
+    font-size: 100%;
+    font-weight: bold;
+}
+
+.grid-row td:last-child {
+    padding-right: 0;
+}
+
+.grid-column {
+    padding-right: 15px;
+}
+
+.content {
+    padding-bottom: 100px;
+}
+
+.centered {
+    text-align: center;
+}
+
+.righted {
+    text-align: right;
+}
+
+.lefted {
+    text-align: left;
+}
+
+.topped {
+    vertical-align: top;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+
+.rounded {
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+.hidden {
+    display: none;
+}
+
+.inline {
+    display: inline-block;
+    margin-bottom: 5px;
+}
+
+.avg-bottom-margin {
+    margin: 10px;
+}
+
+.adaptive-nav {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+.adaptive-nav-fixed {
+    position: fixed;
+    z-index: 900;
+    width: 100%;
+    top: 40px;
+    left: 0;
+    right: 0;
+    background-color: #F8F8F8;
+    border: 0;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+    box-shadow: 0 1px 5px #888;
+    -moz-box-shadow: 0 1px 5px #888;
+    -webkit-box-shadow: 0 1px 5px #888;
+}
+
+.saint-menu-top-container {
+    position: fixed;
+    width: 100%;
+    height: 40px;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: #333;
+}
+
+.el-100px {
+    width: 100px;
+}
+
+.el-75px {
+    width: 75px;
+}
+
+.el-50px {
+    width: 50px;
+}
+
+.saint-ui-chosen {
+    width: 100px;
+}
+
+.saint-filter_label {
+    font-size: 80%;
+    color: #808080;
+}
+
+.saint-save_button {
+    width: 100px;
+}
+
+.saint-selectable {
+
+}
+
+.saint-selectable-hover {
+    background-color: #F1F1F1;
+}
+
+.saint-selectable-active {
+    background-color: #32cd32;
+}
+
+.saint-selectable-selected {
+    background-color: #F1F1F1;
+}
+
+.saint-header {
+    line-height: 40px;
+    text-align: center;
+}
+
+.saint-list-row {
+    text-align: center;
+}
+
+.saint-alert {
+    color: #8b0000;
+}
+
+.saint-error {
+    color: #8b0000;
+}
+
+.saint-text_note {
+    font-size: 90%;
+    color: gray;
+    margin-bottom: 5px;
+}
+
+.saint-cms-datepicker {
+    width: 100px;
+    color: gray;
+    font-size: 80%;
+}
+
+.saint-link {
+    text-decoration: none;
+}
+
+.saint-fm-node-container {
+    color: inherit;
+    width: 100%;
+}
+
+.saint-fm-node-column {
+    overflow-x: hidden;
+    overflow-y: auto;
+    width: auto;
+    height: 500px;
+    min-width: 150px;
+    border-right: 1px solid #DDD;
+    margin-right: 5px;
+    vertical-align: top;
+}
+
+.saint-fm-dir {
+    white-space: nowrap;
+}
+
+.saint-fm-selected_dir {
+    background-color: #DDD;
+}
+
+.saint-fm-active_dir {
+    background-color: #5096DC;
+    color: #FFF;
+}
+
+.saint-fm-node-icon {
+    vertical-align: top;
+}
+
+.saint-fm-node-file {
+    white-space: nowrap;
+}
+
+.saint-fm-node-size {
+    font-size: 80%;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.saint-opts_manager-name {
+    font-weight: bold;;
+}
+
+.saint-opts_manager-details {
+    font-size: 80%;
+    color: #808080;
+}
