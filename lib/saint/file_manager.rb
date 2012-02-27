@@ -115,8 +115,12 @@ module Saint
       end
 
       def geometry file
-        image = MiniMagick::Image.open(file)
-        [image[:width], image[:height]]
+        begin
+          image = MiniMagick::Image.open(file)
+          [image[:width], image[:height]]
+        rescue => e
+          [e.inspect]
+        end
       end
 
       def resize w, h, src_file, dst_file = nil

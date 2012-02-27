@@ -47,8 +47,8 @@ module Saint
         include Presto::Utils
         include Saint::Utils
 
-        http.before :index, :create, :save, :rename, :move, :delete, :resize do |*path|
-          @path = normalize_path(File.join(*path.map { |s| http.unescape(s) }), true)
+        http.before :index, :create do |*path|
+          @path = normalize_path(File.join(*path))
           @index_request_uri = http.route(:index, @path, http.get_params)
           @__meta_title__ = 'FileManager | %s | %s' % [saint.label, @path]
           @roots = roots
@@ -65,81 +65,61 @@ module Saint
         define_method :create do |*path|
 
           name = normalize_path(http.params['name'])
+          type = http.post_params['type'] || 'file'
           node = File.join(root.path, @path, name)
 
-          if File.directory?(node) || File.file?(node)
-            http.flash[:alert] = "#{http.escape_html name} already exists"
-            http.redirect @index_request_uri
-          end
-
           begin
-            if http.post_params['file']
-              FileUtils.touch node
-              params = [@path, {file: File.join(@path, name)}]
-            else
-              FileUtils.mkdir node
-              params = [File.join(@path, name)]
+            case type
+              when 'file'
+                FileUtils.touch node
+                params = [@path, {file: File.join(@path, name)}]
+              when 'folder'
+                FileUtils.mkdir node
+                params = [File.join(@path, name)]
+              else
+                return {status: 0, message: 'wrong type'}.to_json
             end
-            http.redirect http.route(*params, '')
+            response = {status: 1, message: 'Item Successfully Created', location: http.route(*params, '')}
           rescue => e
-            http.flash[:alert] = e.to_s
-            http.redirect @index_request_uri
+            @errors = e
+            response = {status: 0, message: saint_view.render_partial('error')}
           end
+          response.to_json
         end
 
-        define_method :rename do |*path|
+        define_method :rename do
 
-          dir, name, name_was = http.params.values_at('dir', 'name', 'name_was').map do |v|
-            normalize_path(v, true)
-          end
+          return unless (path = http.params['path']) && (name = http.params['name'])
+          path, name = [path, name].map { |v| normalize_path(v, true) }
 
-          node_was = File.join root.path, dir, name_was
-          node_new = File.join root.path, dir, name
-
-          http.redirect(@index_request_uri) unless (is_dir = File.directory?(node_was)) || File.file?(node_was)
-
-          if is_dir
-            alert_var = :alert
-            params = [File.join(dir, name)]
-            proc = lambda { FileUtils.mv(node_was, node_new) }
-          else
-            alert_var = :file_alert
-            params = [@path, {file: File.join(dir, name)}]
-            proc = lambda { File.rename(node_was, node_new) }
-          end
-
-          if File.directory?(node_new) || File.file?(node_new)
-            http.flash[alert_var] = "#{http.escape_html name} already exists"
-            http.redirect @index_request_uri
-          end
+          old_path = File.join(root.path, path)
+          path = File.dirname(path)
+          new_path = File.join(root.path, path, name)
 
           begin
-            proc.call
-            http.flash[alert_var] = "Node successfully renamed at #{current_time}"
-            http.redirect http.route(*params)
+            FileUtils.mv old_path, new_path
+            status, message, location =
+                1, 'Item Successfully Renamed',
+                    File.file?(new_path) ?
+                        http.route(path, file: File.join(path, name)) :
+                        http.route(path, name)
           rescue => e
-            http.flash[alert_var] = e.to_s
-            http.redirect @index_request_uri
+            @errors = e
+            status, message = 0, saint_view.render_partial('error')
           end
+          {status: status, message: message, location: location}.to_json
         end
 
-        define_method :delete do |*path|
-
-          dir, name = http.params.values_at('dir', 'name').map { |v| normalize_path v }
-          node = File.join(root.path, dir, name)
-
-          http.redirect(@index_request_uri) unless (is_dir = File.directory?(node)) || File.file?(node)
-
-          params = is_dir ? [::File.dirname(@path)] : [@path]
-          alert_var = is_dir ? :alert : :file_alert
-
+        define_method :delete do
           begin
-            FileUtils.rm_rf node
-            http.redirect http.route(*params)
+            path = normalize_path(http.params['path'])
+            FileUtils.remove_entry_secure File.join(root.path, path)
+            response = {status: 1, message: 'Item Successfully Deleted', location: http.route(File.dirname(path))}
           rescue => e
-            http.flash[alert_var] = e
-            http.redirect @index_request_uri
+            @errors = e
+            response = {status: 0, message: saint_view.render_partial('error')}
           end
+          response.to_json
         end
 
         define_method :move do
@@ -156,39 +136,25 @@ module Saint
           {status: status, message: message, redirect_to: redirect_to}.to_json
         end
 
-        define_method :resize do |*path|
+        define_method :resize do
 
-          errors, alert_var = [], :file_alert
-          final_path, final_file = '', ''
-          file = normalize_path http.params['file']
-          orig_file = File.join(root.path, file)
+          return unless (path = http.params['path']) && (name = http.params['name'])
+          path, name = [path, name].map { |v| normalize_path(v, true) }
+          args = [
+              http.params.values_at('width', 'height').map { |v| v.to_i },
+              File.join(root.path, path),
+              File.join(root.path, File.dirname(path), name),
+          ].flatten
 
-          if File.file?(orig_file)
-
-            final_file = ::File.basename(file)
-            final_path = ::File.dirname(file)
-
-            if (final_name = normalize_path(http.params['name']).split('/').last.to_s).size > 0
-
-              w, h = http.params.values_at('width', 'height').map { |v| v.to_i }
-
-              resize_status = helper.resize(w, h, orig_file, File.join(root.path, final_path, final_name))
-              if resize_status == true
-                final_file = final_name
-              else
-                errors << resize_status
-              end
-            else
-              errors << 'please specify file name'
-            end
+          resize_status = helper.resize(*args)
+          if resize_status == true
+            response = {status: 1, message: 'Image Resize Completed',
+                        location: http.route(File.dirname(path), file: (File.join(File.dirname(path), name)))}
           else
-            errors << 'target should be a file'
+            @errors = resize_status
+            response = {status: 0, message: saint_view.render_partial('error')}
           end
-
-          if errors.size > 0
-            http.flash[alert_var] = errors.join('<br/>')
-          end
-          http.redirect http.route(final_path, file: File.join(final_path, final_file), _: rand)
+          response.to_json
         end
 
         define_method :upload do
@@ -221,9 +187,9 @@ module Saint
           http.halt response
         end
 
-        define_method :save do |*path|
+        define_method :save do
           begin
-            file = root.path + normalize_path(http.params['file'], true)
+            file = ::File.join(root.path, normalize_path(http.params['file']))
             ::File.open(file, 'w:utf-8') { |f| f << Saint::Utils.normalize_string(http.post_params['content']) }
             status, message = 1, 'File successfully saved'
           rescue => e
@@ -231,6 +197,43 @@ module Saint
             status, message = 0, saint_view.render_partial("error")
           end
           {status: status, message: message}.to_json
+        end
+
+        define_method :search do
+          files = Array.new
+          Find.find(root.path).select { |p| ::File.file?(p) }.each do |p|
+            if ::File.basename(p) =~ /#{http.params['query']}/
+              files << helper.file(p).merge(path: p.sub(root.path, ''))
+            end
+          end
+          saint_view.render_partial 'fm/search', files: files
+        end
+
+        define_method :file do
+
+          return unless file = http.params['file']
+          file = normalize_path(file.to_s)
+          return unless ::File.file?(full_path = ::File.join(root.path, file))
+          hlp = Saint::FileManager::Helper.new
+          file_details = hlp.file(full_path).update(
+              path: file,
+              name: ::File.basename(file),
+              size: hlp.size(full_path, true),
+              uniq: 'saint-fm-file-' << Digest::MD5.hexdigest(full_path),
+              :file? => true
+          )
+          if file_details[:editable?]
+            file_details[:content] = begin
+              Saint::Utils.normalize_string ::File.open(full_path, 'r:binary').read
+            rescue => e
+              'Unable to read file: %s' % e.inspect
+            end
+          end
+          if file_details[:viewable?]
+            file_details[:url] = root.file_server[file]
+            file_details[:geometry] = hlp.geometry(full_path)
+          end
+          saint_view.render_partial 'fm/partial/file', node: file_details
         end
 
         define_method :scan do |dir = nil|
@@ -252,7 +255,7 @@ module Saint
             node[:dir] = dir_path
             node[:name] = File.basename(n)
             node[:path] = File.join(dir_path, node[:name]).gsub(/^\/+|\/+$/, '')
-            node[:uniq] = 'saint-fm-%s-' + Digest::MD5.hexdigest(node[:path])
+            node[:uniq] = 'saint-fm-%s-' << Digest::MD5.hexdigest(node[:path])
 
             if is_dir
 
@@ -273,28 +276,9 @@ module Saint
 
               node[:file?] = true
               node[:uniq] = node[:uniq] % 'file'
-              node.update helper.file(n)
-
               node[:size] = helper.size(n, true)
 
-              if node[:path] == http.params['file'].to_s.gsub(/^\/+|\/+$/, '')
-
-                @active_file, node[:active_file?] = node, true
-                file_path = root.path + node[:path]
-
-                if node[:editable?]
-                  node[:content] = begin
-                    Saint::Utils.normalize_string ::File.open(file_path, 'r:binary').read
-                  rescue => e
-                    "Unable to read file: #{e}"
-                  end
-                end
-                if node[:viewable?]
-                  node[:url] = root.file_server[node[:path]]
-                  node[:geometry] = helper.geometry(n)
-                end
-              end
-              nodes[:files] << node
+              nodes[:files] << node.update(helper.file(n))
             end
           end
           @dirs << {name: dir, path: dir_path, nodes: nodes}

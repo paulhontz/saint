@@ -6,16 +6,22 @@
       </a>
     </li>
     <li>
-      <a href="#saint-fm-toolbar-rename-<%= node.__id__ %>" data-toggle="tab">Rename</a>
+      <a href="#saint-fm-toolbar-rename-<%= node.__id__ %>" data-toggle="tab">
+        <i class="icon-edit"></i>
+        Rename</a>
     </li>
     <% if node[:dir?] -%>
         <li>
-          <a href="#saint-fm-toolbar-create-<%= node.__id__ %>" data-toggle="tab">Create</a>
+          <a href="#saint-fm-toolbar-create-<%= node.__id__ %>" data-toggle="tab">
+            <i class="icon-plus-sign"></i>
+            Create</a>
         </li>
     <% end -%>
     <% if node[:url] -%>
         <li>
-          <a href="#saint-fm-toolbar-resize-<%= node.__id__ %>" data-toggle="tab">Resize</a>
+          <a href="#saint-fm-toolbar-resize-<%= node.__id__ %>" data-toggle="tab">
+            <i class="icon-resize-full"></i>
+            Resize</a>
         </li>
     <% end -%>
   </ul>
@@ -40,27 +46,32 @@
     </div>
 
     <div class="inline topped">
-      <form action="<%= http.route(:delete, @path, file: @active_file && @active_file[:path]) %>" id="<%= form_id = Digest::MD5.hexdigest([node.__id__, rand].join) %>" method="post">
-        <input type="hidden" name="dir" value="<%= node[:dir] -%>"/>
-        <input type="hidden" name="name" value="<%= node[:name] -%>"/>
-        <button class="btn btn-warning"
-                onclick="if(confirm('<%= ('Removing %s/%s/ folder and ANYTHING under it?' % [node[:dir], node[:name]]) if node[:dir?] %> This action can not be undone. Continue?')){$('#<%= form_id %>').submit();}else{return false};">
-          <i class="icon-trash"></i>
-          delete
-        </button>
+      <button class="btn btn-warning"
+              onclick="if(confirm('<%= ('Removing %s/%s/ folder and ANYTHING under it?' % [node[:dir], node[:name]]) if node[:dir?] %> This action can not be undone. Continue?')){
+                      Saint.submit_valid_form('saint-fm-toolbar-delete-<%= node.__id__ %>-form', function(response){window.location=response.location});
+                      }else{return false};">
+        <i class="icon-trash"></i>
+        delete
+      </button>
+      <form action="<%= http.route(:delete) %>" id="saint-fm-toolbar-delete-<%= node.__id__ %>-form" method="post">
+        <input type="hidden" name="path" value="<%= node[:path] -%>"/>
       </form>
     </div>
   </div>
 
   <div class="tab-pane" id="saint-fm-toolbar-rename-<%= node.__id__ %>">
-    <form action="<%= http.route(:rename, @path, file: @active_file && @active_file[:path]) %>" method="post">
-
-      <input type="text" name="name" value="<%= node[:name] -%>" style="width: 200px;"/>
-      <input type="hidden" name="name_was" value="<%= node[:name] -%>"/>
-      <input type="hidden" name="dir" value="<%= node[:dir] -%>"/>
-
-      <input type="submit" name="rename" value="rename" class="btn"/>
-    </form>
+    <div class="inline topped">
+      <form action="<%= http.route(:rename) %>" method="post" id="saint-fm-toolbar-rename-<%= node.__id__ %>-form">
+        <input type="text" name="name" value="<%= node[:name] -%>" style="width: 200px;"/>
+        <input type="hidden" name="path" value="<%= node[:path] -%>"/>
+      </form>
+    </div>
+    <div class="inline topped">
+      <a href="javascript:void(0);" class="btn topped"
+         onclick="Saint.submit_valid_form('saint-fm-toolbar-rename-<%= node.__id__ %>-form', function(response){window.location=response.location});">
+        rename
+      </a>
+    </div>
   </div>
 
   <% if node[:dir?] -%>
@@ -71,24 +82,35 @@
 
   <% if node[:url] -%>
       <div class="tab-pane" id="saint-fm-toolbar-resize-<%= node.__id__ %>">
-        <input value="<%= node[:geometry][0] %>" id="<%= dialog_container %>-resize-width" style="width: 50px;"/>
-        x<input value="<%= node[:geometry][1] %>" id="<%= dialog_container %>-resize-height" style="width: 50px;"/>
-        px
-        <input value="<%= node[:name] %>" id="<%= dialog_container %>-resize-name" style="display: none;"/>
-        <input type="button" value="resize" class="btn btn-info"
-               onclick="window.location = '<%= http.route(:resize) %>' + '?file=<%= node[:path] %>&width=' + $('#<%= dialog_container %>-resize-width').val() + '&height=' + $('#<%= dialog_container %>-resize-height').val() + '&name=' + $('#<%= dialog_container %>-resize-name').val();"
-        />
-        <br/>
+
         <label class="checkbox">
           <input type="checkbox" onclick="$('#<%= dialog_container %>-resize-name').toggle();"/>
           give new name to file
         </label>
 
-        <div class="saint-text_note">
-          to proportionally resize by width, set height to 0.
-          <br/>
-          to proportionally resize by height, set width to 0.
-        </div>
+        <form action="<%= http.route(:resize) %>" method="post" id="saint-fm-toolbar-resize-<%= node.__id__ %>-form">
+          <input type="hidden" name="path" value="<%= node[:path] -%>"/>
+
+          <div class="inline topped">
+            <div>
+              <input name="width" value="<%= node[:geometry][0] %>" class="el-50px"/>x<input name="height" value="<%= node[:geometry][1] %>" class="el-50px"/>px
+            </div>
+          </div>
+          <div class="inline topped" id="<%= dialog_container %>-resize-name" style="display: none;">
+            <input type="text" name="name" value="<%= node[:name] -%>"/>
+          </div>
+          <div class="inline topped">
+            <a href="javascript:void(0);" class="btn topped"
+               onclick="Saint.submit_valid_form('saint-fm-toolbar-resize-<%= node.__id__ %>-form', function(response){window.location=response.location});">
+              resize
+            </a>
+          </div>
+          <p class="saint-text_note">
+            to proportionally resize by width, set height to 0.
+            <br/>
+            to proportionally resize by height, set width to 0.
+          </p>
+        </form>
       </div>
   <% end -%>
 </div>

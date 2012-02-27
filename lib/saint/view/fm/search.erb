@@ -1,0 +1,11 @@
+<h3 class="alert">Found <%= files.size %> files</h3>
+<ul>
+  <% files.each do |file| -%>
+      <li>
+        <a href="javascript:void(0);" onclick="Saint.Fm.display_file('<%= http.route :file, file: file[:path] %>');">
+          <img src="<%= file[:icon] %>"/>
+          <%= file[:path] %>
+        </a>
+      </li>
+  <% end -%>
+</ul>

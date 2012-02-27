@@ -108,7 +108,7 @@ module Saint
 
     OPTS = [
         :summary, :crud, :save,
-        :label, :tag, :rbw,
+        :label, :tag, :rbw, :html,
         :options, :multiple, :size, :join_with, :required, :default,
         :width, :height, :css_style, :css_class,
         :layout, :layout_style, :layout_class,
@@ -134,6 +134,7 @@ module Saint
     # @options opts [Symbol, String] label
     # @options opts [Symbol] tag
     # @options opts [Boolean] rbw
+    # @options opts [Boolean] html
     # @options opts [Hash, Array] options
     # @options opts [Boolean] multiple
     # @options opts [Integer] size
@@ -295,6 +296,16 @@ module Saint
       @label
     end
 
+    # if set to true, value wont be escaped
+    def html *args
+      @html = true if args.size > 0
+      @html
+    end
+
+    def html?
+      @html
+    end
+
     # search/group columns by tags
     def tag tag = nil
       @tag = tag if tag
@@ -426,7 +437,7 @@ module Saint
       return value if password?
 
       @rbw && value = @rbw.wrap(value)
-      value
+      value.is_a?(String) ? (html? ? value : CGI::escapeHTML(value)) : value
     end
 
     # giving access to active controller's methods, like http, view and any helpers

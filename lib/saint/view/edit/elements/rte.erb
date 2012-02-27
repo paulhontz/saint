@@ -1,6 +1,9 @@
-<textarea name="<%= element.name %>" id="<%= element.id %>" style="<%= element.css_style %>" class="<%= element.css_class %>"><%== value || element.default %></textarea>
+<textarea name="<%= element.name %>" id="<%= element.id %>" style="<%= element.css_style %>" class="<%= element.css_class %>"><%= value || element.default %></textarea>
 <script type="text/javascript">
     $(function() {
         $('#<%= element.id %>').elrte();
     });
 </script>
+
+<link rel="stylesheet" href="<%= Saint::FileServer["vendor/elrte/css/elrte.min.css"] %>"/>
+<script type="text/javascript" src="<%= Saint::FileServer["vendor/elrte/js/elrte.min.js"] %>"></script>

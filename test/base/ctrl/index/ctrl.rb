@@ -3,7 +3,7 @@ module Ctrl
 
     include Saint::Api
 
-    http.map :dashboard
+    http.map
     saint.header label: :Dashboard
     saint.menu.position 1_000
     saint.dashboard false

@@ -12,7 +12,7 @@
   </tr>
   </thead>
   <tbody>
-  <% items_counter = @pager.items 
+  <% items_counter = @pager.items + 1
      items.each do |row|
          row_id = row[saint.pkey]
          edit_url = http.route(:edit, row_id, @pager.query_string)
@@ -32,7 +32,7 @@
         <% @columns.each do |column| -%>
             <td>
               <a href="<%= edit_url %>">
-                <%== column.summary_value row, self -%>
+                <%= column.summary_value row, self -%>
               </a>
             </td>
         <% end -%>

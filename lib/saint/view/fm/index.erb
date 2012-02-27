@@ -2,7 +2,11 @@
 <script type="text/javascript">
     $(function() {
 
-        <% if node = @active_file || @active_dir -%>
+        <% if file = http.params['file'] -%>
+        Saint.Fm.display_file('<%= http.route :file, file: file %>');
+        <% end -%>
+
+        <% if node = @active_dir -%>
         $('#saint-fm-window').scrollTo($('#<%= node[:uniq] %>'));
         <% end -%>
 
@@ -29,7 +33,7 @@
         });
     });
 </script>
-
+<div id="saint-fm-file_window"></div>
 <div class="content">
   <p>
     <% if @root_folder -%>
@@ -60,101 +64,91 @@
       <%= saint_view.render_partial('fm/partial/operations', node: @active_dir) if @active_dir %>
   <% end -%>
   </p>
-  <% if node = @active_file
-         dialog_container = '%s-modal' % node[:uniq] -%>
 
-      <div class="modal" id="<%= dialog_container %>">
-        <div class="modal-header">
-          <a class="close" onclick="window.location = '<%= http.path %>';">×</a>
+  <div class="tabbable">
+    <ul class="nav nav-tabs">
+      <li class="active">
+        <a href="#saint-fm-window-fs" data-toggle="tab">
+          <i class="icon-list"></i>
+        </a>
+      </li>
+      <li>
+        <a href="#saint-fm-window-search" data-toggle="tab">
+          <i class="icon-search"></i>
+          Search
+        </a>
+      </li>
+    </ul>
+  </div>
 
-          <h3><%== '%s - %s' % node.values_at(:name, :size) %></h3>
-          <%= saint_view.render_partial('fm/partial/operations', node: node, dialog_container: dialog_container) %>
+  <div class="tab-content">
+    <div class="tab-pane active" id="saint-fm-window-fs">
+      <div id="saint-fm-window" class="saint-fm-window">
+
+        <div class="inline topped">
+          <div class="saint-fm-node-column">
+            <% @roots.each do |root| -%>
+                <div class="<%= 'saint-fm-active_dir' if saint.label == root.saint.label %> saint-selectable"
+                     ondblclick="window.location = '<%= root.http.route %>';">
+                  <img src="<%= Saint::FileServer['vendor/icons/Oxygen/16/folder.png'] %>"/>
+                  <%= root.saint.menu.label %>
+                </div>
+            <% end -%>
+          </div>
         </div>
-        <div class="modal-body">
 
-          <% if node[:content] -%>
+        <% @dirs.each do |dir| -%>
+            <div class="inline topped">
 
-              <form action="<%= http.route(:save, @path, file: node[:path]) %>" id="<%= node[:uniq] %>-edit-form" method="post">
-                <textarea name="content" style="width: 100%; height: 200px;"><%== node[:content] %></textarea>
-              </form>
+              <div class="saint-fmui-droppable saint-fm-node-column" title="<%== dir[:path] %>">
 
-          <% elsif node[:url] -%>
+                <% dir[:nodes][:dirs].each do |node|
+                    fm_class = ''
+                    fm_class = 'saint-fm-selected_dir' if node[:selected_dir?]
+                    fm_class = 'saint-fm-active_dir' if node[:active_dir?] -%>
 
-              <img src="<%= node[:url] %>?_=<%= http.params['_'] %>"/>
+                    <div title="<%== node[:path] %>" id="<%= node[:uniq] %>"
+                         class="saint-fm-dir saint-selectable saint-fmui-draggable saint-fmui-droppable <%= fm_class %>"
+                         ondblclick="window.location = '<%= http.route(node[:path]) %>';">
 
-          <% end -%>
-        </div>
-        <div class="modal-footer">
-          <button class="btn" onclick="window.location = '<%= http.path %>';">Close</button>
-          <% if node[:content] -%>
-              <button onclick="Saint.submit_valid_form('<%= node[:uniq] %>-edit-form');" class="btn btn-info">
-                Save
-              </button>
-          <% end -%>
-        </div>
-      </div>
-      <script type="text/javascript">
-          $(function() {
-              $('#<%= dialog_container %>').modal();
-          });
-      </script>
+                      <img style="border: 0;" src="<%= node[:icon] %>"/>
+                      <%= node[:name] %>
+                      &nbsp;&nbsp;&nbsp;&nbsp;
 
-  <% end -%>
+                    </div>
+                <% end -%>
 
-  <div id="saint-fm-window" class="saint-fm-window">
+                <% dir[:nodes][:files].each do |node| -%>
+                    <div id="<%= node[:uniq] %>"
+                         class="saint-selectable saint-fmui-draggable saint-fm-file"
+                         title="<%== node[:path] %>"
+                         ondblclick="window.location = '<%= http.path + '?file=' + node[:path] %>';">
 
-    <div class="inline topped">
-      <div class="saint-fm-node-column">
-        <% @roots.each do |root| -%>
-            <div class="<%= 'saint-fm-active_dir' if saint.label == root.saint.label %> saint-selectable"
-                 ondblclick="window.location = '<%= root.http.route %>';">
-              <img src="<%= Saint::FileServer['vendor/icons/Oxygen/16/folder.png'] %>"/>
-              <%= root.saint.menu.label %>
+                      <img src="<%= node[:icon] %>" class="saint-fm-node-icon"/>
+                      <%= node[:name] %>
+                      <span class="saint-fm-node-size">
+                              - <%= node[:size] %>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            </span>
+
+                    </div>
+                <% end -%>
+
+              </div>
             </div>
         <% end -%>
       </div>
     </div>
+    <div class="tab-pane" id="saint-fm-window-search">
 
-    <% @dirs.each do |dir| -%>
-        <div class="inline topped">
+      <input id="saint-fm-search-query" type="text" name="query"/>
+      <button class="btn topped" onclick="Saint.update_container('saint-fm-search_results', '<%= http.route :search %>?query=' + $('#saint-fm-search-query').val());">
+        search
+      </button>
 
-          <div class="saint-fmui-droppable saint-fm-node-column" title="<%== dir[:path] %>">
+      <div id="saint-fm-search_results"></div>
 
-            <% dir[:nodes][:dirs].each do |node|
-                fm_class = ''
-                fm_class = 'saint-fm-selected_dir' if node[:selected_dir?]
-                fm_class = 'saint-fm-active_dir' if node[:active_dir?] -%>
-
-                <div title="<%== node[:path] %>" id="<%= node[:uniq] %>"
-                     class="saint-fm-dir saint-selectable saint-fmui-draggable saint-fmui-droppable <%= fm_class %>"
-                     ondblclick="window.location = '<%= http.route(node[:path]) %>';">
-
-                  <img style="border: 0;" src="<%= node[:icon] %>"/>
-                  <%= node[:name] %>
-                  &nbsp;&nbsp;&nbsp;&nbsp;
-
-                </div>
-            <% end -%>
-
-            <% dir[:nodes][:files].each do |node| -%>
-                <div id="<%= node[:uniq] %>"
-                     class="saint-selectable saint-fmui-draggable saint-fm-file"
-                     title="<%== node[:path] %>"
-                     ondblclick="window.location = '<%= http.path + '?file=' + node[:path] %>';">
-
-                  <img src="<%= node[:icon] %>" class="saint-fm-node-icon"/>
-                  <%= node[:name] %>
-                  <span class="saint-fm-node-size">
-                              - <%= node[:size] %>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            </span>
-
-                </div>
-            <% end -%>
-
-          </div>
-        </div>
-    <% end -%>
+    </div>
   </div>
 
 </div>

@@ -148,7 +148,7 @@ module Saint
 
         saint.grid do
 
-          column :name, :plain do
+          column :name, :plain, html: true do
             label 'Option'
             value do
               if row && opt = pool.opts[row.name]
@@ -161,7 +161,7 @@ module Saint
             end
           end
 
-          column :value, :plain do
+          column :value, :plain, html: true do
             save true
             value do
               case scope

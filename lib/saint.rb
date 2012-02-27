@@ -1,8 +1,10 @@
 require 'presto' unless Object.const_defined?(:Presto)
+require 'cgi/util'
 require 'digest'
 require 'erubis'
 require 'json'
 require 'mini_magick'
+require 'find'
 
 module Saint
 

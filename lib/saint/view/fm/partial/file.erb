@@ -1,0 +1,31 @@
+<div class="modal-header">
+  <a class="close" data-dismiss="modal">×</a>
+
+  <h3>
+    <%== '%s - %s' % node.values_at(:name, :size) %>
+    <%= (g = node[:geometry]) && ' - %spx' % g.join('x') %>
+  </h3>
+  
+  <%= saint_view.render_partial('fm/partial/operations', node: node, dialog_container: node[:uniq]) %>
+</div>
+<div class="modal-body">
+
+  <% if node[:content] -%>
+
+      <form action="<%= http.route(:save, file: node[:path]) %>" id="<%= node[:uniq] %>-edit-form" method="post">
+        <textarea name="content" style="width: 100%; height: 200px;"><%== node[:content] %></textarea>
+      </form>
+
+  <% elsif node[:url] -%>
+
+      <img src="<%= node[:url] %>?_=<%= Time.now.to_f %>"/>
+
+  <% end -%>
+</div>
+<% if node[:content] -%>
+    <div class="modal-footer">
+      <button onclick="Saint.submit_valid_form('<%= node[:uniq] %>-edit-form');" class="btn btn-info">
+        Save
+      </button>
+    </div>
+<% end -%>
