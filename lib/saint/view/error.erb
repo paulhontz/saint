@@ -1,5 +1,5 @@
-<% [@errors].compact.flatten.each do |e| %>
+<% [@errors].compact.flatten.each do |e| -%>
     <div class="saint-errors_dialog_container">
       <%= (e.respond_to?(:message) ? e.message : e).gsub(/#<([^>]+)>/, '\1').sub(/\,?(\s+)?uri\:\s+\S+/i, '') %>
     </div>
-<% end %>
+<% end -%>

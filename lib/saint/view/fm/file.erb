@@ -1,0 +1,155 @@
+<% node = @active_file
+   editable_size = @helper.editable_size?(node[:size])
+%>
+<div id="saint-fm-file-window" class="container content">
+
+  <a class="close" href="<%= http.route @encoded_path, @query_string %>">×</a>
+
+  <h3 class="page-header">
+    <img src="<%= node[:icon] %>"/>
+    <%== '%s - %s' % [node[:name], number_to_human_size(node[:size])] %>
+    <%= (g = node[:geometry]) && g.is_a?(Array) && ' - %spx' % g.join('x') %>
+  </h3>
+
+  <div class="tabbable">
+    <ul class="nav nav-tabs">
+      <% if node[:editable?] && editable_size -%>
+          <li>
+            <a href="javascript:void(0);" id="saint-fm-file-buttons-save" class="btn"
+               onclick="var button = $(this); var html = button.html();
+                       var callback = function(response){button.attr('disabled', false).html(html); Saint.ui_alert(response.message);}
+                       button.attr('disabled', true).html('saving file, please wait...');
+                       Saint.submit_valid_form('saint-fm-file-forms-save', callback, callback);">
+              <i class="icon-file"></i>Save
+            </a>
+          </li>
+      <% end -%>
+      <li>
+        <a href="<%= http.route(:download, file: node[:path]) %>">
+          <i class="icon-download"></i>
+          Download
+        </a>
+      </li>
+      <li>
+        <a href="#saint-fm-file-toolbar-rename" data-toggle="tab">
+          <i class="icon-edit"></i>
+          Rename</a>
+      </li>
+      <% if node[:url] && node[:geometry].is_a?(Array) -%>
+          <li>
+            <a href="#saint-fm-file-toolbar-resize" data-toggle="tab">
+              <i class="icon-resize-full"></i>
+              Resize</a>
+          </li>
+      <% end -%>
+      <li>
+        <a href="#saint-fm-file-toolbar-copy" data-toggle="tab">
+          <i class="icon-th-large"></i>
+          Copy</a>
+      </li>
+      <li>
+        <a href="javascript:void(0);"
+           onclick="if(confirm('<%= ('Removing %s/%s/ folder and ANYTHING under it?' % [node[:dir], node[:name]]) if node[:dir?] %> This action can not be undone. Continue?')){
+                   Saint.submit_valid_form('saint-fm-forms-delete', function(response){window.location=response.location});
+                   }else{return false};">
+          <i class="icon-trash"></i>
+          Delete
+        </a>
+      </li>
+      <li>
+        <a href="<%= http.route @encoded_path, @query_string %>">
+          <i class="icon-remove"></i>
+          Close</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="tab-content">
+
+    <div class="tab-pane" id="saint-fm-file-toolbar-rename">
+      <%= saint_view.render_view 'fm/partial/rename', node: node %>
+    </div>
+
+    <% if node[:url] && node[:geometry].is_a?(Array) -%>
+        <div class="tab-pane" id="saint-fm-file-toolbar-resize">
+
+          <form action="<%= http.route(:resize, @encoded_path, @query_string) %>" method="post" id="saint-fm-file-forms-resize">
+            <input type="hidden" name="path" value="<%= node[:path] %>"/>
+            <input type="hidden" name="name" value="<%= node[:name] %>"/>
+
+            <div class="inline topped">
+              <div>
+                <input name="width" value="<%= node[:geometry][0] %>" class="el-50px"/>x<input name="height" value="<%= node[:geometry][1] %>" class="el-50px"/>px
+              </div>
+            </div>
+            <div class="inline topped">
+              <a href="javascript:void(0);" class="btn topped"
+                 onclick="Saint.submit_valid_form('saint-fm-file-forms-resize', function(response){window.location=response.location});">
+                resize
+              </a>
+            </div>
+            <div class="saint-text_note">
+              To resize proportionally by width, set height to 0.
+              To resize proportionally by height, set width to 0.
+            </div>
+          </form>
+        </div>
+    <% end -%>
+
+    <div class="tab-pane" id="saint-fm-file-toolbar-copy">
+
+      <form action="<%= http.route(:copy, @encoded_path, @query_string) %>" method="post" id="saint-fm-file-forms-copy">
+        <input type="text" name="name" value="copy of <%= node[:name] -%>"/>
+        <input type="hidden" name="path" value="<%= node[:path] -%>"/>
+
+        <a href="javascript:void(0);" class="btn topped"
+           onclick="Saint.submit_valid_form('saint-fm-file-forms-copy', function(response){window.location=response.location});">
+          copy
+        </a>
+      </form>
+
+    </div>
+  </div>
+
+  <%= saint_view.render_view 'fm/partial/delete', node: node %>
+
+  <div id="saint-fm-file-alerts" class="alert" style="display: none;"></div>
+
+  <% if node[:editable?] -%>
+      <% if editable_size -%>
+          <form action="<%= http.route(:save, file: node[:path]) %>" id="saint-fm-file-forms-save" method="post">
+            <textarea name="content" id="saint-fm-file-content" title="<%= node[:path_encoded] %>"
+                      style="width: 100%; height: 600px;" disabled="true">
+              loading content, please wait ...</textarea>
+          </form>
+      <% else -%>
+          <div class="alert alert-error">
+            Sorry, can not edit files bigger
+            than <%= number_to_human_size(@helper.editable_size) %>
+          </div>
+      <% end -%>
+  <% elsif node[:url] -%>
+      <% if node[:geometry].is_a?(Array) -%>
+          <img src="<%= node[:url] %>?_=<%= Time.now.to_f %>"/>
+      <% else -%>
+          <%= node[:geometry] %>
+      <% end -%>
+  <% end -%>
+</div>
+
+<script type="text/javascript">
+    $(function() {
+        <% if node[:editable?] -%>
+        $('#saint-fm-file-buttons-save').hide();
+        <% if editable_size -%>
+        Saint.valid_POST("<%= http.route :read_file %>", {file: $('#saint-fm-file-content').attr('title')}, function(response) {
+            $('#saint-fm-file-content').attr('disabled', false).val(response.content).focus();
+            $('#saint-fm-file-buttons-save').show();
+        }, function(response) {
+            $('#saint-fm-file-content').remove();
+            $('#saint-fm-file-alerts').html(response.message).show();
+        });
+        <% end -%>
+        <% end -%>
+    });
+</script>

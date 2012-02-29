@@ -6,15 +6,15 @@ module Saint
     BOOLEAN_OPTIONS = {1 => 'Yes', 0 => 'No'}
 
     def saint_view scope = self
-      unless @saint_view
-        @saint_view = Presto::ViewApi.new
-        @saint_view.engine Saint.view.engine
-        @saint_view.ext Saint.view.ext
-        @saint_view.root Saint.view.root
-      end
-      @saint_view.scope scope
-      @saint_view
+      api = Presto::ViewApi.new
+      api.engine Saint.view.engine
+      api.ext Saint.view.ext
+      api.root Saint.view.root
+      api.scope scope
+      api
     end
+
+    module_function :saint_view
 
     def current_time
       Time.now.strftime("%b %d, %I:%M:%S %p")

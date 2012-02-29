@@ -1,0 +1,3 @@
+<form action="<%= http.route(:delete, @encoded_path, @query_string) %>" id="saint-fm-forms-delete" method="post">
+  <input type="hidden" name="path" value="<%= node[:path] -%>"/>
+</form>

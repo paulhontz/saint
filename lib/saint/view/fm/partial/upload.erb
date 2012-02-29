@@ -5,17 +5,13 @@
 <div class="modal" id="saint-fm-uploader-dialog" style="display: none;">
   <div class="modal-header">
     <a class="close" data-dismiss="modal">×</a>
-    Uploading files into <%= label %>
+    Uploading files into "<%== label %>"
   </div>
   <div class="modal-body">
     <div id="saint-fm-uploader-queue"></div>
   </div>
 </div>
 
-<button class="btn" onclick="$('#saint-fm-uploader-dialog').modal();">
-  <i class="icon-upload"></i>
-  upload
-</button>
 <script type="text/javascript">
     $('#saint-fm-uploader-dialog').on('shown', function() {
         var errors = new Array();
@@ -32,7 +28,7 @@
                 },
                 UploadComplete: function(uploader, files) {
                     if (errors.length > 0)
-                        return alert(errors.join());
+                        return Saint.ui_alert(errors.join());
                     window.location.reload();
                 }
             }

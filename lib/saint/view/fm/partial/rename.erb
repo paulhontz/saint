@@ -1,0 +1,8 @@
+<form action="<%= http.route(:rename, @encoded_path, @query_string) %>" method="post" id="saint-fm-forms-rename">
+  <input type="text" name="name" value="<%= node[:name] -%>"/>
+  <a href="javascript:void(0)" class="btn topped"
+     onclick="Saint.submit_valid_form('saint-fm-forms-rename', function(response){window.location=response.location});">
+    rename
+  </a>
+  <input type="hidden" name="path" value="<%= node[:path] -%>"/>
+</form>

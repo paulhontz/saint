@@ -1,1 +1,0 @@
-env['PATH_INFO']

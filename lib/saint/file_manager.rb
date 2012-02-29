@@ -47,14 +47,16 @@ module Saint
       end
 
       def file file
-        filename = ::File.basename(file).downcase
+        name = ::File.basename(file)
         ext = ::File.extname(file).to_s.sub(/^\./, '').downcase
         map = editable_files.merge(viewable_files).merge(readonly_files)
-        file = Hash.new
-        file[:icon] = icon(map[ext] || 'file')
+        file = {
+            name: name,
+            icon: icon(map[ext] || 'file'),
+        }
         %w[ editable viewable readonly ].each do |state|
           map = self.send(:"#{state}_files")
-          file[:"#{state}?"] = map.has_key?(ext) || map.has_key?(filename)
+          file[:"#{state}?"] = map.has_key?(ext) || map.has_key?(name.downcase)
         end
         file
       end
@@ -73,7 +75,8 @@ module Saint
           image = MiniMagick::Image.open(file)
           [image[:width], image[:height]]
         rescue => e
-          [e.inspect]
+          @errors = e
+          Saint::Utils.saint_view(self).render_partial 'error'
         end
       end
 
@@ -98,6 +101,14 @@ module Saint
         end
         return error if error
         true
+      end
+
+      def editable_size
+        MAX_FILE_SIZE
+      end
+      
+      def editable_size? size
+        size < editable_size
       end
 
     end

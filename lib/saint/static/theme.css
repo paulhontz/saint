@@ -32,7 +32,8 @@ fieldset legend {
 }
 
 .content {
-    padding-bottom: 100px;
+    padding-bottom: 50px;
+    margin-bottom: 50px;
 }
 
 .centered {
@@ -72,6 +73,22 @@ fieldset legend {
 
 .avg-bottom-margin {
     margin: 10px;
+}
+
+.zero_padding {
+    padding: 0;
+}
+
+.zero_margin{
+    margin: 0;
+}
+
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    -ms-text-overflow: ellipsis;
 }
 
 .adaptive-nav {
@@ -246,6 +263,13 @@ fieldset legend {
     cursor: move;
 }
 
-.saint-fm-active_dir a{
+.saint-fm-active_dir a {
     color: #fff;
+}
+
+#saint-fm-file-window {
+    box-shadow: 0 1px 5px #888;
+    -moz-box-shadow: 0 1px 5px #888;
+    -webkit-box-shadow: 0 1px 5px #888;
+    padding: 20px;
 }

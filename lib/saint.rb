@@ -6,6 +6,7 @@ require 'json'
 require 'mini_magick'
 require 'find'
 require 'base64'
+require 'fileutils'
 
 module Saint
 

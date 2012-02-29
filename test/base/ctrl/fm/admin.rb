@@ -10,8 +10,8 @@ module Ctrl
     end
 
     saint.fm do
-      root Pfg.tmp / :templates
-      root Pfg.tmp / :public
+      root File.expand_path '../test-unofficial/file-manager/templates', Pfg.root
+      root File.expand_path '../test-unofficial/file-manager/public', Pfg.root
     end
 
   end

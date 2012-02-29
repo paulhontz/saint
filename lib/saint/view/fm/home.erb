@@ -1,11 +1,10 @@
 <h3 class="alert">
   Please Select Root
 </h3>
-
-<% @nodes.each do |node| -%>
+<% roots.each do |root| -%>
     <div class="well">
-      <a href="<%= node.http.route %>" class="btn" style="min-width: 200px;">
-        <%= node.saint.menu.label %>
+      <a href="<%= root.http.route %>" class="btn" style="min-width: 200px;">
+        <%= root.saint.menu.label %>
       </a>
     </div>
 <% end -%>

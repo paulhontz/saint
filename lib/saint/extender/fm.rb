@@ -9,6 +9,15 @@ module Saint
     def initialize node, opts = {}, &proc
       @node, @opts, @roots = node, opts, Array.new
       self.instance_exec &proc
+
+      unless @node.respond_to?(:index)
+        host = self
+        @node.class_exec do
+          define_method :index do
+            Saint::Utils.saint_view(self).render_layout Saint::Utils.saint_view(host).render_view('fm/home')
+          end
+        end
+      end
     end
 
     def root root, label = nil
@@ -17,10 +26,7 @@ module Saint
       label ||= File.basename(root)
       node, host = @node, self
 
-      unless File.directory?(root)
-        puts 'Creating %s directory ...' % root
-        FileUtils.mkdir_p root
-      end
+      raise '"%s" should be a directory' % root unless File.directory?(root)
 
       fm_class = classify(label)
       fm = node.const_set fm_class, Class.new
@@ -40,7 +46,7 @@ module Saint
         include Presto::Api
         http.map fm.http.route('__file_server__')
         http.file_server root do |env|
-          env['PATH_INFO'] = Presto::Utils.split_path(env['PATH_INFO'].gsub(/\.saint\-fs/, '')).map{|a| http.escape(a)}.join('/')
+          env['PATH_INFO'] = env['PATH_INFO'].sub(/\.saint\-fs$/, '')
         end
 
         def self.[] path
@@ -80,7 +86,7 @@ module Saint
           @helper = Saint::FileManager::Helper.new
         end
 
-        http.before :index, :create, :rename, :resize, :delete, :search do |path = nil|
+        http.before :index, :create, :rename, :resize, :delete, :search, :copy do |path = nil|
           @encoded_path = path
           @query_string = Hash.new
           if (search_query = http.params['q']) && search_query.size > 1
@@ -92,9 +98,14 @@ module Saint
 
         def index path = nil
           @active_dir, @active_file = nil, active_file?
-          scan
-          @path.split('/').each { |dir| scan dir }
-          saint_view.render_layout saint_view.render_partial('fm/index')
+          if @active_file
+            view = :file
+          else
+            view = :index
+            scan
+            @path.split('/').each { |dir| scan dir }
+          end
+          saint_view.render_layout saint_view.render_partial('fm/%s' % view)
         end
 
         def create path = nil
@@ -126,6 +137,7 @@ module Saint
           new_path = File.join(root, path, name)
 
           jsonify do
+            raise '"%s" already exists' % name if File.file?(new_path) || File.directory?(new_path)
             FileUtils.mv old_path, new_path
             route = [encode_path(File.join(path, name))]
             route = [encode_path(@path)] << {file: encode_path(File.join(path, name))} if File.file?(new_path)
@@ -212,6 +224,23 @@ module Saint
           end
         end
 
+        def copy path = nil
+          path, name = path_related_params 'path', 'name'
+          return unless path && name
+
+          jsonify do
+            rel_path = File.join File.dirname(path), name
+            full_path = File.join root, rel_path
+            conflicting_file = File.file?(full_path) ? rel_path : nil
+            if File.directory?(full_path) && File.file?(File.join(full_path, File.basename(path)))
+              conflicting_file = File.join rel_path, File.basename(path)
+            end
+            raise '"%s" file already exists' % conflicting_file if conflicting_file
+            FileUtils.cp File.join(root, path), full_path
+            [encode_path(@path)] << {file: encode_path(rel_path)}
+          end
+        end
+
         def search
           files = Array.new
           Find.find(root).select { |p| ::File.file?(p) }.each do |p|
@@ -255,7 +284,7 @@ module Saint
           node = @helper.file(full_path).update(
               path: file,
               name: ::File.basename(file),
-              size: @helper.size(full_path, true),
+              size: @helper.size(full_path),
               uniq: 'saint-fm-file-' << Digest::MD5.hexdigest(full_path),
               :file? => true
           )
@@ -275,17 +304,19 @@ module Saint
           dir_full_path = File.join(root, dir_path, '')
           return unless File.directory?(dir_full_path)
           @current_path << dir if dir
-          @root_folder = dir.nil?
+          @root_folder = dir.nil? ? {path: '/', label: 'Root'} : false
 
           nodes = {dirs: [], files: []}
-          Dir[dir_full_path + "*"].each do |n|
+          Dir.glob('%s*' % dir_full_path, File::FNM_DOTMATCH).each do |n|
 
+            name = File.basename(n)
+            next if name == '.' || name == '..'
             next unless (is_dir = File.directory?(n)) || File.file?(n)
 
             node = Hash.new
             node[:dir] = dir_path
-            node[:name] = File.basename(n)
-            node[:path] = File.join([dir_path, node[:name]].select { |c| c.size > 0 })
+            node[:name] = name
+            node[:path] = File.join([dir_path, name].select { |c| c.size > 0 })
             node[:path_encoded] = encode_path(node[:path])
             node[:uniq] = 'saint-fm-%s-' << Digest::MD5.hexdigest(node[:path])
 
