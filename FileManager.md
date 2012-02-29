@@ -14,10 +14,9 @@ Each root should provide the absolute path to the folder to be managed.
         root '/some/another/path/'
     end
 
-
 By default, Saint will use the folder name for root label.
 
-To have a custom label for some root, use :label option.
+To have a custom label for some root, pass it as second argument:
 
     saint.fm do
         root '/path/to/templates'
@@ -25,7 +24,6 @@ To have a custom label for some root, use :label option.
     # this will use Templates as label
 
     saint.fm do
-        root '/path/to/templates', label: "Views"
+        root '/path/to/templates', 'Views'
     end
     # this will use Views as label
-

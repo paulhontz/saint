@@ -8,7 +8,7 @@
 
     <script type="text/javascript">
         <%= "function update_relation_#{@relation.id}(val, element_id) {" %>
-        Saint.valid_get(
+        Saint.valid_GET(
                 '<%= @relation.local_node.http.route(:save, @local_id) + "?" + @relation.local_key.to_s %>=' + val,
                 function(status, message) {
                     Saint.update_value('<%= @relation.id %>-element', status);

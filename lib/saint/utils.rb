@@ -1,6 +1,8 @@
 module Saint
   module Utils
 
+    include Presto::Utils
+
     BOOLEAN_OPTIONS = {1 => 'Yes', 0 => 'No'}
 
     def saint_view scope = self

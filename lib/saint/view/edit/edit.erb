@@ -79,7 +79,7 @@
             <a href="javascript:void(0);"
                class="btn btn-warning"
                onclick="if(confirm('This action can not be undone! Continue?')){
-                       Saint.valid_get('<%= http.route(:delete, @row_id) %>',function(response){
+                       Saint.valid_GET('<%= http.route(:delete, @row_id) %>',function(response){
                                Saint.ui_alert(response.message + '<br/>Reloading...', {
                                        time: 1000,
                                        after_close: function(){window.location = '<%= http.route @pager.query_string %>';}

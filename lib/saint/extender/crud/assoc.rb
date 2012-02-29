@@ -71,7 +71,7 @@ module Saint
           return unless relation = Saint.relations[relation_id]
 
           remote_id = remote_id.to_i
-          local_id = (action == 'delete') || (local_id == SaintConst::_NULL_VALUE) ? nil : local_id.to_i
+          local_id = (action == 'delete') || (local_id == SaintConst::NULL_VALUE) ? nil : local_id.to_i
 
           # getting remote item
           remote_item, @errors = relation.remote_orm.first(relation.remote_pkey => remote_id)

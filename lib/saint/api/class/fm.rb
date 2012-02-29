@@ -2,10 +2,10 @@ module Saint
   class ClassApi
 
     # turn node into an File Manager
-    def fm &proc
-      return @fm unless proc
-      @fm = Saint::FileManager::Setup.new @node, &proc
-      Saint::FmExtender.new @node
+    def file_manager opts = {}, &proc
+      FmExtender.new(@node, opts, &proc) if proc && configurable?
     end
+
+    alias :fm :file_manager
   end
 end

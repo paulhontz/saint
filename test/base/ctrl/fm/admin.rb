@@ -10,9 +10,9 @@ module Ctrl
     end
 
     saint.fm do
-      root Pfg.tmp / :public
       root Pfg.tmp / :templates
+      root Pfg.tmp / :public
     end
-    
+
   end
 end

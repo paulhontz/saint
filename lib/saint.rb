@@ -1,10 +1,11 @@
-require 'presto' unless Object.const_defined?(:Presto)
+require '../../presto/lib/presto' unless Object.const_defined?(:Presto)
 require 'cgi/util'
 require 'digest'
 require 'erubis'
 require 'json'
 require 'mini_magick'
 require 'find'
+require 'base64'
 
 module Saint
 
@@ -17,11 +18,6 @@ module Saint
 
     def root
       @root ||= ::File.join(::File.expand_path('../saint', __FILE__), '')
-    end
-
-    def root_url url = nil
-      @root_url ||= rootify_url(url) if url
-      @root_url || '/'
     end
 
     def ordered_nodes

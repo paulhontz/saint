@@ -241,3 +241,11 @@ fieldset legend {
     font-size: 80%;
     color: #808080;
 }
+
+.saint-fmui-draggable {
+    cursor: move;
+}
+
+.saint-fm-active_dir a{
+    color: #fff;
+}

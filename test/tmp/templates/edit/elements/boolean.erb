@@ -1,9 +1,0 @@
-<% Saint::Utils::BOOLEAN_OPTIONS.each_pair do |val, label|
-    active = (value == val) || (value.nil? && element.default == val) -%>
-    <label class="radio inline">
-      <input type="radio" name="<%= element.name %>" value="<%= val %>"
-             style="<%= element.css_style %>" class="<%= element.css_class %>"
-             <%= 'checked' if active %> />
-      <%= label %>
-    </label>
-<% end -%>

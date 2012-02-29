@@ -23,7 +23,7 @@
             runtimes : 'html5,gears,flash,html4',
             flash_swf_url : '<%= Saint::FileServer['vendor/plupload/js/plupload.flash.swf'] %>',
             url : '<%= http.route(:upload) %>',
-            multipart_params: {dir: '<%= path %>'},
+            multipart_params: {path: '<%= path %>'},
             init: {
                 FileUploaded: function(uploader, file, response) {
                     if (response.response == 1)

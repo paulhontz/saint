@@ -133,7 +133,7 @@
                       </form>
                       <button class="btn btn-success" onclick="Saint.submit_valid_form('<%= form_id %>', function(response){
                               if($('#associator-belongs_to-<%= rel.id %>').attr('checked')){
-                                      Saint.valid_get('<%= http.route :save, row_id, rel.local_key => '' %>' + response.status, function(response){
+                                      Saint.valid_GET('<%= http.route :save, row_id, rel.local_key => '' %>' + response.status, function(response){
                                               Saint.update_container('saint-crud-header', '<%= http.route :head, row_id %>');
                                               });
                                       }

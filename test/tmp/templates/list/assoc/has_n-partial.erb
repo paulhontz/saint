@@ -59,7 +59,7 @@
                           <a class="btn <%= 'disabled' if disabled %>"
                              <% unless disabled -%>
                              onclick="if(confirm('Please confirm Attach action')){
-                                     Saint.valid_get('<%= '%s/%s/%s/create' % [update_relation_url, remote_id, @local_id] %>', function(status, message){
+                                     Saint.valid_GET('<%= '%s/%s/%s/create' % [update_relation_url, remote_id, @local_id] %>', function(status, message){
                                              Saint.update_container('<%= @relation.id %>0', '<%= @update_selector_url + "0" + @pager.query_string %>');
                                              Saint.update_container('<%= @relation.id %>1', '<%= @update_selector_url + "1" %>');
                                              Saint.update_container('<%= @relation.id %>-edit_assoc_container');
@@ -75,7 +75,7 @@
 
                       <a class="btn"
                          onclick="if(confirm('Please confirm Detach action')){
-                                 Saint.valid_get('<%= '%s/%s/%s/delete' % [update_relation_url, remote_id, @local_id] %>', function(status, message){
+                                 Saint.valid_GET('<%= '%s/%s/%s/delete' % [update_relation_url, remote_id, @local_id] %>', function(status, message){
                                          Saint.update_container('<%= @relation.id %>0', '<%= @update_selector_url + "0" %>');
                                          Saint.update_container('<%= @relation.id %>1', '<%= @update_selector_url + "1" + @pager.query_string %>');
                                          Saint.update_container('<%= @relation.id %>-edit_assoc_container');

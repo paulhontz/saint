@@ -1,247 +1,278 @@
 module Saint
   class FmExtender
 
-    def initialize node
+    include Saint::Utils
+    include Saint::Inflector
 
-      fm_nodes = Hash.new
-      node.saint.dashboard false
-      node.saint.fm.roots.each_value do |root|
+    attr_reader :roots
 
-        fm_node = node.const_set root.name, Class.new
-
-        fm_node.class_exec do
-
-          include Saint::Api
-
-          http.map node.http.route(root.name)
-          saint.header root.label
-          saint.dashboard false
-          saint.menu do
-            parent node
-            label root.label
-          end
-
-        end
-        fm_nodes[root] = fm_node
-      end
-      fm_nodes.each_pair do |root, fm_node|
-        extend fm_node, root, fm_nodes.values
-      end
-
-      node.class_exec do
-
-        include Saint::Utils
-
-        define_method :index do
-          @nodes = fm_nodes.values
-          saint_view.render_layout saint_view.render_partial('fm/home')
-        end
-      end
+    def initialize node, opts = {}, &proc
+      @node, @opts, @roots = node, opts, Array.new
+      self.instance_exec &proc
     end
 
-    def extend node, root, roots
+    def root root, label = nil
 
-      helper = Saint::FileManager::Helper.new
-      node.class_exec do
+      root = normalize_path root
+      label ||= File.basename(root)
+      node, host = @node, self
 
-        include Presto::Utils
+      unless File.directory?(root)
+        puts 'Creating %s directory ...' % root
+        FileUtils.mkdir_p root
+      end
+
+      fm_class = classify(label)
+      fm = node.const_set fm_class, Class.new
+      @roots << fm
+
+      fs = fm.const_set :FileServer, Class.new
+      fm.class_exec do
+        include Saint::Api
         include Saint::Utils
+        http.map node.http.route(fm_class)
+        saint.header label: label
+        saint.menu.parent node
+      end
 
-        http.before :index, :create do |*path|
-          @path = normalize_path(File.join(*path))
-          @index_request_uri = http.route(:index, @path, http.get_params)
-          @__meta_title__ = 'FileManager | %s | %s' % [saint.label, @path]
-          @roots = roots
+      fs.class_exec do
+
+        include Presto::Api
+        http.map fm.http.route('__file_server__')
+        http.file_server root do |env|
+          env['PATH_INFO'] = Presto::Utils.split_path(env['PATH_INFO'].gsub(/\.saint\-fs/, '')).map{|a| http.escape(a)}.join('/')
         end
 
-        define_method :index do |*path|
-          @label = root.label
-          @active_dir, @active_file = nil
+        def self.[] path
+          '%s/%s.saint-fs' % [http.route, Presto::Utils.normalize_path(path, false, false)]
+        end
+      end
+
+      fm.class_exec do
+        define_method :roots do
+          host.roots
+        end
+
+        define_singleton_method :root do
+          root
+        end
+
+        define_method :root do
+          root
+        end
+
+        define_singleton_method :label do
+          fm_class
+        end
+
+        define_method :label do
+          fm_class
+        end
+      end
+      extend fm
+    end
+
+    def extend node
+
+      node.class_exec do
+
+        http.before do
+          @helper = Saint::FileManager::Helper.new
+        end
+
+        http.before :index, :create, :rename, :resize, :delete, :search do |path = nil|
+          @encoded_path = path
+          @query_string = Hash.new
+          if (search_query = http.params['q']) && search_query.size > 1
+            @query_string[:q] = search_query
+          end
+          @path = path ? normalize_path(decode_path(path), false, false) : ''
+          @__meta_title__ = 'FileManager | %s | %s' % [saint.label, @path]
+        end
+
+        def index path = nil
+          @active_dir, @active_file = nil, active_file?
           scan
           @path.split('/').each { |dir| scan dir }
           saint_view.render_layout saint_view.render_partial('fm/index')
         end
 
-        define_method :create do |*path|
+        def create path = nil
 
-          name = normalize_path(http.params['name'])
-          type = http.post_params['type'] || 'file'
-          node = File.join(root.path, @path, name)
+          name, type = path_related_params 'name', 'type'
+          return unless name && type
+          node = File.join(root, @path, name)
 
-          begin
-            case type
-              when 'file'
-                FileUtils.touch node
-                params = [@path, {file: File.join(@path, name)}]
-              when 'folder'
-                FileUtils.mkdir node
-                params = [File.join(@path, name)]
-              else
-                return {status: 0, message: 'wrong type'}.to_json
+          jsonify do
+            encoded_path = encode_path(File.join(@path, name))
+            if type == 'folder'
+              FileUtils.mkdir node
+              route = [encoded_path]
+            else
+              FileUtils.touch node
+              route = [encode_path(@path), {file: encoded_path}]
             end
-            response = {status: 1, message: 'Item Successfully Created', location: http.route(*params, '')}
-          rescue => e
-            @errors = e
-            response = {status: 0, message: saint_view.render_partial('error')}
+            route
           end
-          response.to_json
         end
 
-        define_method :rename do
+        def rename path = nil
 
-          return unless (path = http.params['path']) && (name = http.params['name'])
-          path, name = [path, name].map { |v| normalize_path(v, true) }
+          path, name = path_related_params 'path', 'name'
+          return unless path && name
 
-          old_path = File.join(root.path, path)
+          old_path = File.join(root, path)
           path = File.dirname(path)
-          new_path = File.join(root.path, path, name)
+          new_path = File.join(root, path, name)
 
-          begin
+          jsonify do
             FileUtils.mv old_path, new_path
-            status, message, location =
-                1, 'Item Successfully Renamed',
-                    File.file?(new_path) ?
-                        http.route(path, file: File.join(path, name)) :
-                        http.route(path, name)
+            route = [encode_path(File.join(path, name))]
+            route = [encode_path(@path)] << {file: encode_path(File.join(path, name))} if File.file?(new_path)
+            route
+          end
+        end
+
+        def delete path = nil
+
+          path = path_related_params 'path'
+          return unless path
+
+          jsonify do
+            FileUtils.remove_entry_secure File.join(root, path)
+            [encode_path(File.directory?(File.join root, @path) ? @path : File.dirname(path))]
+          end
+        end
+
+        def move
+
+          src, dst, current = path_related_params 'src', 'dst', 'current'
+          return unless src && dst && current
+
+          jsonify do
+            ::FileUtils.mv(::File.join(root, src), ::File.join(root, dst))
+            current_path = ::File.join(root, current)
+            [encode_path(File.file?(current_path) || ::File.directory?(current_path) ? current : dst)]
+          end
+        end
+
+        def resize path = nil
+
+          path, name = path_related_params 'path', 'name'
+          return unless path && name
+
+          jsonify do
+
+            @helper.resize *[
+                http.params.values_at('width', 'height').map { |v| v.to_i },
+                File.join(root, path),
+                File.join(root, File.dirname(path), name),
+            ].flatten
+
+            [encode_path(@path)] << {file: encode_path(File.join(File.dirname(path), name))}
+          end
+        end
+
+        def upload
+
+          path, name = path_related_params 'path', 'name'
+          return unless path && name
+
+          begin
+            FileUtils.mv(http.params['file'][:tempfile], ::File.join(root, path, name))
           rescue => e
             @errors = e
-            status, message = 0, saint_view.render_partial('error')
+            return saint_view.render_partial('error')
           end
-          {status: status, message: message, location: location}.to_json
+          1
         end
 
-        define_method :delete do
-          begin
-            path = normalize_path(http.params['path'])
-            FileUtils.remove_entry_secure File.join(root.path, path)
-            response = {status: 1, message: 'Item Successfully Deleted', location: http.route(File.dirname(path))}
-          rescue => e
-            @errors = e
-            response = {status: 0, message: saint_view.render_partial('error')}
-          end
-          response.to_json
-        end
+        def download
 
-        define_method :move do
-          src, dst, current = http.params.values_at('src', 'dst', 'current').map { |v| normalize_path http.unescape(v.to_s) }
-          begin
-            FileUtils.mv(root.path + src, root.path + dst)
-            status, message = 1, 'Item moved'
-            current_path = root.path + current
-            redirect_to = http.route(::File.file?(current_path) || ::File.directory?(current_path) ? current : dst)
-          rescue => e
-            @errors = ["Can not move %s" % File.basename(src), e.to_s]
-            status, message = 0, saint_view.render_partial('error')
-          end
-          {status: status, message: message, redirect_to: redirect_to}.to_json
-        end
+          path = path_related_params 'file'
+          return unless path
 
-        define_method :resize do
-
-          return unless (path = http.params['path']) && (name = http.params['name'])
-          path, name = [path, name].map { |v| normalize_path(v, true) }
-          args = [
-              http.params.values_at('width', 'height').map { |v| v.to_i },
-              File.join(root.path, path),
-              File.join(root.path, File.dirname(path), name),
-          ].flatten
-
-          resize_status = helper.resize(*args)
-          if resize_status == true
-            response = {status: 1, message: 'Image Resize Completed',
-                        location: http.route(File.dirname(path), file: (File.join(File.dirname(path), name)))}
-          else
-            @errors = resize_status
-            response = {status: 0, message: saint_view.render_partial('error')}
-          end
-          response.to_json
-        end
-
-        define_method :upload do
-
-          dir, name = http.params.values_at('dir', 'name').map { |v| normalize_path v }
-          wd = File.join(root.path, dir, '')
-
-          @errors = []
-
-          unless (File.file?(tempfile = http.params['file'][:tempfile]) rescue nil)
-            @errors << "Was unable to upload file"
-          end
-
-          begin
-            FileUtils.mv(tempfile, wd + name)
-          rescue => e
-            @errors << e.to_s
-          end
-
-          return 1 if @errors.size == 0
-          saint_view.render_partial("error")
-        end
-
-        define_method :download do
-          path = normalize_path http.params['file']
           file = File.basename(path)
-          fs = Rack::File.new root.path + File.dirname(path)
+          fs = Rack::File.new File.join(root, File.dirname(path))
           response = fs.call(http.env.merge('PATH_INFO' => file))
           response[1].update 'Content-Disposition' => "attachment; filename=#{file}"
           http.halt response
         end
 
-        define_method :save do
-          begin
-            file = ::File.join(root.path, normalize_path(http.params['file']))
-            ::File.open(file, 'w:utf-8') { |f| f << Saint::Utils.normalize_string(http.post_params['content']) }
-            status, message = 1, 'File successfully saved'
-          rescue => e
-            @errors = ["File Not Saved", e.to_s]
-            status, message = 0, saint_view.render_partial("error")
+        def save
+
+          file = path_related_params 'file'
+          return unless file
+
+          jsonify do
+            ::File.open(::File.join(root, file), 'w:utf-8') do |f|
+              f << Saint::Utils.normalize_string(http.post_params['content'])
+            end
+            {status: 1, message: 'File successfully saved'}
           end
-          {status: status, message: message}.to_json
         end
 
-        define_method :search do
+        def search
           files = Array.new
-          Find.find(root.path).select { |p| ::File.file?(p) }.each do |p|
-            if ::File.basename(p) =~ /#{http.params['query']}/
-              files << helper.file(p).merge(path: p.sub(root.path, ''))
+          Find.find(root).select { |p| ::File.file?(p) }.each do |p|
+            if ::File.basename(p) =~ /#{Regexp.escape http.params['query']}/
+              file = @helper.file(p).merge(path: p.sub(root, ''))
+              file[:path_encoded] = encode_path(file[:path])
+              files << file
             end
           end
           saint_view.render_partial 'fm/search', files: files
         end
 
-        define_method :file do
+        def read_file
+          file = path_related_params 'file'
+          return unless file
+          file = decode_path file
+          return unless ::File.file?(full_path = ::File.join(root, file))
+          content, @errors = nil
+          if @helper.size(full_path) > Saint::FileManager::MAX_FILE_SIZE
+            @errors = 'Sorry, files bigger than %s are not editable.' % number_to_human_size(Saint::FileManager::MAX_FILE_SIZE)
+          else
+            begin
+              content = Saint::Utils.normalize_string ::File.open(full_path, 'r:utf-8').read
+            rescue => e
+              @errors = 'Unable to read file: %s' % e.message
+            end
+          end
+          response = {status: 1, content: content}
+          response = {status: 0, message: saint_view.render_partial('error')} if @errors
+          response.to_json
+        end
 
-          return unless file = http.params['file']
-          file = normalize_path(file.to_s)
-          return unless ::File.file?(full_path = ::File.join(root.path, file))
-          hlp = Saint::FileManager::Helper.new
-          file_details = hlp.file(full_path).update(
+        private
+        def active_file?
+
+          file = path_related_params 'file'
+          return unless file
+          file = decode_path file
+          return unless ::File.file?(full_path = ::File.join(root, file))
+
+          node = @helper.file(full_path).update(
               path: file,
               name: ::File.basename(file),
-              size: hlp.size(full_path, true),
+              size: @helper.size(full_path, true),
               uniq: 'saint-fm-file-' << Digest::MD5.hexdigest(full_path),
               :file? => true
           )
-          if file_details[:editable?]
-            file_details[:content] = begin
-              Saint::Utils.normalize_string ::File.open(full_path, 'r:binary').read
-            rescue => e
-              'Unable to read file: %s' % e.inspect
-            end
+          node[:path_encoded] = encode_path(node[:path])
+          if node[:viewable?]
+            node[:url] = FileServer[file]
+            node[:geometry] = @helper.geometry(full_path)
           end
-          if file_details[:viewable?]
-            file_details[:url] = root.file_server[file]
-            file_details[:geometry] = hlp.geometry(full_path)
-          end
-          saint_view.render_partial 'fm/partial/file', node: file_details
+          node
         end
 
-        define_method :scan do |dir = nil|
+        def scan dir = nil
 
           @dirs ||= Array.new
           @current_path ||= Array.new
           dir_path = File.join(*@current_path, dir||'')
-          dir_full_path = File.join(root.path, dir_path, '/')
+          dir_full_path = File.join(root, dir_path, '')
           return unless File.directory?(dir_full_path)
           @current_path << dir if dir
           @root_folder = dir.nil?
@@ -254,16 +285,17 @@ module Saint
             node = Hash.new
             node[:dir] = dir_path
             node[:name] = File.basename(n)
-            node[:path] = File.join(dir_path, node[:name]).gsub(/^\/+|\/+$/, '')
+            node[:path] = File.join([dir_path, node[:name]].select { |c| c.size > 0 })
+            node[:path_encoded] = encode_path(node[:path])
             node[:uniq] = 'saint-fm-%s-' << Digest::MD5.hexdigest(node[:path])
 
             if is_dir
 
               node[:dir?] = true
-              node[:icon] = helper.icon('folder')
+              node[:icon] = @helper.icon('folder')
               node[:uniq] = node[:uniq] % 'dir'
 
-              if @path =~ /^#{node[:path]}\//
+              if @path =~ /^#{Regexp.escape node[:path]}\//
                 node[:selected_dir?] = true
               end
               if @path == node[:path]
@@ -274,16 +306,51 @@ module Saint
 
             else
 
+              node.update(@helper.file(n))
               node[:file?] = true
               node[:uniq] = node[:uniq] % 'file'
-              node[:size] = helper.size(n, true)
+              node[:size] = @helper.size(n, true)
 
-              nodes[:files] << node.update(helper.file(n))
+              nodes[:files] << node
             end
           end
           @dirs << {name: dir, path: dir_path, nodes: nodes}
         end
-        private :scan
+
+        def jsonify &proc
+          begin
+            response = proc.call
+            if response.is_a?(String)
+              response = {status: 1, location: response}
+            elsif response.is_a?(Array)
+
+              params_updated = false
+              response.each { |p| p.is_a?(Hash) && p.update(@query_string) && params_updated = true }
+              response << @query_string unless params_updated
+
+              response = {status: 1, location: http.route(*response)}
+            end
+          rescue => e
+            @errors = e
+            response = {status: 0, message: saint_view.render_partial('error')}
+          end
+          response.to_json
+        end
+
+        def path_related_params *params
+          params_given = http.params.values_at(*params).compact
+          return unless params_given.size == params.size
+          params = params_given.map { |p| normalize_path(p, false, false) }
+          params.size == 1 ? params.first : params
+        end
+
+        def encode_path path
+          Base64.encode64(path).strip
+        end
+
+        def decode_path path
+          Base64.decode64 path
+        end
 
       end
     end

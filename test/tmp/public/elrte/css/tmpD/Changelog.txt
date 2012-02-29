@@ -1,0 +1,5 @@
+Unable to read file: undefined local variable or method `full_path' for #
+
+
+
+<Ctrl::Fm::Public:0x007f96ec656f28>

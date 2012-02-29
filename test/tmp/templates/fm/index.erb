@@ -17,7 +17,7 @@
                 var dst = $(this).attr('title');
                 var src = $(ui.draggable).attr('title');
                 if (src == dst) return false;
-                Saint.valid_get(
+                Saint.valid_GET(
                         '<%= http.route(:move) %>?src=' + src + '&dst=' + dst,
                         function() {
                             window.location.reload();
