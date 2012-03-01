@@ -9,14 +9,9 @@ module Saint
     def initialize node, opts = {}, &proc
       @node, @opts, @roots = node, opts, Array.new
       self.instance_exec &proc
-
       unless @node.respond_to?(:index)
-        host = self
-        @node.class_exec do
-          define_method :index do
-            Saint::Utils.saint_view(self).render_layout Saint::Utils.saint_view(host).render_view('fm/home')
-          end
-        end
+        root = @roots.first
+        @node.class_exec { http.before { http.redirect root.http.route } }
       end
     end
 

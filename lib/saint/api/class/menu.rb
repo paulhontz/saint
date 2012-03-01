@@ -20,11 +20,7 @@ module Saint
 
     def initialize node = nil, &proc
 
-      if @node = node
-        @_url = @node.http.route
-        @_label = @node.saint.label
-      end
-
+      @node = node
       @scope = :default
       @position = 0
       @children = Array.new
@@ -33,13 +29,13 @@ module Saint
 
     def url url = nil
       @url = url if url
-      @url || @_url
+      @url || (@node.http.route if @node)
     end
 
     # label to be displayed in UI
     def label label = nil
       @label = label if label
-      @label || @_label
+      @label || (@node.saint.label if @node)
     end
 
     # node under which the current menu item will reside
