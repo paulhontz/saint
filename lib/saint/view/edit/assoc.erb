@@ -64,7 +64,7 @@
 
                       <% if remote_belongs_to.size > 0 -%>
                           <div class="tabbable">
-                            <ul class="nav nav-pills">
+                            <ul class="nav nav-tabs">
                               <li class="active">
                                 <a href="#<%= tab_id %>-create_new-tabs" data-toggle="tab">
                                   <i class="icon-edit"></i>
@@ -82,11 +82,10 @@
                           </div>
                       <% end -%>
 
-                      <form id="<%= form_id %>" action="<%= rel.remote_node.http.route(:save) %>" method="post">
-                        <div class="tab-content">
+                      <div class="tab-content">
 
-                          <div class="tab-pane active" id="<%= tab_id %>-create_new-tabs">
-
+                        <div class="tab-pane active" id="<%= tab_id %>-create_new-tabs">
+                          <form id="<%= form_id %>" action="<%= rel.remote_node.http.route(:save) %>" method="post">
                             <% if row_id > 0 && rel.belongs_to? -%>
                                 <div class="alert alert-info">
                                   <label class="checkbox">
@@ -100,37 +99,39 @@
                             <% end -%>
 
                             <%= render_elements crud_columns(rel.remote_node.saint.columns), node: rel.remote_node %>
-
-                          </div>
-
-                          <% remote_belongs_to.each_value do |remote_rel|
-                              associated = rel.local_model.__id__ == remote_rel.remote_model.__id__
-                              associator_id = '%s-element' % remote_rel.id -%>
-
-                              <div id="<%= tab_id %>-create_new-tabs-<%= remote_rel.id %>" class="tab-pane">
-
-                                <input type="hidden" name="<%= remote_rel.local_key %>" value="<%= associated ? row_id : SaintConst::NULL_VALUE %>"
-                                       id="<%= associator_id %>"/>
-
-                                <% if row && associated -%>
-                                    <div class="alert alert-info">
-                                      <label class="checkbox">
-                                        <input type="checkbox" checked="true"
-                                               onclick="$('#<%= associator_id %>').attr('disabled', !$(this).attr('checked'));"/>
-                                        Attach newly created
-                                        <strong><%= label__singular %></strong>
-                                        to current
-                                        <strong><%= saint.label singular: true %></strong>
-                                      </label>
-                                    </div>
-                                <% end -%>
-                                <div id="<%= remote_rel.id %>0">
-                                  <%= remote_rel.remote_node.http.xhr_get(:assoc__any__remote_items, remote_rel.id) %>
-                                </div>
-                              </div>
-                          <% end -%>
+                            <% remote_belongs_to.each_value do |remote_rel|
+                                associated = rel.local_model.__id__ == remote_rel.remote_model.__id__ -%>
+                                <input type="hidden" name="<%= remote_rel.local_key %>"
+                                       value="<%= associated ? row_id : SaintConst::NULL_VALUE %>"
+                                       id="<%= remote_rel.id %>-element"/>
+                            <% end -%>
+                          </form>
                         </div>
-                      </form>
+
+                        <% remote_belongs_to.each_value do |remote_rel|
+                            associated = rel.local_model.__id__ == remote_rel.remote_model.__id__ -%>
+
+                            <div id="<%= tab_id %>-create_new-tabs-<%= remote_rel.id %>" class="tab-pane">
+
+                              <% if row && associated -%>
+                                  <div class="alert alert-info">
+                                    <label class="checkbox">
+                                      <input type="checkbox" checked="true"
+                                             onclick="$('#<%= remote_rel.id %>-element').attr('disabled', !$(this).attr('checked'));"/>
+                                      Attach newly created
+                                      <strong><%= label__singular %></strong>
+                                      to current
+                                      <strong><%= saint.label singular: true %></strong>
+                                    </label>
+                                  </div>
+                              <% end -%>
+                              <div id="<%= remote_rel.id %>0">
+                                <%= remote_rel.remote_node.http.xhr_get(:assoc__any__remote_items, remote_rel.id) %>
+                              </div>
+                            </div>
+                        <% end -%>
+                      </div>
+
                       <button class="btn btn-success" onclick="Saint.submit_valid_form('<%= form_id %>', function(response){
                               if($('#associator-belongs_to-<%= rel.id %>').attr('checked')){
                                       Saint.valid_GET('<%= http.route :save, row_id, rel.local_key => '' %>' + response.status, function(response){

@@ -1,6 +1,6 @@
 <div class="inline topped">
   <form action="<%= http.route(:create, encode_path(@path)) %>" id="saint-fm-toolbar-create-<%= node.__id__ %>-form" method="post">
-    <input type="text" name="name" value="" placeholder="Create new File or Folder..."/>
+    <input type="text" name="name" value="" placeholder="Create new File or Folder..." class="disable_enter_key"/>
     <input type="hidden" name="type" id="saint-fm-toolbar-create-<%= node.__id__ %>-form-type"/>
   </form>
 </div>

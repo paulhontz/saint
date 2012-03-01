@@ -99,7 +99,7 @@
     <div class="tab-pane" id="saint-fm-file-toolbar-copy">
 
       <form action="<%= http.route(:copy, @encoded_path, @query_string) %>" method="post" id="saint-fm-file-forms-copy">
-        <input type="text" name="name" value="copy of <%= node[:name] -%>"/>
+        <input type="text" name="name" value="copy of <%= node[:name] -%>" class="disable_enter_key"/>
         <input type="hidden" name="path" value="<%= node[:path] -%>"/>
 
         <a href="javascript:void(0);" class="btn topped"

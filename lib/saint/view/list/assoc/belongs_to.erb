@@ -59,7 +59,7 @@
         <div class="saint-filter_label">&nbsp;</div>
         <div class="btn-group">
           <a href="javascript:void(0);" class="btn"
-             onclick="Saint.submit_form('saint_assoc_filters-<%= @relation.id %>', '<%= @relation.id + @attached.to_s %>-items');">
+             onclick="console.log($('#saint_assoc_filters-<%= @relation.id %>')); Saint.submit_form('saint_assoc_filters-<%= @relation.id %>', '<%= @relation.id + @attached.to_s %>-items');">
             <i class="icon-search"></i>
             Search</a>
           <a href="javascript:void(0);" class="btn"
