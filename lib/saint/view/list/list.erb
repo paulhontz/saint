@@ -12,7 +12,7 @@
           <div class="inline topped">
             <div class="saint-filter_label">&nbsp;</div>
             <div class="btn-group">
-              <a href="javascript:void(0);" class="btn" onclick="$('#saint-forms-summary-search').submit();">
+              <a class="btn void-link" onclick="$('#saint-forms-summary-search').submit();">
                 <i class="icon-search"></i>
                 Search
               </a>
@@ -33,7 +33,7 @@
         <div class="btn-group">
 
           <% if saint.delete && @pager.items > 0 -%>
-              <a href="javascript:void(0);" class="btn btn-warning"
+              <a class="btn btn-warning void-link"
                  onclick="if(confirm('This will remove selected items. This action CAN NOT be undone! Continue?')){
                          Saint.submit_valid_form('saint-forms-summary-delete', function(response){
                                  Saint.ui_alert(response.message + '<br/>Reloading...', {

@@ -1,9 +1,3 @@
-div {
-    /*border-right: 1px solid gray;*/
-    /*border-bottom: 1px solid gray;*/
-    /*margin: 2px;*/
-}
-
 body {
     padding-top: 60px;
 }
@@ -83,12 +77,16 @@ fieldset legend {
     margin: 0;
 }
 
-.ellipsis {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    -o-text-overflow: ellipsis;
-    -ms-text-overflow: ellipsis;
+.saint-input-medium {
+    width: 25%;
+}
+
+.saint-input-large {
+    width: 50%;
+}
+
+.void-link {
+    cursor: pointer;
 }
 
 .adaptive-nav {

@@ -46,7 +46,7 @@
         </div>
     <% end -%>
 <% else -%>
-    <a href="javascript:void(0);" onclick="$('#<%= @id %>-error_dialog').dialog({title: 'Filter Errors - <%= @setup.label %>', modal: true, width: '40%'});">
+    <a class="void-link" onclick="$('#<%= @id %>-error_dialog').dialog({title: 'Filter Errors - <%= @setup.label %>', modal: true, width: '40%'});">
       view errors
     </a>
     <div id="<%= @id %>-error_dialog" style="display: none;">

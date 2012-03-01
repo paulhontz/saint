@@ -1,6 +1,9 @@
 <% node = @root_folder || @active_dir
    search_query = @query_string[:q]
 %>
+<link rel="stylesheet" href="<%= Saint::FileServer['vendor/plupload/js/jquery.plupload.queue/css/jquery.plupload.queue.css'] %>"/>
+<script type="text/javascript" src="<%= Saint::FileServer['vendor/plupload/js/plupload.full.js'] %>"></script>
+<script type="text/javascript" src="<%= Saint::FileServer['vendor/plupload/js/jquery.plupload.queue/jquery.plupload.queue.js'] %>"></script>
 <script type="text/javascript" src="<%= Saint::FileServer["vendor/jquery.scrollTo.js"] %>"></script>
 <script type="text/javascript">
     $(function() {
@@ -21,8 +24,8 @@
             accept: '.saint-fmui-draggable',
             drop: function(event, ui) {
 
-                var dst = $(this).attr('title');
-                var src = $(ui.draggable).attr('title');
+                var dst = $(this).attr('droppable-title');
+                var src = $(ui.draggable).attr('droppable-title');
                 if (src == dst) return false;
                 Saint.valid_POST(
                         '<%= http.route(:move) %>',
@@ -33,8 +36,42 @@
                 );
             }
         });
+
+        $('#saint-fm-uploader-dialog').on('shown', function() {
+            var errors = new Array();
+            $('#saint-fm-uploader-queue').pluploadQueue({
+                runtimes : 'html5,gears,flash,html4',
+                flash_swf_url : '<%= Saint::FileServer['vendor/plupload/js/plupload.flash.swf'] %>',
+                url : '<%= http.route(:upload) %>',
+                multipart_params: {path: '<%= node[:path] %>'},
+                init: {
+                    FileUploaded: function(uploader, file, response) {
+                        if (response.response == 1)
+                            return true;
+                        errors.push(response.response);
+                    },
+                    UploadComplete: function(uploader, files) {
+                        if (errors.length > 0)
+                            return Saint.ui_alert(errors.join());
+                        window.location.reload();
+                    }
+                }
+            });
+        });
     });
 </script>
+
+<div class="modal" id="saint-fm-uploader-dialog" style="display: none;">
+  <div class="modal-header">
+    <a class="close" data-dismiss="modal">×</a>
+    <h3>Uploading files into "<%== node[:name] %>"</h3>
+  </div>
+  <div class="modal-body">
+    <div id="saint-fm-uploader-queue"></div>
+  </div>
+</div>
+
+<%= saint_view.render_view('fm/partial/delete', node: node) unless @root_folder -%>
 
 <div class="container content">
 
@@ -46,7 +83,7 @@
           Search</a>
       </li>
       <li>
-        <a href="javascript:void(0);" onclick="$('#saint-fm-uploader-dialog').modal();">
+        <a class="void-link" onclick="$('#saint-fm-uploader-dialog').modal();">
           <i class="icon-upload"></i>
           Upload</a>
       </li>
@@ -62,7 +99,7 @@
               Rename</a>
           </li>
           <li>
-            <a href="javascript:void(0);"
+            <a class="void-link"
                onclick="if(confirm('<%= ('Removing %s/%s/ folder and ANYTHING under it?' % [node[:dir], node[:name]]) if node[:dir?] %> This action can not be undone. Continue?')){
                        Saint.submit_valid_form('saint-fm-forms-delete', function(response){window.location=response.location});
                        }else{return false};">
@@ -97,13 +134,26 @@
     <% end -%>
 
     <div class="tab-pane" id="saint-fm-toolbar-create">
-      <%= saint_view.render_partial('fm/partial/create') -%>
+
+
+      <form action="<%= http.route(:create, encode_path(@path)) %>" id="saint-fm-toolbar-create-<%= node.__id__ %>-form" method="post">
+        <input type="hidden" name="type" id="saint-fm-toolbar-create-<%= node.__id__ %>-form-type"/>
+        <input type="text" name="name" value="" placeholder="Create new File or Folder..." class="disable_enter_key saint-input-medium"/>
+
+        <a class="btn topped" onclick="Saint.Fm.create_item('saint-fm-toolbar-create-<%= node.__id__ %>-form', 'file');">
+          <i class="icon-file"></i>
+          file
+        </a>
+
+        <a class="btn topped" onclick="Saint.Fm.create_item('saint-fm-toolbar-create-<%= node.__id__ %>-form', 'folder');">
+          <i class="icon-folder-close"></i>
+          folder
+        </a>
+      </form>
+
     </div>
 
   </div>
-
-  <%= saint_view.render_view('fm/partial/upload', path: node[:path], label: node[:name]) -%>
-  <%= saint_view.render_view('fm/partial/delete', node: node) unless @root_folder -%>
 
   <div id="saint-fm-window" class="saint-fm-window">
 
@@ -111,7 +161,7 @@
       <div class="saint-fm-node-column">
         <% roots.each do |root| -%>
             <div class="<%= @root_folder && label == root.label ? 'saint-fm-active_dir' : ('saint-fm-selected_dir' if label == root.label) %> saint-selectable">
-              <img src="<%= Saint::FileServer['vendor/icons/Oxygen/16/folder.png'] %>"/>
+              <img src="<%= @helper.icon('folder') %>"/>
               <a href="<%= root.http.route %>">
                 <%= root.saint.menu.label %>
               </a>
@@ -123,14 +173,14 @@
     <% @dirs.each do |dir| -%>
         <div class="inline topped">
 
-          <div class="saint-fmui-droppable saint-fm-node-column" title="<%== dir[:path] %>">
+          <div class="saint-fmui-droppable saint-fm-node-column" droppable-title="<%== dir[:path] %>">
 
             <% dir[:nodes][:dirs].each do |node|
                 fm_class = ''
                 fm_class = 'saint-fm-selected_dir' if node[:selected_dir?]
                 fm_class = 'saint-fm-active_dir' if node[:active_dir?] -%>
 
-                <div title="<%== node[:path] %>" id="<%= node[:uniq] %>"
+                <div droppable-title="<%== node[:path] %>" id="<%= node[:uniq] %>"
                      class="saint-fmui-draggable saint-fmui-droppable saint-fm-dir saint-selectable <%= fm_class %>">
 
                   <img src="<%= node[:icon] %>"/>
@@ -143,7 +193,7 @@
             <% end -%>
 
             <% dir[:nodes][:files].each do |node| -%>
-                <div title="<%== node[:path] %>" id="<%= node[:uniq] %>"
+                <div droppable-title="<%== node[:path] %>" id="<%= node[:uniq] %>"
                      class="saint-fmui-draggable saint-selectable saint-fm-file">
 
                   <img src="<%= node[:icon] %>" class="saint-fm-node-icon"/>
@@ -187,7 +237,7 @@
       <div class="modal-header">
         <a href="<%= http.route @encoded_path %>" class="close">×</a>
 
-        <h3>Found <%= files.size %> files for "<%== search_query  %>"</h3>
+        <h3>Found <%= files.size %> files for "<%== search_query %>"</h3>
       </div>
       <div class="modal-body">
 

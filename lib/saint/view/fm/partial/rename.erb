@@ -1,6 +1,6 @@
 <form action="<%= http.route(:rename, @encoded_path, @query_string) %>" method="post" id="saint-fm-forms-rename">
-  <input type="text" name="name" value="<%= node[:name] -%>" class="disable_enter_key"/>
-  <a href="javascript:void(0)" class="btn topped"
+  <input type="text" name="name" value="<%= node[:name] -%>" class="disable_enter_key saint-input-medium"/>
+  <a class="btn topped void-link"
      onclick="Saint.submit_valid_form('saint-fm-forms-rename', function(response){window.location=response.location});">
     rename
   </a>

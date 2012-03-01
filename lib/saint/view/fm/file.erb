@@ -1,6 +1,9 @@
 <% node = @active_file
    editable_size = @helper.editable_size?(node[:size])
 %>
+
+<%= saint_view.render_view 'fm/partial/delete', node: node %>
+
 <div id="saint-fm-file-window" class="container content">
 
   <a class="close" href="<%= http.route @encoded_path, @query_string %>">×</a>
@@ -15,7 +18,7 @@
     <ul class="nav nav-tabs">
       <% if node[:editable?] && editable_size -%>
           <li>
-            <a href="javascript:void(0);" id="saint-fm-file-buttons-save" class="btn"
+            <a id="saint-fm-file-buttons-save" class="btn void-link"
                onclick="var button = $(this); var html = button.html();
                        var callback = function(response){button.attr('disabled', false).html(html); Saint.ui_alert(response.message);}
                        button.attr('disabled', true).html('saving file, please wait...');
@@ -48,7 +51,7 @@
           Copy</a>
       </li>
       <li>
-        <a href="javascript:void(0);"
+        <a class="void-link"
            onclick="if(confirm('<%= ('Removing %s/%s/ folder and ANYTHING under it?' % [node[:dir], node[:name]]) if node[:dir?] %> This action can not be undone. Continue?')){
                    Saint.submit_valid_form('saint-fm-forms-delete', function(response){window.location=response.location});
                    }else{return false};">
@@ -81,19 +84,19 @@
           <% end -%>
           <li>
             <a href="<%= http.route encode_path(dirname) %>">
-              <img src="<%= Saint::FileServer['vendor/icons/Oxygen/16/folder.png'] %>"/>
+              <img src="<%= @helper.icon('folder') %>"/>
               <%= dirname_label.call dirname %>
             </a>
           </li>
           <% ls(File.join(root, dirname)).each do |n|
               file = File.file?(n) ? @helper.file(n) : nil
-              d = n.sub(root, '')
-              encoded_path = encode_path(d)
-              route = file ? [@encoded_path] << {file: encoded_path} : [encoded_path] -%>
-              <li class="<%= 'active' if d == node[:path] %>">
+              dirname = n.sub(root, '')
+              encoded_path = encode_path(dirname)
+              route = file ? [@encoded_path] << @query_string.update(file: encoded_path) : [encoded_path] << @query_string -%>
+              <li class="<%= 'active' if dirname == node[:path] %>">
                 <a href="<%= http.route *route %>">
                   <span style="color: #999;">\_</span>
-                  <img src="<%= file ? file[:icon] : Saint::FileServer['vendor/icons/Oxygen/16/folder.png'] %>"/>
+                  <img src="<%= file ? file[:icon] : @helper.icon('folder') %>"/>
                   <%= file ? file[:name] : File.basename(n) %>
                 </a>
               </li>
@@ -122,7 +125,7 @@
               </div>
             </div>
             <div class="inline topped">
-              <a href="javascript:void(0);" class="btn topped"
+              <a class="btn topped void-link"
                  onclick="Saint.submit_valid_form('saint-fm-file-forms-resize', function(response){window.location=response.location});">
                 resize
               </a>
@@ -138,10 +141,10 @@
     <div class="tab-pane" id="saint-fm-file-toolbar-copy">
 
       <form action="<%= http.route(:copy, @encoded_path, @query_string) %>" method="post" id="saint-fm-file-forms-copy">
-        <input type="text" name="name" value="copy of <%= node[:name] -%>" class="disable_enter_key"/>
+        <input type="text" name="name" value="copy of <%= node[:name] -%>" class="disable_enter_key saint-input-medium"/>
         <input type="hidden" name="path" value="<%= node[:path] -%>"/>
 
-        <a href="javascript:void(0);" class="btn topped"
+        <a class="btn topped void-link"
            onclick="Saint.submit_valid_form('saint-fm-file-forms-copy', function(response){window.location=response.location});">
           copy
         </a>
@@ -150,14 +153,12 @@
     </div>
   </div>
 
-  <%= saint_view.render_view 'fm/partial/delete', node: node %>
-
   <div id="saint-fm-file-alerts" class="alert" style="display: none;"></div>
 
   <% if node[:editable?] -%>
       <% if editable_size -%>
           <form action="<%= http.route(:save, file: node[:path]) %>" id="saint-fm-file-forms-save" method="post">
-            <textarea name="content" id="saint-fm-file-content" title="<%= node[:path_encoded] %>"
+            <textarea name="content" id="saint-fm-file-content"
                       style="width: 100%; height: 600px;" disabled="true">
               loading content, please wait ...</textarea>
           </form>
@@ -175,13 +176,13 @@
       <% end -%>
   <% end -%>
 </div>
-
+<input type="hidden" id="saint-fm-file-encoded_path" value="<%= node[:path_encoded] %>" />
 <script type="text/javascript">
     $(function() {
         <% if node[:editable?] -%>
         $('#saint-fm-file-buttons-save').hide();
         <% if editable_size -%>
-        Saint.valid_POST("<%= http.route :read_file %>", {file: $('#saint-fm-file-content').attr('title')}, function(response) {
+        Saint.valid_POST("<%= http.route :read_file %>", {file: $('#saint-fm-file-encoded_path').val()}, function(response) {
             $('#saint-fm-file-content').attr('disabled', false).val(response.content).focus();
             $('#saint-fm-file-buttons-save').show();
         }, function(response) {

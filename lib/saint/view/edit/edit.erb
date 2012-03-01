@@ -76,8 +76,7 @@
         <% end -%>
 
         <% if saint.delete -%>
-            <a href="javascript:void(0);"
-               class="btn btn-warning"
+            <a class="btn btn-warning void-link"
                onclick="if(confirm('This action can not be undone! Continue?')){
                        Saint.valid_GET('<%= http.route(:delete, @row_id) %>',function(response){
                                Saint.ui_alert(response.message + '<br/>Reloading...', {
