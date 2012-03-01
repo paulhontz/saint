@@ -14,14 +14,14 @@
         $('#saint-fm-search_field').focus();
         $('#saint-fm-window').scrollTo($('#right-edge'));
 
-        $(".saint-fmui-draggable").draggable({
+        $(".saint-fm-draggable").draggable({
             helper: 'clone',
             revert: true,
             scroll: false
         });
-        $(".saint-fmui-droppable").droppable({
+        $(".saint-fm-droppable").droppable({
             greedy: true,
-            accept: '.saint-fmui-draggable',
+            accept: '.saint-fm-draggable',
             drop: function(event, ui) {
 
                 var dst = $(this).attr('droppable-title');
@@ -52,7 +52,7 @@
                     },
                     UploadComplete: function(uploader, files) {
                         if (errors.length > 0)
-                            return Saint.ui_alert(errors.join());
+                            return Saint.alert(errors.join());
                         window.location.reload();
                     }
                 }
@@ -135,7 +135,6 @@
 
     <div class="tab-pane" id="saint-fm-toolbar-create">
 
-
       <form action="<%= http.route(:create, encode_path(@path)) %>" id="saint-fm-toolbar-create-<%= node.__id__ %>-form" method="post">
         <input type="hidden" name="type" id="saint-fm-toolbar-create-<%= node.__id__ %>-form-type"/>
         <input type="text" name="name" value="" placeholder="Create new File or Folder..." class="disable_enter_key saint-input-medium"/>
@@ -173,7 +172,7 @@
     <% @dirs.each do |dir| -%>
         <div class="inline topped">
 
-          <div class="saint-fmui-droppable saint-fm-node-column" droppable-title="<%== dir[:path] %>">
+          <div class="saint-fm-droppable saint-fm-node-column" droppable-title="<%== dir[:path] %>">
 
             <% dir[:nodes][:dirs].each do |node|
                 fm_class = ''
@@ -181,7 +180,7 @@
                 fm_class = 'saint-fm-active_dir' if node[:active_dir?] -%>
 
                 <div droppable-title="<%== node[:path] %>" id="<%= node[:uniq] %>"
-                     class="saint-fmui-draggable saint-fmui-droppable saint-fm-dir saint-selectable <%= fm_class %>">
+                     class="saint-fm-draggable saint-fm-droppable saint-fm-dir saint-selectable <%= fm_class %>">
 
                   <img src="<%= node[:icon] %>"/>
                   <a href="<%= http.route(node[:path_encoded]) %>">
@@ -194,7 +193,7 @@
 
             <% dir[:nodes][:files].each do |node| -%>
                 <div droppable-title="<%== node[:path] %>" id="<%= node[:uniq] %>"
-                     class="saint-fmui-draggable saint-selectable saint-fm-file">
+                     class="saint-fm-draggable saint-selectable saint-fm-file">
 
                   <img src="<%= node[:icon] %>" class="saint-fm-node-icon"/>
                   <a href="<%= http.path + '?file=' + node[:path_encoded] %>">

@@ -34,15 +34,10 @@
       <tr class="saint-selectable" style="<%= "background-color: ##{bg_color}" if bg_color %>">
         <% if level == 0 -%>
             <td style="text-align: center;">
-              <% n = (items_counter -= 1) - @pager.page_number * saint.ipp
-                 if remote_node %>
-                  <a href="<%= remote_node.http.route(:edit, remote_id) %>"
-                     class="btn" target="_blank">
-                    <%= n %>
-                  </a>
-              <% else %>
-                  <%= n %>
-              <% end %>
+              <a class="btn" target="_blank"
+                 href="<%= remote_node ? remote_node.http.route(:edit, remote_id) : 'javascript:void(0);' %>">
+                <%= (items_counter -= 1) - @pager.page_number * @pager.items_per_page %>
+              </a>
             </td>
             <% unless readonly -%>
                 <td style="text-align: center;">
@@ -62,9 +57,9 @@
                                      Saint.valid_GET('<%= '%s/%s/%s/create' % [update_relation_url, remote_id, @local_id] %>', function(response){
                                              Saint.update_container('<%= @relation.id %>0', '<%= @update_selector_url + "0" + @pager.query_string %>');
                                              Saint.update_container('<%= @relation.id %>1', '<%= @update_selector_url + "1" %>');
-                                             Saint.update_container('<%= @relation.id %>-edit_assoc_container');
                                              Saint.update_container('saint-crud-header', '<%= http.route(:head, @local_id) %>');
-                                             Saint.ui_alert(response.message);
+                                             Saint.empty_container('<%= @relation.id %>-edit_assoc_container');
+                                             Saint.alert(response.message);
                                              });}"
                              <% end -%> >
                             attach
@@ -78,9 +73,9 @@
                                  Saint.valid_GET('<%= '%s/%s/%s/delete' % [update_relation_url, remote_id, @local_id] %>', function(response){
                                          Saint.update_container('<%= @relation.id %>0', '<%= @update_selector_url + "0" %>');
                                          Saint.update_container('<%= @relation.id %>1', '<%= @update_selector_url + "1" + @pager.query_string %>');
-                                         Saint.update_container('<%= @relation.id %>-edit_assoc_container');
                                          Saint.update_container('saint-crud-header', '<%= http.route(:head, @local_id) %>');
-                                         Saint.ui_alert(response.message);
+                                         Saint.empty_container('<%= @relation.id %>-edit_assoc_container');
+                                         Saint.alert(response.message);
                                          });}">
                         detach
                       </a>
@@ -93,7 +88,7 @@
             value = column.summary_value remote_item, self -%>
             <td>
               <% if remote_node -%>
-                  <a href="<%= remote_node.http.route(:edit, remote_id) %>" target="_blank" class="saint-link">
+                  <a href="<%= remote_node.http.route(:edit, remote_id) %>" target="_blank">
                     <%= value %>
                   </a>
               <% else -%>

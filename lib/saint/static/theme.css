@@ -196,8 +196,13 @@ fieldset legend {
     font-size: 80%;
 }
 
-.saint-link {
-    text-decoration: none;
+.saint-opts_manager-name {
+    font-weight: bold;;
+}
+
+.saint-opts_manager-details {
+    font-size: 80%;
+    color: #808080;
 }
 
 .saint-fm-window {
@@ -248,16 +253,9 @@ fieldset legend {
     white-space: nowrap;
 }
 
-.saint-opts_manager-name {
-    font-weight: bold;;
-}
 
-.saint-opts_manager-details {
-    font-size: 80%;
-    color: #808080;
-}
 
-.saint-fmui-draggable {
+.saint-fm-draggable {
     cursor: move;
 }
 

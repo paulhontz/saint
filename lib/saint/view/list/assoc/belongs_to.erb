@@ -8,17 +8,14 @@
 
     <script type="text/javascript">
         <%= "function update_relation_#{@relation.id}(val, element_id) {" %>
-        Saint.valid_GET(
-                '<%= @relation.local_node.http.route(:save, @local_id) + "?" + @relation.local_key.to_s %>=' + val,
-                function(response) {
+        Saint.valid_GET('<%= @relation.local_node.http.route(:save, @local_id) << '?' << @relation.local_key.to_s %>=' + val, function(response) {
                     Saint.update_value('<%= @relation.id %>-element', response.status);
                     Saint.update_container('saint-crud-header', '<%= http.route :head, @local_id %>');
                     Saint.update_container('<%= @relation.id %>0', '<%= @relation.local_node.http.route(:assoc__any__remote_items, @relation.id , @local_id, 0) %>');
-                    Saint.ui_alert(response.message);
-                },
-                function(response) {
+                    Saint.alert(response.message);
+                }, function(response) {
                     $('#' + element_id).attr('checked', false);
-                    Saint.ui_alert(response.message);
+                    Saint.alert(response.message);
                 }
         );
         <%= "}" %>
@@ -59,7 +56,7 @@
         <div class="saint-filter_label">&nbsp;</div>
         <div class="btn-group">
           <a class="btn void-link"
-             onclick="console.log($('#saint_assoc_filters-<%= @relation.id %>')); Saint.submit_form('saint_assoc_filters-<%= @relation.id %>', '<%= @relation.id + @attached.to_s %>-items');">
+             onclick="Saint.update_container('<%= @relation.id + @attached.to_s %>-items', {form: 'saint_assoc_filters-<%= @relation.id %>'});">
             <i class="icon-search"></i>
             Search</a>
           <a class="btn void-link"

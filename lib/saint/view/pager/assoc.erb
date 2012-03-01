@@ -1,7 +1,7 @@
 <% if @pages > 1 %>
     <div class="btn-group inline">
       <% if @page_min > 1 -%>
-          <a class="btn void-link" onclick="Saint.pager('<%= link_page 1 %>','<%= @opts[:container_id] %>');">
+          <a class="btn void-link" onclick="Saint.update_container('<%= @opts[:container_id] %>', '<%= link_page 1 %>');">
             1</a>
           <a class="btn">...</a>
       <% end -%>
@@ -11,21 +11,21 @@
                 <%= page %>
               </a>
           <% else -%>
-              <a class="btn void-link" onclick="Saint.pager('<%= link_page page %>','<%= @opts[:container_id] %>');">
+              <a class="btn void-link" onclick="Saint.update_container('<%= @opts[:container_id] %>', '<%= link_page page %>');">
                 <%= page %></a>
           <% end -%>
       <% end -%>
       <% if @page_max < @pages -%>
           <a class="btn">...</a>
-          <a class="btn void-link" onclick="Saint.pager('<%= link_page @pages %>','<%= @opts[:container_id] %>');">
+          <a class="btn void-link" onclick="Saint.update_container('<%= @opts[:container_id] %>', '<%= link_page @pages %>');">
             <%= @pages %></a>
       <% end -%>
     </div>
     <div class="btn-group inline">
-      <a class="btn void-link" onclick="Saint.pager('<%= link_page @page_label - 1 %>','<%= @opts[:container_id] %>');" >
+      <a class="btn void-link" onclick="Saint.update_container('<%= @opts[:container_id] %>', '<%= link_page @page_label - 1 %>');" >
         <i class="icon-chevron-left"></i>
       </a>
-      <a class="btn void-link" onclick="Saint.pager('<%= link_page @page_label + 1 %>','<%= @opts[:container_id] %>');">
+      <a class="btn void-link" onclick="Saint.update_container('<%= @opts[:container_id] %>', '<%= link_page @page_label + 1 %>');">
         <i class="icon-chevron-right"></i>
       </a>
     </div>

@@ -31,21 +31,15 @@
          remote_item_id = remote_item[@relation.remote_pkey]
          children = tree ? remote_item.send(tree[:has_n].children) : []
          self_color = color || Saint.tree_colors.sample
-         bg_color = color || (self_color if children.size > 0)
-  -%>
+         bg_color = color || (self_color if children.size > 0) -%>
       <tr class="saint-selectable" style="<%= "background-color: ##{bg_color}" if bg_color %>">
         <% if level == 0 -%>
 
             <td style="text-align: center;">
-              <% n = (items_counter -= 1) - @pager.page_number * saint.ipp
-                 if remote_node %>
-                  <a href="<%= remote_node.http.route(:edit, remote_item_id) %>"
-                     class="btn" target="_blank">
-                    <%= n %>
-                  </a>
-              <% else %>
-                  <%= n %>
-              <% end %>
+              <a class="btn" target="_blank"
+                 href="<%= remote_node ? remote_node.http.route(:edit, remote_item_id) : 'javascript:void(0);' %>">
+                <%= (items_counter -= 1) - @pager.page_number * @pager.items_per_page %>
+              </a>
             </td>
 
             <% unless @relation.readonly
@@ -72,7 +66,7 @@
 
         <% if remote_node -%>
             <td>
-              <a href="<%= remote_node.http.route(:edit, remote_item_id) %>" target="_blank" class="saint-link">
+              <a href="<%= remote_node.http.route(:edit, remote_item_id) %>" target="_blank">
                 <%== remote_node.saint.h remote_item, label: nil -%>
               </a>
             </td>
@@ -87,13 +81,12 @@
       </tr>
 
       <% if children.size > 0
-             children_container_id = @relation.id + @attached.to_s + level.to_s + remote_item_id.to_s + '_children_container' -%>
+             children_container_id = '%s%s%s%s_children_container' % [@relation.id, @attached, level, remote_item_id] -%>
           <tr>
             <td></td>
             <td style="text-align: right; vertical-align: top;">
               <% if level == 0 -%>
-                  <div id="<%= children_container_id %>-status"
-                       style="cursor: pointer;" class="saint-text_note"
+                  <div id="<%= children_container_id %>-status" style="cursor: pointer;" class="saint-text_note"
                        onclick="Saint.Utils.toggleChildrenContainer('<%= children_container_id %>');">
                     children +
                   </div>

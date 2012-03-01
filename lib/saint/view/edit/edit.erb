@@ -55,9 +55,9 @@
                        Saint.submit_valid_form('<%= form_id %>',function(response){
                                <% if @row_id > 0 -%>
                                Saint.update_container('saint-crud-header', '<%= http.route(:head) %>/' + status);
-                               Saint.ui_alert(response.message);
+                               Saint.alert(response.message);
                                <% else -%>
-                               Saint.ui_alert(response.message + '<br/>Reloading...', {
+                               Saint.alert(response.message + '<br/>Reloading...', {
                                        time: 1000,
                                        after_close: function(){window.location = '<%= http.route :edit %>/' + status + '/<%= @pager.query_string %>';}
                                        });
@@ -79,7 +79,7 @@
             <a class="btn btn-warning void-link"
                onclick="if(confirm('This action can not be undone! Continue?')){
                        Saint.valid_GET('<%= http.route(:delete, @row_id) %>',function(response){
-                               Saint.ui_alert(response.message + '<br/>Reloading...', {
+                               Saint.alert(response.message + '<br/>Reloading...', {
                                        time: 1000,
                                        after_close: function(){window.location = '<%= http.route @pager.query_string %>';}
                                        });

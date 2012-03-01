@@ -25,7 +25,7 @@
           <input type="checkbox" name="rows[]" value="<%= row_id %>" <%= 'disabled' if children.size > 0 %> />
           <% if level == 0 -%>
               <a href="<%= edit_url %>" class="btn btn-small">
-                <%= (items_counter -= 1) - @pager.page_number * saint.ipp %>
+                <%= (items_counter -= 1) - @pager.page_number * @pager.items_per_page %>
               </a>
           <% end -%>
         </td>
@@ -41,8 +41,9 @@
       <% if children.size > 0
              children_container_id = 'saint-list-%s-children_container-%s' % [row_id, level] -%>
           <tr>
-            <td style="vertical-align: top; text-align: right; white-space: nowrap;">
-              <a class="void-link nowrap" onclick="$('#<%= children_container_id %>').toggle();">
+            <td class="topped nowrap">
+              <a id="<%= children_container_id %>-status" class="void-link nowrap"
+                 onclick="Saint.Utils.toggleChildrenContainer('<%= children_container_id %>');">
                 children +
               </a>
             </td>

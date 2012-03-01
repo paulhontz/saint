@@ -36,7 +36,7 @@
               <a class="btn btn-warning void-link"
                  onclick="if(confirm('This will remove selected items. This action CAN NOT be undone! Continue?')){
                          Saint.submit_valid_form('saint-forms-summary-delete', function(response){
-                                 Saint.ui_alert(response.message + '<br/>Reloading...', {
+                                 Saint.alert(response.message + '<br/>Reloading...', {
                                          time: 1000,
                                          after_close: function(){window.location = '<%= http.route @pager.query_string %>';}
                                          });
@@ -47,7 +47,7 @@
 
           <% if saint.create -%>
               <a href="<%= http.route(:edit, @pager.query_string) %>" class="btn">
-                <i class="icon-plus"></i></a>
+                <i class="icon-plus-sign"></i></a>
           <% end -%>
         </div>
       </div>

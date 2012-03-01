@@ -20,7 +20,7 @@
           <li>
             <a id="saint-fm-file-buttons-save" class="btn void-link"
                onclick="var button = $(this); var html = button.html();
-                       var callback = function(response){button.attr('disabled', false).html(html); Saint.ui_alert(response.message);}
+                       var callback = function(response){button.attr('disabled', false).html(html); Saint.alert(response.message);}
                        button.attr('disabled', true).html('saving file, please wait...');
                        Saint.submit_valid_form('saint-fm-file-forms-save', callback, callback);">
               <i class="icon-file"></i>Save

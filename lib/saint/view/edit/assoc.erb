@@ -141,7 +141,7 @@
                               $('#<%= form_id %>')[0].reset();
                               Saint.update_container('<%= rel.id %>1', '<%= rel.remote_node.http.route :assoc__any__remote_items, rel.id, row_id, 1 %>');
                               Saint.update_container('<%= rel.id %>0', '<%= rel.remote_node.http.route :assoc__any__remote_items, rel.id, row_id, 0 %>');
-                              Saint.ui_alert(response.message);
+                              Saint.alert(response.message);
                               });">
                         Save <%= label__singular %>
                       </button>
@@ -149,8 +149,7 @@
                   <% else
                          snippet = 'node %s::%s, true' % [self.class.name.split('::').shift, Saint::Inflector.classify(rel.name)] -%>
                       Please insert <code><%= snippet %></code> into
-                      relation
-                      block.
+                      relation block.
                       <p>
                           <pre>
 <%= "class #{ rel.local_node}\n  saint.#{ '%s :%s, %s do' % [rel.type, rel.name, rel.remote_model] }\n    #{ snippet }\n    # other setup\n  end\nend" %></pre>
