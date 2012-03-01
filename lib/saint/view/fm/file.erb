@@ -61,6 +61,45 @@
           <i class="icon-remove"></i>
           Close</a>
       </li>
+      <li class="dropdown">
+        <a class="dropdown-toggle"
+           data-toggle="dropdown"
+           href="#">
+          <i class="icon-list"></i>
+          <b class="caret"></b>
+        </a>
+        <% dirname = File.dirname node[:path]
+           dirname_label = lambda { |d| (d = File.basename(d)) && (d == '.' ? '/' : d) } -%>
+        <ul class="dropdown-menu">
+          <% unless dirname == '.' -%>
+              <li>
+                <a href="<%= http.route encode_path(File.dirname(dirname)) %>">
+                  <i class="icon-arrow-up"></i>
+                  <%= dirname_label.call File.dirname(dirname) %>
+                </a>
+              </li>
+          <% end -%>
+          <li>
+            <a href="<%= http.route encode_path(dirname) %>">
+              <img src="<%= Saint::FileServer['vendor/icons/Oxygen/16/folder.png'] %>"/>
+              <%= dirname_label.call dirname %>
+            </a>
+          </li>
+          <% ls(File.join(root, dirname)).each do |n|
+              file = File.file?(n) ? @helper.file(n) : nil
+              d = n.sub(root, '')
+              encoded_path = encode_path(d)
+              route = file ? [@encoded_path] << {file: encoded_path} : [encoded_path] -%>
+              <li class="<%= 'active' if d == node[:path] %>">
+                <a href="<%= http.route *route %>">
+                  <span style="color: #999;">\_</span>
+                  <img src="<%= file ? file[:icon] : Saint::FileServer['vendor/icons/Oxygen/16/folder.png'] %>"/>
+                  <%= file ? file[:name] : File.basename(n) %>
+                </a>
+              </li>
+          <% end -%>
+        </ul>
+      </li>
     </ul>
   </div>
 

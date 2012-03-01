@@ -307,11 +307,9 @@ module Saint
           @root_folder = dir.nil? ? {path: '/', label: 'Root'} : false
 
           nodes = {dirs: [], files: []}
-          Dir.glob('%s*' % dir_full_path, File::FNM_DOTMATCH).each do |n|
+          ls(dir_full_path).each do |n|
 
             name = File.basename(n)
-            next if name == '.' || name == '..'
-            next unless (is_dir = File.directory?(n)) || File.file?(n)
 
             node = Hash.new
             node[:dir] = dir_path
@@ -320,7 +318,7 @@ module Saint
             node[:path_encoded] = encode_path(node[:path])
             node[:uniq] = 'saint-fm-%s-' << Digest::MD5.hexdigest(node[:path])
 
-            if is_dir
+            if File.directory?(n)
 
               node[:dir?] = true
               node[:icon] = @helper.icon('folder')
@@ -381,6 +379,13 @@ module Saint
 
         def decode_path path
           Base64.decode64 path
+        end
+
+        def ls path
+          Dir.glob('%s/*' % path, File::FNM_DOTMATCH).
+              partition { |d| test(?d, d) }.flatten.
+              select { |e| File.directory?(e) || File.file?(e) }.
+              reject { |e| ['.', '..'].include? File.basename(e) }
         end
 
       end
