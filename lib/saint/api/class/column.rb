@@ -466,7 +466,7 @@ module Saint
 
       # passwords are not wrapped
       return value if password?
-      return format_date__time(@type, value) if date? || date_time? || time?
+      return format_date__time(@type, value, scope == :summary) if date? || date_time? || time?
 
       @rbw && value = @rbw.wrap(value)
       value.is_a?(String) ? (html? ? value : escape_html(value)) : value

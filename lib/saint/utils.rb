@@ -16,18 +16,14 @@ module Saint
 
     module_function :saint_view
 
-    def format_date__time type, val
+    def format_date__time type, val, with_timezone = false
       return val unless val.is_a?(Date) || val.is_a?(DateTime) || val.is_a?(Time)
       return unless format = {
-          'date' => '%Y-%m-%d',
-          'date_time' => '%Y-%m-%d %H:%M:%S.%L',
-          'time' => '%H:%M:%S.%L',
+          'date' => '%F',
+          'date_time' => '%F %T.%L' << (with_timezone ? ' %Z' : ''),
+          'time' => '%T.%L',
       }[type.to_s]
       val.strftime format
-    end
-
-    def current_time
-      Time.now.strftime("%b %d, %I:%M:%S %p")
     end
 
     # remove any non-printable chars
