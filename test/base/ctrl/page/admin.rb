@@ -21,8 +21,6 @@ module Ctrl
       column :label
     end
 
-    saint.column :url
-
     saint.grid do
       column :meta_title, :text, width: '60%' do
         summary false

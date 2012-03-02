@@ -128,7 +128,8 @@ module Saint
     end
 
     def properties include_serials = false
-      properties = model.properties.inject({}) { |fp, cp| fp.update cp.name => cp.class.name.split('::').last.downcase }
+      properties = model.properties.reject { |p| p.name.to_s =~ /_id$/i }.
+          inject({}) { |fp, cp| fp.update cp.name => cp.class.name.split('::').last.downcase }
       return properties if include_serials
       properties.reject { |n, t| t == 'serial' }
     end

@@ -1,5 +1,4 @@
-<% header = saint.h(@row)
-   label = saint.label
+<% label = saint.label
    label__singular = saint.label singular: true
    belongs_to, has_n = (saint.belongs_to || {}), (saint.has_n || {})
    form_id = 'saint-form-CRUD-%s-%s' % [saint.model.__id__, @row_id] -%>
@@ -11,7 +10,7 @@
 
       <p id="saint-crud-header">
         <% if @row_id > 0 -%>
-            <%== header %>
+            <%== saint.h @row %>
         <% else -%>
           <div class="alert">
             <%== 'Creating new %s' % label__singular %>
@@ -45,24 +44,25 @@
 
       <div class="btn-group inline">
         <% if saint.update -%>
-            <a class="btn btn-info el-50px"
+            <a class="btn btn-info el-75px"
                onclick="<% saint.columns.select { |n,c| c.rte? }.each_value do |column| -%>
                        <%= "$('##{column.id}').val( $('##{column.id}').elrte('val') );" -%>
                        <% end -%>
-                       <% saint.columns.select { |n,c| c.password? }.each_value do |column| -%>
-                       <%= "if($('##{column.id}').val() != $('##{column.id}_confirm').val()) {alert('Values mismatch for #{column.label} field'); return false;}" %>
+                       <% saint.columns.select { |n, c| c.password? }.each_value do |column| -%>
+                       <%= "if($('#%s').val() != $('#%s_confirm').val()) {alert('Values mismatch for %s field'); return false;}" % [column.id, column.id, column.label] %>
                        <% end -%>
                        Saint.submit_valid_form('<%= form_id %>',function(response){
                                <% if @row_id > 0 -%>
-                               Saint.update_container('saint-crud-header', '<%= http.route(:head) %>/' + status);
+                               Saint.update_container('saint-crud-header', '<%= http.route(:head) %>/' + response.status);
                                Saint.alert(response.message);
                                <% else -%>
                                Saint.alert(response.message + '<br/>Reloading...', {
                                        time: 1000,
-                                       after_close: function(){window.location = '<%= http.route :edit %>/' + status + '/<%= @pager.query_string %>';}
+                                       after_close: function(){window.location = '<%= http.route :edit %>/' + response.status + '/<%= @pager.query_string %>';}
                                        });
                                <% end -%>
                                });">
+              <i class="icon-file"></i>
               Save</a>
         <% end -%>
       </div>
@@ -71,7 +71,7 @@
 
         <% if saint.create -%>
             <a href="<%= http.route(:edit, @pager.query_string) %>" class="btn">
-              <i class="icon-plus"></i>
+              <i class="icon-plus-sign"></i>
             </a>
         <% end -%>
 

@@ -1,28 +1,26 @@
-Text fields
+
+By default, Saint will manage all properties found on given model(excluding primary key and foreign keys).
+
+Columns will be displayed in the order they found in given model.
+
+To ignore some of them, simply use `saint.ignore :column1, :column2, :etc`
+
+You can also fine tune any automatically added column, or even add new ones.
+
+For example, your model contains :content property.
+Saint will create an textarea column, but you need an WYSIWYG editor for :content.
+You simply need to override :content column setup:
+
+    saint.column :content, :rte
+
+Custom types supported by Saint:
+
+Text Fields
 ---
-
-###:string
-
-    saint.column :name
-
-
-<div class="screenshot-container">
-<img src="http://saintrb.org/screenshots/columns/page-name.png" class="screenshot" />
-</div>
-
-###:text
-
-    saint.column :meta_title, :text
-
-
-<div class="screenshot-container">
-<img src="http://saintrb.org/screenshots/columns/page-meta_title.png" class="screenshot" />
-</div>
 
 ###:rte
 
     saint.column :content, :rte
-
 
 <div class="screenshot-container">
 <img src="http://saintrb.org/screenshots/columns/page-rte.png" class="screenshot" />

@@ -3,10 +3,6 @@ module Ctrl
 
     saint.model Model::Author
 
-    #saint.menu.parent Ctrl::Country
-
-    saint.column :name
-    saint.column :email
     saint.column :password, :password
 
     saint.column :status, :boolean
@@ -30,7 +26,6 @@ module Ctrl
 
     saint.belongs_to :country, Model::Country do
       node Ctrl::Country, true
-      # other setup
     end
 
   end

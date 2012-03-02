@@ -121,5 +121,17 @@ module Saint
 
     module_function :column_format
 
+    def escape_html str
+      CGI::escapeHTML str
+    end
+
+    module_function :escape_html
+
+    def unescape_html str
+      CGI::unescapeHTML str
+    end
+
+    module_function :unescape_html
+
   end
 end

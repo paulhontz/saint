@@ -40,6 +40,9 @@ module Saint
     # @param [Proc] proc
     def model model = nil, pkey = nil, &proc
       if configurable? && model
+        ORM.new(model).properties.each_pair do |name, type|
+          column name, type unless columns_ignored.include?(name)
+        end
         @model = model
         @pkey = pkey if pkey
         # adding CRUD methods to node

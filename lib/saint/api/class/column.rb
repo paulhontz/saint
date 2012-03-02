@@ -39,6 +39,23 @@ module Saint
       columns[column.name] = column
     end
 
+    # by default, Saint will manage all properties found on given model(excluding primary key and foreign keys).
+    # to ignore some of them, simply use `saint.ignore`
+    #
+    # @example
+    #    saint.ignore :column1, :column2, :etc
+    #
+    # @param [Array] *columns
+    def ignore *columns
+      if columns.size > 0 && configurable?
+        columns.each { |c| columns_ignored << c; columns().delete(c) }
+      end
+    end
+
+    def columns_ignored
+      @columns_ignored ||= Array.new
+    end
+
     # by default, GUI use a fieldset to display elements.
     # use this method to define a custom layout.
     #
@@ -182,7 +199,7 @@ module Saint
         @grid_width = @width
         width = '100%'
       end
-      
+
       width = @width if select? || checkbox? || radio? || password? || boolean?
 
       @css_style = '%s %s %s' % [
