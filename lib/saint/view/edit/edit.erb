@@ -1,3 +1,6 @@
+<link rel="stylesheet" href="<%= Saint::FileServer["vendor/jQuery-Timepicker-Addon/jquery-ui-timepicker-addon.css"] %>"/>
+<script type="text/javascript" src="<%= Saint::FileServer["vendor/jQuery-Timepicker-Addon/jquery-ui-timepicker-addon.js"] %>"></script>
+
 <% label = saint.label
    label__singular = saint.label singular: true
    belongs_to, has_n = (saint.belongs_to || {}), (saint.has_n || {})

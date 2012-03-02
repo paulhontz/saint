@@ -3,7 +3,7 @@ module Saint
 
     include Presto::Utils
 
-    BOOLEAN_OPTIONS = {1 => 'Yes', 0 => 'No'}
+    BOOLEAN_OPTIONS = {true => 'Yes', false => 'No'}
 
     def saint_view scope = self
       api = Presto::ViewApi.new
@@ -15,6 +15,16 @@ module Saint
     end
 
     module_function :saint_view
+
+    def format_date__time type, val
+      return val unless val.is_a?(Date) || val.is_a?(DateTime) || val.is_a?(Time)
+      return unless format = {
+          'date' => '%Y-%m-%d',
+          'date_time' => '%Y-%m-%d %H:%M:%S.%L',
+          'time' => '%H:%M:%S.%L',
+      }[type.to_s]
+      val.strftime format
+    end
 
     def current_time
       Time.now.strftime("%b %d, %I:%M:%S %p")

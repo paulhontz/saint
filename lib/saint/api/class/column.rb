@@ -123,6 +123,8 @@ module Saint
 
   class Column
 
+    include Saint::Utils
+
     OPTS = [
         :summary, :crud, :save,
         :label, :tag, :rbw, :html,
@@ -180,7 +182,7 @@ module Saint
       instance_variable_defined?(:@save) || @save = (type == :plain ? false : true)
 
       # default type is string
-      @type = type || :string
+      @type = (type || 'string').to_s
 
       # is current column a part of a grid
       @grid = opts[:grid]
@@ -369,39 +371,51 @@ module Saint
     end
 
     def select?
-      @type == :select
+      @type == 'select'
     end
 
     def checkbox?
-      @type == :checkbox
+      @type == 'checkbox'
     end
 
     def radio?
-      @type == :radio
+      @type == 'radio'
     end
 
     def plain?
-      @type == :plain
+      @type == 'plain'
     end
 
     def boolean?
-      @type == :boolean
+      @type == 'boolean'
     end
 
     def password?
-      @type == :password
+      @type == 'password'
     end
 
     def rte?
-      @type == :rte
+      @type == 'rte'
     end
 
-    # alias for `value row, :crud'
+    def date?
+      @type == 'date'
+    end
+
+    def date_time?
+      @type == 'date_time'
+    end
+
+    def time?
+      @type == 'time'
+    end
+
+    # shortcut for `value row, :crud`
     def crud_value row = nil, node_instance = nil
       value row, :crud, node_instance
     end
 
-    # alias for `value row, :summary'
+    # shortcut for `value row, :summary`
     def summary_value row = nil, node_instance = nil
       value row, :summary, node_instance
     end
@@ -452,9 +466,10 @@ module Saint
 
       # passwords are not wrapped
       return value if password?
+      return format_date__time(@type, value) if date? || date_time? || time?
 
       @rbw && value = @rbw.wrap(value)
-      value.is_a?(String) ? (html? ? value : CGI::escapeHTML(value)) : value
+      value.is_a?(String) ? (html? ? value : escape_html(value)) : value
     end
 
     # giving access to active controller's methods, like http, view and any helpers

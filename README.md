@@ -9,8 +9,6 @@ It is aimed to automatize the backend building process, by creating **Summary** 
 
     $ [sudo] gem install saint
 
-Before any setup, let Saint know the model to be managed.
-
 **Define Model:**
 
     class PageModel
@@ -26,7 +24,6 @@ Before any setup, let Saint know the model to be managed.
         include Saint::Api
         http.map :pages
         saint.model PageModel
-        saint.column :name
     end
 
 
@@ -42,34 +39,41 @@ Before any setup, let Saint know the model to be managed.
 Columns
 ---
 
-Saint allow to build HTML columns of various types and options using pure Ruby.
+By default, Saint will create a column for each property found on given model
+(excluding ones of unsupported types as well as primary and foreign keys).
 
-###Text
+Automatically created columns can be later fine tuned, by using `saint.column`
+or removed from list, by using `saint.ignore`.
 
-    saint.column :name
+Saint supports columns of various types. Below are some of them.
 
-
-<div class="screenshot-container">
-<img src="http://saintrb.org/screenshots/columns/page-name.png" class="screenshot" />
-</div>
-
-###Textarea
-
-    saint.column :about, :text
-
-
-<div class="screenshot-container">
-<img src="http://saintrb.org/screenshots/columns/page-meta_title.png" class="screenshot" />
-</div>
-
-###Select
+###Dropdown
 
     saint.column :status, :select, options: {1 => :Active, 0 => :Suspended}
-
 
 <div class="screenshot-container">
 <img src="http://saintrb.org/screenshots/columns/select.png" class="screenshot" />
 </div>
+
+
+###Boolean
+
+Renders an radio selector with 2 options: 1 => 'Yes' and 0 => 'No'
+
+    saint.column :active, :boolean
+
+<div class="screenshot-container">
+<img src="http://saintrb.org/screenshots/columns/boolean.png" class="screenshot" />
+</div>
+
+### Rich Text Editor
+
+    saint.column :content, :rte
+
+<div class="screenshot-container">
+<img src="http://saintrb.org/screenshots/columns/page-rte.png" class="screenshot" />
+</div>
+
 
 [More on Columns](http://saintrb.org/Columns.md)
 

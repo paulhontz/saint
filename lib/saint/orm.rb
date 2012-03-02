@@ -46,9 +46,32 @@ module Saint
   end
 
   module ORMUtils
+
+    PROPERTY_TYPES_MAP = {
+        'binary' => 'text',
+        'boolean' => true,
+        'date' => true,
+        'date_time' => true,
+        'decimal' => 'string',
+        'float' => 'string',
+        'integer' => 'string',
+        'string' => true,
+        'text' => true,
+        'time' => true,
+    }
+
     class << self
 
       include ORMQuery
+      include Saint::Inflector
+
+      def properties model
+        model.properties.reject { |p| p.name.to_s =~ /_id$/ }.inject({}) do |properties, p|
+          (primitive = underscore(demodulize(p.class))) &&
+              (type = PROPERTY_TYPES_MAP[primitive]) &&
+              (properties||{}).update(p.name => type == true ? primitive : type)
+        end
+      end
 
       def quote_column column, model
         property = model.properties.select { |p| p.name == column }.first
@@ -127,11 +150,8 @@ module Saint
       ORMUtils.quote_column column, model
     end
 
-    def properties include_serials = false
-      properties = model.properties.reject { |p| p.name.to_s =~ /_id$/i }.
-          inject({}) { |fp, cp| fp.update cp.name => cp.class.name.split('::').last.downcase }
-      return properties if include_serials
-      properties.reject { |n, t| t == 'serial' }
+    def properties
+      ORMUtils.properties model
     end
 
     def subset subset

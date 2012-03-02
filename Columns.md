@@ -1,17 +1,20 @@
 
-By default, Saint will manage all properties found on given model(excluding primary key and foreign keys).
-
-Columns will be displayed in the order they found in given model.
+By default, Saint will create a column for each property found on given model
+(excluding ones of unsupported types as well as primary and foreign keys).
 
 To ignore some of them, simply use `saint.ignore :column1, :column2, :etc`
 
-You can also fine tune any automatically added column, or even add new ones.
+Column type are inherited from property.
+
+You can fine tune any automatically added column, or even add new ones.
 
 For example, your model contains :content property.
 Saint will create an textarea column, but you need an WYSIWYG editor for :content.
 You simply need to override :content column setup:
 
     saint.column :content, :rte
+
+Columns will be displayed in the order they found in given model.
 
 Custom types supported by Saint:
 
