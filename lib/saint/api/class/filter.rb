@@ -457,7 +457,7 @@ module Saint
 
       @remote_orm = Saint::ORM.new(@remote_model)
       @remote_pkey = @remote_opts.fetch :pkey, :id
-      @remote_label = [@remote_opts.fetch(:label, @remote_orm.properties(true).first)].flatten
+      @remote_label = [@remote_opts.fetch(:label, @remote_orm.properties.keys.first)].flatten
       @remote_associate_via = @remote_opts.fetch :via, tableize(demodulize @local_model)
 
       if @through_model

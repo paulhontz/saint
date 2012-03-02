@@ -37,7 +37,8 @@ module Saint
     #   should be an valid ORM model. for now only DataMapper ORM supported.
     # @param [Symbol] pkey
     #   the model primary key, `:id`
-    def model model = nil, pkey = nil
+    # @param [Proc] proc
+    def model model = nil, pkey = nil, &proc
       if configurable? && model
         @model = model
         @pkey = pkey if pkey
@@ -179,7 +180,7 @@ module Saint
         if row && args.size == 0
           # no snippets defined, so using first non-id column
           orm = Saint::ORM.new(@node.saint.model)
-          args = [orm.properties(true).first]
+          args = [orm.properties.keys.first]
         end
         args.each do |a|
           (s = column_format(a, row)) && s.strip.size > 0 && header << s

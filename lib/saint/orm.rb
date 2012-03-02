@@ -127,10 +127,10 @@ module Saint
       ORMUtils.quote_column column, model
     end
 
-    def properties skip_id_properties = false
-      properties = model.properties.map { |p| p.name }
-      return properties unless skip_id_properties
-      properties.select { |p| true unless p == :id || p.to_s =~ /_id$/i }
+    def properties include_serials = false
+      properties = model.properties.inject({}) { |fp, cp| fp.update cp.name => cp.class.name.split('::').last.downcase }
+      return properties if include_serials
+      properties.reject { |n, t| t == 'serial' }
     end
 
     def subset subset

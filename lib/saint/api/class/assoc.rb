@@ -267,8 +267,8 @@ module Saint
         end
       end
       if @columns.size == 0
-        # seems remote node not defined, using 1st non-id remote column
-        if column = @remote_orm.properties(true).first
+        # seems remote node not defined, using 1st remote column
+        if column = @remote_orm.properties.keys.first
           column = ::Saint::Column.new(column)
           @columns[column.name] = column
         end
