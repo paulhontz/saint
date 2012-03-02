@@ -25,10 +25,6 @@ Text Fields
 
     saint.column :content, :rte
 
-<div class="screenshot-container">
-<img src="http://saintrb.org/screenshots/columns/page-rte.png" class="screenshot" />
-</div>
-
 ###:plain
 
 Will only display the value, without render any field.<br/>
@@ -36,21 +32,11 @@ Plain columns are not saved to db.
 
     saint.column :option, :plain
 
-
-<div class="screenshot-container">
-<img src="http://saintrb.org/screenshots/columns/plain.png" class="screenshot" />
-</div>
-
 ###:password
 
 Creates two password fields - password and password confirmation.
 
     saint.column :content, :password
-
-
-<div class="screenshot-container">
-<img src="http://saintrb.org/screenshots/columns/password.png" class="screenshot" />
-</div>
 
 Selectors
 ---
@@ -63,11 +49,6 @@ Selectors
         options 1 => :Active, 0 => :Suspended
     end
 
-
-<div class="screenshot-container">
-<img src="http://saintrb.org/screenshots/columns/radio.png" class="screenshot" />
-</div>
-
 ###:select
 
     saint.column :status, :select, options: {1 => :Active, 0 => :Suspended}
@@ -75,11 +56,6 @@ Selectors
     saint.column :status, :select do
         options 1 => :Active, 0 => :Suspended
     end
-
-
-<div class="screenshot-container">
-<img src="http://saintrb.org/screenshots/columns/select.png" class="screenshot" />
-</div>
 
 Use `multiple true` option to render an select field allowing to select multiple options.
 
@@ -93,11 +69,6 @@ Use `size: N` to define how much lines to display when :multiple set to true.
         options 'red', 'green', 'blue'
     end
 
-
-<div class="screenshot-container">
-<img src="http://saintrb.org/screenshots/columns/select-multiple.png" class="screenshot" />
-</div>
-
 By default, Saint will join selected options with a coma when saved to db.<br/>
 Use `join_with 'some-str'` to override this.
 
@@ -109,11 +80,6 @@ Use `join_with 'some-str'` to override this.
     saint.column :color, :checkbox do
         options 'red', 'green', 'blue'
     end
-
-
-<div class="screenshot-container">
-<img src="http://saintrb.org/screenshots/columns/checkbox.png" class="screenshot" />
-</div>
 
 By default, Saint will join selected options with a coma when saved to db.<br/>
 Use `join_with 'some-str'` to override this:
@@ -132,10 +98,6 @@ Renders an radio selector with 2 options: 1 => 'Yes' and 0 => 'No'
 
     saint.column :active, :boolean
 
-
-<div class="screenshot-container">
-<img src="http://saintrb.org/screenshots/columns/boolean.png" class="screenshot" />
-</div>
 
 Options
 ---
