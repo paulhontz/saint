@@ -254,14 +254,6 @@ module Saint
       @after
     end
 
-    def render_assets
-      @rendered_assets ||= saint_view.render_partial 'assets'
-    end
-
-    def render_menu
-      @rendered_menu ||= Menu.new.render
-    end
-
     def render_dashboard scope
       @rendered_dashboard ||= saint_view(scope).render_layout(saint_view(scope).render_partial('dashboard'))
     end

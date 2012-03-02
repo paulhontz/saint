@@ -18,24 +18,28 @@ module Saint
     def root root, label = nil
 
       root = normalize_path root
-      label ||= File.basename(root)
-      node, host = @node, self
-
       raise '"%s" should be a directory' % root unless File.directory?(root)
 
-      fm_class = classify(label)
-      fm = node.const_set fm_class, Class.new
-      @roots << fm
+      label ||= File.basename(root)
+      url = label.to_s.gsub(/[^\w|\d]/i, '')
+      node, host = @node, self
 
-      fs = fm.const_set :FileServer, Class.new
+      @roots << (fm = node.const_set 'Saint__Fm__' << url, Class.new)
       fm.class_exec do
-        include Saint::Api
+        include Presto::Api
         include Saint::Utils
-        http.map node.http.route(fm_class)
-        saint.header label: label
-        saint.menu.parent node
-      end
+        http.map node.http.route url
 
+        define_singleton_method :setup do
+          @fm ||= Struct.new(:root, :roots, :url, :label).
+              new(root.freeze, host.roots.freeze, url.freeze, label.freeze).freeze
+        end
+
+        define_method :setup do
+          self.class.setup
+        end
+      end
+      fs = fm.const_set :FileServer, Class.new
       fs.class_exec do
 
         include Presto::Api
@@ -46,28 +50,6 @@ module Saint
 
         def self.[] path
           '%s/%s.saint-fs' % [http.route, Presto::Utils.normalize_path(path, false, false)]
-        end
-      end
-
-      fm.class_exec do
-        define_method :roots do
-          host.roots
-        end
-
-        define_singleton_method :root do
-          root
-        end
-
-        define_method :root do
-          root
-        end
-
-        define_singleton_method :label do
-          fm_class
-        end
-
-        define_method :label do
-          fm_class
         end
       end
       extend fm
@@ -88,7 +70,7 @@ module Saint
             @query_string[:q] = search_query
           end
           @path = path ? normalize_path(decode_path(path), false, false) : ''
-          @__meta_title__ = 'FileManager | %s | %s' % [saint.label, @path]
+          @__meta_title__ = 'FileManager | %s | %s' % [setup.label, @path]
         end
 
         def index path = nil
@@ -107,7 +89,7 @@ module Saint
 
           name, type = path_related_params 'name', 'type'
           return unless name && type
-          node = File.join(root, @path, name)
+          node = File.join(setup.root, @path, name)
 
           jsonify do
             encoded_path = encode_path(File.join(@path, name))
@@ -127,9 +109,9 @@ module Saint
           path, name = path_related_params 'path', 'name'
           return unless path && name
 
-          old_path = File.join(root, path)
+          old_path = File.join(setup.root, path)
           path = File.dirname(path)
-          new_path = File.join(root, path, name)
+          new_path = File.join(setup.root, path, name)
 
           jsonify do
             raise '"%s" already exists' % name if File.file?(new_path) || File.directory?(new_path)
@@ -146,8 +128,8 @@ module Saint
           return unless path
 
           jsonify do
-            FileUtils.remove_entry_secure File.join(root, path)
-            [encode_path(File.directory?(File.join root, @path) ? @path : File.dirname(path))]
+            FileUtils.remove_entry_secure File.join(setup.root, path)
+            [encode_path(File.directory?(File.join setup.root, @path) ? @path : File.dirname(path))]
           end
         end
 
@@ -157,8 +139,8 @@ module Saint
           return unless src && dst && current
 
           jsonify do
-            ::FileUtils.mv(::File.join(root, src), ::File.join(root, dst))
-            current_path = ::File.join(root, current)
+            ::FileUtils.mv(::File.join(setup.root, src), ::File.join(setup.root, dst))
+            current_path = ::File.join(setup.root, current)
             [encode_path(File.file?(current_path) || ::File.directory?(current_path) ? current : dst)]
           end
         end
@@ -172,8 +154,8 @@ module Saint
 
             @helper.resize *[
                 http.params.values_at('width', 'height').map { |v| v.to_i },
-                File.join(root, path),
-                File.join(root, File.dirname(path), name),
+                File.join(setup.root, path),
+                File.join(setup.root, File.dirname(path), name),
             ].flatten
 
             [encode_path(@path)] << {file: encode_path(File.join(File.dirname(path), name))}
@@ -186,7 +168,7 @@ module Saint
           return unless path && name
 
           begin
-            FileUtils.mv(http.params['file'][:tempfile], ::File.join(root, path, name))
+            FileUtils.mv(http.params['file'][:tempfile], ::File.join(setup.root, path, name))
           rescue => e
             @errors = e
             return saint_view.render_partial('error')
@@ -200,7 +182,7 @@ module Saint
           return unless path
 
           file = File.basename(path)
-          fs = Rack::File.new File.join(root, File.dirname(path))
+          fs = Rack::File.new File.join(setup.root, File.dirname(path))
           response = fs.call(http.env.merge('PATH_INFO' => file))
           response[1].update 'Content-Disposition' => "attachment; filename=#{file}"
           http.halt response
@@ -212,7 +194,7 @@ module Saint
           return unless file
 
           jsonify do
-            ::File.open(::File.join(root, file), 'w:utf-8') do |f|
+            ::File.open(::File.join(setup.root, file), 'w:utf-8') do |f|
               f << Saint::Utils.normalize_string(http.post_params['content'])
             end
             {status: 1, message: 'File successfully saved'}
@@ -225,22 +207,22 @@ module Saint
 
           jsonify do
             rel_path = File.join File.dirname(path), name
-            full_path = File.join root, rel_path
+            full_path = File.join setup.root, rel_path
             conflicting_file = File.file?(full_path) ? rel_path : nil
             if File.directory?(full_path) && File.file?(File.join(full_path, File.basename(path)))
               conflicting_file = File.join rel_path, File.basename(path)
             end
             raise '"%s" file already exists' % conflicting_file if conflicting_file
-            FileUtils.cp File.join(root, path), full_path
+            FileUtils.cp File.join(setup.root, path), full_path
             [encode_path(@path)] << {file: encode_path(rel_path)}
           end
         end
 
         def search
           files = Array.new
-          Find.find(root).select { |p| ::File.file?(p) }.each do |p|
+          Find.find(setup.root).select { |p| ::File.file?(p) }.each do |p|
             if ::File.basename(p) =~ /#{Regexp.escape http.params['query']}/
-              file = @helper.file(p).merge(path: p.sub(root, ''))
+              file = @helper.file(p).merge(path: p.sub(setup.root, ''))
               file[:path_encoded] = encode_path(file[:path])
               files << file
             end
@@ -252,7 +234,7 @@ module Saint
           file = path_related_params 'file'
           return unless file
           file = decode_path file
-          return unless ::File.file?(full_path = ::File.join(root, file))
+          return unless ::File.file?(full_path = ::File.join(setup.root, file))
           content, @errors = nil
           if @helper.size(full_path) > Saint::FileManager::MAX_FILE_SIZE
             @errors = 'Sorry, files bigger than %s are not editable.' % number_to_human_size(Saint::FileManager::MAX_FILE_SIZE)
@@ -274,7 +256,7 @@ module Saint
           file = path_related_params 'file'
           return unless file
           file = decode_path file
-          return unless ::File.file?(full_path = ::File.join(root, file))
+          return unless ::File.file?(full_path = ::File.join(setup.root, file))
 
           node = @helper.file(full_path).update(
               path: file,
@@ -296,7 +278,7 @@ module Saint
           @dirs ||= Array.new
           @current_path ||= Array.new
           dir_path = File.join(*@current_path, dir||'')
-          dir_full_path = File.join(root, dir_path, '')
+          dir_full_path = File.join(setup.root, dir_path, '')
           return unless File.directory?(dir_full_path)
           @current_path << dir if dir
           @root_folder = dir.nil? ? {path: '/', label: 'Root'} : false

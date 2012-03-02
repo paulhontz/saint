@@ -64,6 +64,7 @@
 <div class="modal" id="saint-fm-uploader-dialog" style="display: none;">
   <div class="modal-header">
     <a class="close" data-dismiss="modal">×</a>
+
     <h3>Uploading files into "<%== node[:name] %>"</h3>
   </div>
   <div class="modal-body">
@@ -156,11 +157,12 @@
 
     <div class="inline topped">
       <div class="saint-fm-node-column">
-        <% roots.each do |root| -%>
-            <div class="<%= @root_folder && label == root.label ? 'saint-fm-active_dir' : ('saint-fm-selected_dir' if label == root.label) %> saint-selectable">
+        <% setup.roots.each do |root|
+            active = setup.label == root.setup.label -%>
+            <div class="<%= @root_folder && active ? 'saint-fm-active_dir' : ('saint-fm-selected_dir' if active) %> saint-selectable">
               <img src="<%= @helper.icon('folder') %>"/>
               <a href="<%= root.http.route %>">
-                <%= root.saint.menu.label %>
+                <%= root.setup.label %>
               </a>
             </div>
         <% end -%>

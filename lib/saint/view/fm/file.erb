@@ -88,9 +88,9 @@
               <%= dirname_label.call dirname %>
             </a>
           </li>
-          <% ls(File.join(root, dirname)).each do |n|
+          <% ls(File.join(setup.root, dirname)).each do |n|
               file = File.file?(n) ? @helper.file(n) : nil
-              dirname = n.sub(root, '')
+              dirname = n.sub(setup.root, '')
               encoded_path = encode_path(dirname)
               route = file ? [@encoded_path] << @query_string.update(file: encoded_path) : [encoded_path] << @query_string -%>
               <li class="<%= 'active' if dirname == node[:path] %>">

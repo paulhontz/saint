@@ -12,19 +12,7 @@ module Saint
       @node.saint.after.each_pair { |a, p| @orm.after a, &p }
 
     end
-
-    def meta_title
-      @node_instance.instance_variable_get :@__meta_title__
-    end
-
-    def assets
-      @node.saint.render_assets
-    end
-
-    def menu
-      @node.saint.render_menu
-    end
-
+    
     def dashboard
       @node.saint.render_dashboard @node_instance
     end
