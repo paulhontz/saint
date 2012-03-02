@@ -195,7 +195,7 @@ module Saint
       @width = '%spx' % @width if @width.is_a?(Numeric)
       @height = '%spx' % @height if @height.is_a?(Numeric)
 
-      width, height = @width || '100%', @height
+      width, height = @width, @height
 
       if @grid
         @grid_width = @width
