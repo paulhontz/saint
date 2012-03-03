@@ -19,7 +19,7 @@
                 <i class="icon-search"></i>
                 Search</a>
               <a class="btn void-link"
-                 onclick="Saint.update_container('<%= @relation.id + @attached.to_s %>-partial', '<%= @update_selector_url %>0?xhr=true');">
+                 onclick="Saint.reset_form('saint_assoc_filters-<%= @relation.id %>'); Saint.update_container('<%= @relation.id + @attached.to_s %>-partial', '<%= @update_selector_url %>0?xhr=true');">
                 Reset</a>
             </div>
           </div>

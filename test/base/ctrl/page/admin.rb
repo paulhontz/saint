@@ -53,13 +53,13 @@ module Ctrl
     #end
     #
     #saint.is_tree
-    #
-    #saint.belongs_to :author, Model::Author do
-    #  node Ctrl::Author, true
-    #  column :name
-    #  column :email
-    #  column :status, :boolean
-    #end
+    
+    saint.belongs_to :author, Model::Author do
+      node Ctrl::Author, true
+      column :name
+      column :email
+      column :status, :boolean
+    end
 
     saint.filter :name
     saint.filter :active, :boolean

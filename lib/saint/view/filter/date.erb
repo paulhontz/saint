@@ -4,8 +4,3 @@
 <div class="saint-filter_label"><%= label %> max</div>
 <input type="text" name="<%= @setup.query_string :max %>" value="<%== ((@val||{})['max'] rescue nil) %>"
        class="disable_enter_key saint-filters-datepicker"/>
-<script type="text/javascript">
-    $(function() {
-        $('.saint-filters-datepicker').datepicker({dateFormat: 'yy-mm-dd', changeMonth: true, changeYear: true, showButtonPanel: true});
-    });
-</script>

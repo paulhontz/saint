@@ -1,11 +1,6 @@
-<input type="text" name="<%= element.name %>" value="<%= value || element.default %>" id="<%= element.id %>"
-       style="<%= element.css_style %>" class="<%= element.css_class %> disable_enter_key"/>
-<script>
-    $(function() {
-        $("#<%= element.id %>").timepicker({
-            timeFormat: 'hh:mm:ss.l',
-            showSecond: true,
-            showMillisec: true
-        });
-    });
-</script>
+<div class="saint-filter_label"><%= label %> min</div>
+<input type="text" name="<%= @setup.query_string :min %>" value="<%== ((@val||{})['min'] rescue nil) %>"
+       class="disable_enter_key saint-filters-timepicker"/>
+<div class="saint-filter_label"><%= label %> max</div>
+<input type="text" name="<%= @setup.query_string :max %>" value="<%== ((@val||{})['max'] rescue nil) %>"
+       class="disable_enter_key saint-filters-timepicker"/>
