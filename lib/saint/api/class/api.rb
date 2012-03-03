@@ -4,6 +4,8 @@ module Saint
     include Saint::Utils
     include Saint::Inflector
 
+    attr_reader :columns
+
     # initializing the configuration Api for given node.
     #
     # @param [Object] node
@@ -12,7 +14,8 @@ module Saint
       @node = node
       @ipp = Saint.ipp
       @pkey = :id
-      @columns, @columns_ignored = Hash.new, Hash.new
+      @columns = Hash.new
+      @columns_ignored, @relations_ignored, @filters_ignored = Hash.new, Hash.new, Hash.new
       @header_args, @header_opts = [], {}
 
       @create, @update, @delete, @dashboard = true, true, true, true
@@ -277,24 +280,6 @@ module Saint
     private
     def configurable?
       @node.node.configurable?
-    end
-
-    def build_associations
-      tree__has_n, tree__belongs_to = nil
-      ORMUtils.relations(model).each do |relation|
-        type, name, remote_model = relation
-        if remote_model == model
-          tree__has_n = name if type == :has_n
-          tree__belongs_to = name if type == :belongs_to
-        else
-          self.send relation.shift, *relation
-        end
-      end
-      is_tree(tree__has_n, tree__belongs_to) if tree__has_n && tree__belongs_to
-    end
-
-    def build_columns
-      ORMUtils.properties(model).reject { |n, t| @columns_ignored[n] }.each { |c| column *c }
     end
 
     def extend_node

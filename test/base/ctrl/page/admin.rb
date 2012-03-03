@@ -2,10 +2,9 @@ module Ctrl
   class Page
 
     include Saint::OptsApi
-
     opts Ctrl::Options
 
-    #saint.menu.parent Ctrl::Author
+    saint.model Model::Page
 
     saint.header :name, ', by #author.name', ', #children.count children'
 

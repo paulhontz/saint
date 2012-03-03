@@ -12,7 +12,7 @@ module Saint
     # @param [Proc] &proc configuration proc
     def belongs_to name = nil, remote_model = nil, &proc
 
-      if name && remote_model
+      if name && remote_model && configurable?
 
         # initializing association
         @belongs_to[name] = Assoc.new(__method__, name, @node, remote_model, &proc)
@@ -46,7 +46,7 @@ module Saint
     # @param [Proc] &proc configuration proc
     def has_n name = nil, remote_model = nil, through_model = nil, &proc
 
-      if name && remote_model
+      if name && remote_model && configurable?
 
         # initializing relation
         @has_n[name] = Assoc.new(__method__, name, @node, remote_model, through_model, &proc)
@@ -77,15 +77,14 @@ module Saint
     # @param [Symbol] belongs_to
     # @param [Proc] &proc configuration proc
     def is_tree has_n = :children, belongs_to = :parent, &proc
-      @tree_setup = [has_n, belongs_to, proc]
+      @tree_setup = [has_n, belongs_to, proc] if configurable?
     end
 
     # (see #is_tree)
     def is_tree?
-
       return unless @tree_setup
       unless @is_tree
-
+        return unless configurable?
         @is_tree = Hash.new
         has_n, belongs_to, proc = @tree_setup
         node = @node
@@ -115,6 +114,94 @@ module Saint
 
       end
       @is_tree
+    end
+
+    # by default, Saint will manage all relations found on given model.
+    # to ignore some of them, use `saint.relations_ignored`
+    #
+    # @note
+    #   it will also delete manually defined associations.
+    #   well, only ones defined before `saint.relations_ignored` called.
+    #   so, call it before defining associations.
+    #
+    # @example
+    #    # lets consider a model like this:
+    #    class AuthorModel
+    #      include DataMapper::Resource
+    #      # basic setup
+    #      has n, :pages, model: PageModel
+    #    end
+    #    # and controller
+    #    class AuthorController
+    #      include Saint::Api
+    #      # basic setup
+    #      saint.model AuthorModel
+    #    end
+    #    # now, Saint will build an interface to manage Author to Page relation.
+    #    # if you do not need this relation to be managed by Saint, use `relations_ignored` inside controller:
+    #    class AuthorController
+    #      include Saint::Api
+    #      # basic setup
+    #      saint.model AuthorModel
+    #      saint.relations_ignored :pages
+    #    end
+    #
+    def relations_ignored *relations
+      if relations.size > 0 && configurable?
+        (@relations_ignored = relations).each { |r| @belongs_to.delete(r); @has_n.delete(r) }
+      end
+    end
+
+    # instruct Saint to not manage tree associations.
+    #
+    # @example
+    #
+    #    # lets consider a model like this:
+    #    class PageModel
+    #      include DataMapper::Resource
+    #      # basic setup
+    #      is :tree
+    #    end
+    #    # and controller
+    #    class PageController
+    #      include Saint::Api
+    #      # basic setup
+    #      saint.model PageModel
+    #    end
+    #    # now, Saint will build tree related associations.
+    #    # to avoid this, simply use `saint.tree_ignored`
+    #    class PageController
+    #      include Saint::Api
+    #      # basic setup
+    #      saint.model PageModel
+    #      saint.tree_ignored true
+    #    end
+    def tree_ignored *args
+      if args.size > 0 && configurable?
+        @tree_ignored = true
+        if tree = is_tree?
+          @belongs_to.each_pair { |n, r| @belongs_to.delete(n) if r.__id__ == tree[:belongs_to].__id__ }
+          @has_n.each_pair { |n, r| @has_n.delete(n) if r.__id__ == tree[:has_n].__id__ }
+        end
+        @tree_setup, @is_tree = nil
+      end
+    end
+
+    private
+    # automatically build associations based on properties found on given model
+    def build_associations
+      return unless configurable?
+      tree__has_n, tree__belongs_to = nil
+      ORMUtils.relations(model).reject { |r| @relations_ignored.include?(r[1]) }.each do |relation|
+        type, name, remote_model = relation
+        if remote_model == model
+          tree__has_n = name if type == :has_n
+          tree__belongs_to = name if type == :belongs_to
+        else
+          self.send relation.shift, *relation
+        end
+      end
+      tree__has_n && tree__belongs_to && is_tree(tree__has_n, tree__belongs_to) && is_tree? unless @tree_ignored
     end
 
   end

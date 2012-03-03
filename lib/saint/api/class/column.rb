@@ -39,18 +39,6 @@ module Saint
       @columns[column.name] = column
     end
 
-    # by default, Saint will manage all properties found on given model(excluding primary and foreign keys)
-    # to ignore some of them, simply use `saint.columns_ignored`
-    #
-    # @example
-    #    saint.columns_ignored :column1, :column2, :etc
-    #
-    # @param [Array] *columns
-    def columns_ignored *columns
-      columns.each { |c| @columns_ignored[c] = true } if columns.size > 0
-      @columns_ignored
-    end
-
     # by default, UI use a fieldset to display elements.
     # use this method to define a custom layout.
     #
@@ -67,11 +55,6 @@ module Saint
     def column_layout layout = nil
       @column_layout = layout if configurable? && layout
       @column_layout
-    end
-
-    # returns the columns defined earlier
-    def columns
-      (@columns ||= Hash.new).reject { |n, s| @columns_ignored[n] }
     end
 
     # by default, columns are delimited by line break.
@@ -112,6 +95,30 @@ module Saint
     # returns earlier defined grids
     def grids
       @grids ||= Hash.new
+    end
+
+    # by default, Saint will manage all properties found on given model(excluding primary and foreign keys)
+    # to ignore some of them, simply use `saint.columns_ignored`
+    #
+    # @note
+    #   it will also delete manually defined columns.
+    #   well, only ones defined before `saint.columns_ignored` called.
+    #   so, call it before defining columns.
+    #
+    # @example
+    #    saint.columns_ignored :column1, :column2, :etc
+    #
+    # @param [Array] *columns
+    def columns_ignored *columns
+      return unless columns.size > 0 && configurable?
+      (@columns_ignored = columns).each { |c| @columns.delete(c) }
+    end
+
+    private
+    # automatically build columns based on properties found on given model
+    def build_columns
+      return unless configurable?
+      ORMUtils.properties(model).reject { |n, t| @columns_ignored.include?(n) }.each { |c| column *c }
     end
 
   end

@@ -3,7 +3,7 @@ module Ctrl
 
     saint.model Model::Author
 
-    saint.columns_ignored :status
+    #saint.columns_ignored :status
 
     saint.column :password, :password
 
