@@ -61,9 +61,6 @@ module Ctrl
       column :status, :boolean
     end
 
-    saint.filter :name
-    saint.filter :active, :boolean
-    
     saint.filter :menu do
       model Model::Menu, through: Model::MenuPage
     end

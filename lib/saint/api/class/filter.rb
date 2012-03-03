@@ -116,6 +116,33 @@ module Saint
       filter
     end
 
+    # by default, Saint will build a filter for each property found on given model.
+    # to ignore some of them, simply use `saint.filters_ignored`
+    #
+    # @note
+    #   it will also delete manually defined filters.
+    #   well, only ones defined before `saint.filters_ignored` called.
+    #   so, call it before defining filters.
+    #
+    # @example
+    #    saint.filters_ignored :column1, :column2, :etc
+    #
+    # @param [Array] *columns
+    def filters_ignored *columns
+      return unless columns.size > 0 && configurable?
+      (@columns_ignored = columns).each { |c| @filters.delete(c) }
+    end
+
+    private
+    # automatically build filters based on properties found on given model
+    def build_filters
+      return unless configurable?
+      supported_types = %w[ boolean date date_time string time ]
+      ORMUtils.properties(model).reject { |n, t| @filters_ignored.include?(n) }.
+          select { |n, t| supported_types.include?(t.to_s) }.
+          each { |c| filter *c }
+    end
+
   end
 
   class Filter

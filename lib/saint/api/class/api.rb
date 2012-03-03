@@ -15,7 +15,7 @@ module Saint
       @ipp = Saint.ipp
       @pkey = :id
       @columns = Hash.new
-      @columns_ignored, @relations_ignored, @filters_ignored = Hash.new, Hash.new, Hash.new
+      @columns_ignored, @relations_ignored, @filters_ignored = [], [], []
       @header_args, @header_opts = [], {}
 
       @create, @update, @delete, @dashboard = true, true, true, true
@@ -41,6 +41,7 @@ module Saint
         @pkey = pkey if pkey
         build_associations
         build_columns
+        build_filters
         extend_node
       end
       @model

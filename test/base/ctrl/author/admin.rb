@@ -7,11 +7,13 @@ module Ctrl
 
     saint.column :password, :password
 
-    saint.filter :name, logic: 'like'
+    #saint.filter :name, logic: 'like'
     #saint.filter :status, :boolean
-    saint.filter :date, :date
-    saint.filter :date_time, :date_time
-    saint.filter :time, :time
+    #saint.filter :date, :date
+    #saint.filter :date_time, :date_time
+    #saint.filter :time, :time
+
+    saint.filters_ignored :password
 
     saint.header :name
 
