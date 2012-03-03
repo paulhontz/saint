@@ -217,11 +217,11 @@ module Saint
 
       if @type == :has_n
         if @through_model
-          @local_key ||= foreign_key @local_model
-          @remote_key ||= foreign_key @remote_model
+          @local_key ||= foreign_key(@local_model)
+          @remote_key ||= foreign_key(@remote_model)
         else
           @local_key ||= :id
-          @remote_key ||= foreign_key @local_model
+          @remote_key ||= foreign_key(@local_model)
         end
       else
         @local_key ||= foreign_key(name)
@@ -333,7 +333,7 @@ module Saint
     #    class City
     #      saint.model Model::City
     #      saint.belongs_to :country, Model::Country do
-    #        local_key :cntr_id
+    #        local_key :c_id
     #      end
     #    end
     #    # now Model::City#cntr_id will be compared to Model::Country#id
@@ -383,7 +383,7 @@ module Saint
     #    class Author
     #      saint.model Model::Author
     #      saint.has_n :pages, Model::Page do
-    #        remote_key :auid
+    #        remote_key :a_id
     #      end
     #    end
     #    # now Model::Author#id will be compared to Model::Page#auid

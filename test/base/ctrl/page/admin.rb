@@ -50,27 +50,26 @@ module Ctrl
       end
     end
 
-    saint.filter :name
-    #saint.filter :content
-    saint.filter :active, :boolean
-
-    saint.has_n :menus, Model::Menu, Model::MenuPage do
-      node Ctrl::Menu, true
-      order :id, :desc
-    end
-
-    saint.is_tree
-
-    saint.belongs_to :author, Model::Author do
-      node Ctrl::Author, true
-      column :name
-      column :email
-      column :status, :boolean
-    end
-
-    #saint.filter :menu do
-    #  model Model::Menu, through: Model::MenuPage
+    #saint.has_n :menus, Model::Menu, Model::MenuPage do
+    #  node Ctrl::Menu, true
+    #  order :id, :desc
     #end
+    #
+    #saint.is_tree
+    #
+    #saint.belongs_to :author, Model::Author do
+    #  node Ctrl::Author, true
+    #  column :name
+    #  column :email
+    #  column :status, :boolean
+    #end
+
+    saint.filter :name
+    saint.filter :active, :boolean
+    
+    saint.filter :menu do
+      model Model::Menu, through: Model::MenuPage
+    end
 
     saint.filter :country_id do
       model Model::Country, label: '#name (#authors.count authors)'

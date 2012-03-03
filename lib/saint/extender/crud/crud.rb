@@ -179,7 +179,7 @@ module Saint
 
         def head row_id
           if row = saint.orm.first(saint.pkey => row_id.to_i)[0]
-            escape_html saint.h(row)
+            saint.h row
           end
         end
 

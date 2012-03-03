@@ -126,7 +126,7 @@
                                   </div>
                               <% end -%>
                               <div id="<%= remote_rel.id %>0">
-                                <%= remote_rel.remote_node.http.xhr_get(:assoc__any__remote_items, remote_rel.id) %>
+                                <%= http.xhr_get(:assoc__any__remote_items, remote_rel.id) %>
                               </div>
                             </div>
                         <% end -%>

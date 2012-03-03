@@ -13,7 +13,8 @@
 
       <p id="saint-crud-header">
         <% if @row_id > 0 -%>
-            <%== saint.h @row %>
+            <strong>
+            <%= saint.h @row %></strong>
         <% else -%>
           <div class="alert">
             <%== 'Creating new %s' % label__singular %>
@@ -36,7 +37,7 @@
                 row, page = setup -%>
                 <li class="<%= 'active' if row.send(saint.pkey) == @row_id %>">
                   <a href="<%= http.route :edit, row.send(saint.pkey), @pager.query_string(page) %>">
-                    <%== saint.h row, length: 20 %>
+                    <%= saint.h row, length: 20 %>
                   </a>
                 </li>
             <% end -%>
@@ -98,7 +99,7 @@
         <div class="hide-if-lt-768">
           <% if @prev
                  row, page = @prev -%>
-              <a class="btn" rel="tooltip" title="<%== saint.h row %>"
+              <a class="btn" rel="tooltip" title="<%= saint.h row %>"
                  href="<%= http.route(:edit, row.send(saint.pkey), @pager.query_string(page)) %>">
                 <i class="icon-chevron-left"></i>
               </a>
@@ -108,7 +109,7 @@
 
           <% if @next
                  row, page = @next -%>
-              <a class="btn" rel="tooltip" title="<%== saint.h row %>"
+              <a class="btn" rel="tooltip" title="<%= saint.h row %>"
                  href="<%= http.route(:edit, row.send(saint.pkey), @pager.query_string(page)) %>">
                 <i class="icon-chevron-right"></i>
               </a>

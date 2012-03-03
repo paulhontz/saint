@@ -41,7 +41,7 @@
       <% if children.size > 0
              children_container_id = 'saint-list-%s-children_container-%s' % [row_id, level] -%>
           <tr>
-            <td class="topped nowrap">
+            <td class="topped">
               <a id="<%= children_container_id %>-status" class="void-link nowrap"
                  onclick="Saint.Utils.toggleChildrenContainer('<%= children_container_id %>');">
                 children +

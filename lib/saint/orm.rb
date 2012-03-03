@@ -47,7 +47,7 @@ module Saint
 
   module ORMUtils
 
-    PROPERTY_TYPES_MAP = {
+    PROPERTIES_MAP = {
         'binary' => 'text',
         'boolean' => true,
         'date' => true,
@@ -60,15 +60,30 @@ module Saint
         'time' => true,
     }
 
+    RELATIONS_MAP = {
+        'ManyToOne' => :belongs_to,
+        'OneToMany' => :has_n,
+        'OneToOne' => :has_n,
+        'ManyToMany' => :has_n,
+    }
+
     class << self
 
       include ORMQuery
       include Saint::Inflector
 
+      def relations model
+        skip_models = model.relationships.map { |r| (r.through.target_model if r.respond_to?(:through)) }.compact
+        model.relationships.reject { |r| skip_models.include?(r.target_model) }.map do |r|
+          (type = RELATIONS_MAP[r.class.name.split('::')[2]]) &&
+              [type, r.field.to_sym, r.target_model, (r.through.target_model if r.respond_to?(:through))].compact
+        end.compact
+      end
+
       def properties model
         model.properties.reject { |p| p.name.to_s =~ /_id$/ }.inject({}) do |properties, p|
           (primitive = underscore(demodulize(p.class))) &&
-              (type = PROPERTY_TYPES_MAP[primitive]) &&
+              (type = PROPERTIES_MAP[primitive]) &&
               (properties||{}).update(p.name => type == true ? primitive : type)
         end
       end

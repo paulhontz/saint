@@ -26,7 +26,7 @@
           <p class="alert alert-info">
             Belongs to:
             <a href="<%= @relation.remote_node ? @relation.remote_node.http.route(:edit, remote_item[saint.pkey]) : 'javascript:void(0);' %>" target="_blank">
-              <%== @relation.remote_node ?
+              <%= @relation.remote_node ?
                            @relation.remote_node.saint.h(remote_item) :
                            @remote_columns.map { |c| val = c.summary_value(remote_item, self).to_s; val.size > 0 ? val : nil }.compact.join(', ')
               %>

@@ -40,13 +40,11 @@ module Saint
     # @param [Proc] proc
     def model model = nil, pkey = nil, &proc
       if configurable? && model
-        ORMUtils.properties(model).each_pair do |name, type|
-          column name, type unless columns_ignored.include?(name)
-        end
         @model = model
         @pkey = pkey if pkey
-        # adding CRUD methods to node
-        Saint::CrudExtender.new @node
+        build_associations
+        build_columns
+        extend_node
       end
       @model
     end
@@ -172,12 +170,12 @@ module Saint
       row, opts = nil, {}
       row_or_opts.each { |a| a.is_a?(Hash) ? opts.update(a) : row = a }
 
-      label = opts.fetch :label, @header_opts[:label]
-      join = opts.fetch :join, ', '
+      label = (l=opts.fetch :label, @header_opts[:label]) && escape_html(l)
+      join = escape_html(opts.fetch :join, ', ')
       header = Array.new
 
       if @header_proc
-        header << @header_proc.call(row).to_s
+        header << escape_html(@header_proc.call(row).to_s)
       else
         args = @header_args
         if row && args.size == 0
@@ -186,7 +184,7 @@ module Saint
           args = [orm.properties.keys.first]
         end
         args.each do |a|
-          (s = column_format(a, row)) && s.strip.size > 0 && header << s
+          (s = column_format(a, row)) && s.strip.size > 0 && header << escape_html(s)
         end
       end
 
@@ -278,13 +276,37 @@ module Saint
 
     # get the label earlier set by `header`
     def label opts = {}
-      l = (@label ||= ((hl = @header_opts[:label]) && hl.to_s) || pluralize(titleize(demodulize(@node))))
+      l = escape_html((@label ||= ((hl = @header_opts[:label]) && hl.to_s) || pluralize(titleize(demodulize(@node)))))
       opts[:singular] ? singularize(l) : l
     end
 
     private
     def configurable?
       @node.node.configurable?
+    end
+
+    def build_associations
+      tree__has_n, tree__belongs_to= nil
+      ORMUtils.relations(model).each do |relation|
+        type, name, remote_model = relation
+        if remote_model == model
+          tree__has_n = name if type == :has_n
+          tree__belongs_to = name if type == :belongs_to
+        else
+          self.send relation.shift, *relation.compact
+        end
+      end
+      is_tree(tree__has_n, tree__belongs_to) if tree__has_n && tree__belongs_to
+    end
+
+    def build_columns
+      ORMUtils.properties(model).each_pair do |name, type|
+        column name, type unless columns_ignored.include?(name)
+      end
+    end
+
+    def extend_node
+      Saint::CrudExtender.new @node
     end
 
     def remove_capability cap

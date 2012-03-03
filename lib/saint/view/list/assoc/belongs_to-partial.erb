@@ -15,7 +15,7 @@
     <% end -%>
     <% if remote_node -%>
         <th>
-          <%== remote_node.saint.h -%>
+          <%= remote_node.saint.h -%>
         </th>
     <% else -%>
         <% @remote_columns.each do |column| -%>
@@ -67,7 +67,7 @@
         <% if remote_node -%>
             <td>
               <a href="<%= remote_node.http.route(:edit, remote_item_id) %>" target="_blank">
-                <%== remote_node.saint.h remote_item, label: nil -%>
+                <%= remote_node.saint.h remote_item, label: nil -%>
               </a>
             </td>
         <% else -%>
@@ -84,9 +84,9 @@
              children_container_id = '%s%s%s%s_children_container' % [@relation.id, @attached, level, remote_item_id] -%>
           <tr>
             <td></td>
-            <td style="text-align: right; vertical-align: top;">
+            <td class="topped">
               <% if level == 0 -%>
-                  <div id="<%= children_container_id %>-status" style="cursor: pointer;" class="saint-text_note"
+                  <div id="<%= children_container_id %>-status" class="void-link nowrap"
                        onclick="Saint.Utils.toggleChildrenContainer('<%= children_container_id %>');">
                     children +
                   </div>
