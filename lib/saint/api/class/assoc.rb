@@ -77,17 +77,17 @@ module Saint
     # @param [Symbol] belongs_to
     # @param [Proc] &proc configuration proc
     def is_tree has_n = :children, belongs_to = :parent, &proc
-      @associations[:is_tree] = [has_n, belongs_to, proc]
+      @tree_setup = [has_n, belongs_to, proc]
     end
 
     # (see #is_tree)
     def is_tree?
 
-      return unless @associations[:is_tree]
+      return unless @tree_setup
       unless @is_tree
 
         @is_tree = Hash.new
-        has_n, belongs_to, proc = @associations[:is_tree]
+        has_n, belongs_to, proc = @tree_setup
         node = @node
 
         has_n_assoc = Assoc.new(:has_n, has_n, @node, @node.saint.model) do

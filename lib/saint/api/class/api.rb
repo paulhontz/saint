@@ -15,14 +15,7 @@ module Saint
       @header_args, @header_opts = [], {}
 
       @create, @update, @delete, @dashboard = true, true, true, true
-
-      @associations = {
-          belongs_to: Hash.new,
-          has_n: Hash.new,
-      }
-      @belongs_to = Hash.new
-      @has_n = Hash.new
-
+      @belongs_to, @has_n = Hash.new, Hash.new
       @before, @after = Hash.new, Hash.new
       @capabilities = {create: true, update: true, delete: true}
 
