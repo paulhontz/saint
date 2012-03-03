@@ -33,9 +33,7 @@ module Ctrl
       end
     end
 
-    saint.column :content, :rte do
-      height '400px'
-    end
+    saint.column :content, :rte
 
     saint.grid do
       column :active, :boolean

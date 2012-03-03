@@ -3,9 +3,9 @@ module Ctrl
 
     saint.model Model::Author
 
-    saint.column :password, :password
+    saint.columns_ignored :status
 
-    saint.column :status, :boolean
+    saint.column :password, :password
 
     saint.filter :name, logic: 'like'
     saint.filter :status, :boolean

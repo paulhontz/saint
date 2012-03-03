@@ -2,7 +2,7 @@
 By default, Saint will create a column for each property found on given model
 (excluding ones of unsupported types as well as primary and foreign keys).
 
-To ignore some of them, simply use `saint.ignore :column1, :column2, :etc`
+To ignore some of them, simply use `saint.columns_ignored :column1, :column2, :etc`
 
 Column type are inherited from property.
 
