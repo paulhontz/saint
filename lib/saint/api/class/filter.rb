@@ -428,13 +428,14 @@ module Saint
     #
     # @param [String] var
     # @param [Symbol] logic
-    def self.query_string var, logic = :eql, multiple = false
-      "saint-filters[%s][%s]%s" % [var, logic, ('[]' if multiple)]
+    def self.query_string var, logic = :eql, *args
+      args = args.map { |a| '[%s]' % (a == true ? '' : a.to_s) if a }.compact.join
+      'saint-filters[%s][%s]%s' % [var, logic, args]
     end
 
     # (see #self.query_string)
-    def query_string
-      self.class.query_string @var, @logic, multiple?
+    def query_string *args
+      self.class.query_string @var, @logic, *[args, multiple?].flatten
     end
 
     def string?
@@ -519,6 +520,19 @@ module Saint
       return default_filters unless @val
       return default_filters if @setup.dependant_filters.size > 0
 
+      # handling ranges
+      if @val.is_a?(Hash)
+        min, max = @val.values_at('min', 'max').map { |v| v if v && v.size > 0 }
+        if min && max
+          default_filters.update ORMUtils.gte(@setup.column, min).merge(ORMUtils.lte(@setup.column, max))
+        else
+          default_filters.update ORMUtils.gte(@setup.column, min) if min
+          default_filters.update ORMUtils.lte(@setup.column, max) if max
+        end
+        return default_filters
+      end
+
+      # handling arrays
       if @val.is_a?(Array)
         val = @val.select { |v| v.size > 0 }
         return default_filters unless val.size > 0
@@ -550,6 +564,11 @@ module Saint
 
     # return HTTP query
     def http
+      if @val.is_a?(Hash)
+        query_string = []
+        @val.each_pair { |k, v| query_string << '%s[%s]=%s' % [@setup.query_string, escape(k), escape(v)] }
+        return query_string.join('&')
+      end
       @val.is_a?(Array) ?
           @val.map { |v| '%s=%s' % [@setup.query_string, escape(v)] }.join('&') :
           '%s=%s' % [@setup.query_string, escape(@val)]

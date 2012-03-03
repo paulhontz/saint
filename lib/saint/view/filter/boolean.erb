@@ -1,12 +1,9 @@
-<% options = {1 => 'Yes', 0 => 'No'} -%>
 <div class="saint-filter_label"><%= label -%></div>
 <select name="<%= @setup.query_string %>" id="<%= @id %>-input"
-        data-placeholder=' any '
-        class="saint-ui-chosen" style="width: 100px;">
+        data-placeholder=' any ' class="saint-ui-chosen">
   <option value=""></option>
-  <% options.each_pair do |value, label|
-      selected = @val == value -%>
-      <option value="<%= value %>" <%= 'selected' if selected %>>
+  <% Saint::Utils::BOOLEAN_OPTIONS.each_pair do |value, label| -%>
+      <option value="<%= value %>" <%= 'selected' if @val == value.to_s %>>
         <%= label %>
       </option>
   <% end -%>

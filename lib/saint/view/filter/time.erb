@@ -2,6 +2,10 @@
        style="<%= element.css_style %>" class="<%= element.css_class %> disable_enter_key"/>
 <script>
     $(function() {
-        $("#<%= element.id %>").datepicker({dateFormat: 'yy-mm-dd',changeMonth: true,changeYear: true,showButtonPanel: true});
+        $("#<%= element.id %>").timepicker({
+            timeFormat: 'hh:mm:ss.l',
+            showSecond: true,
+            showMillisec: true
+        });
     });
 </script>

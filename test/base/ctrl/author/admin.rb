@@ -9,6 +9,7 @@ module Ctrl
 
     saint.filter :name, logic: 'like'
     saint.filter :status, :boolean
+    saint.filter :date, :date, logic: :eql
 
     saint.header :name
 
