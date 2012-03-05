@@ -4,7 +4,7 @@ module Saint
     include Presto::Utils
 
     BOOLEAN_OPTIONS = {true => 'Yes', false => 'No'}
-    BOOLEAN_FILTERS = {'1' => 'Yes', '0' => 'No'}
+    BOOLEAN_FILTERS = {1 => 'Yes', 0 => 'No'}
 
     def saint_view scope = self
       api = Presto::ViewApi.new
