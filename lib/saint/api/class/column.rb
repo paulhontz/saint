@@ -36,7 +36,7 @@ module Saint
       type, opts = nil, {}
       type_and_or_opts.each { |a| a.is_a?(Hash) ? opts.update(a) : type = a }
       column = ::Saint::Column.new(name, type, opts.merge(rbw: @node.saint.rbw, grid: @grid), &proc)
-      columns[column.name] = column
+      @columns[column.name] = column
     end
 
     # by default, UI use a fieldset to display elements.
@@ -97,8 +97,8 @@ module Saint
       @grids ||= Hash.new
     end
 
-    # columns setter/getter.
-    # if called with args, it will define columns to be built automatically.
+    # by default, Saint will manage all properties found on given model.
+    # use `columns` inside #model block to limit them to specified ones.
     # if first argument is false [Boolean], no columns will be built automatically.
     # that's for case when you want to declare columns manually.
     #
@@ -112,20 +112,16 @@ module Saint
     #      columns false
     #    end
     #
-    # @node as setter, this method should be called inside #model block
-    #
-    # if called without args, it will return built columns.
     def columns *args
       if args.size > 0 && configurable?
         raise 'please call %s only inside #model block' % __method__ if model_defined?
         return @columns_opted = false if args.first == false
         @columns_opted = args
       end
-      @columns
     end
 
     # by default, Saint will manage all properties found on given model(except primary and foreign keys)
-    # to ignore some of them, simply use `saint.columns_ignored`
+    # to ignore some of them, simply use `columns_ignored` inside #model block
     #
     # @node this method should be called inside #model block
     #
@@ -140,6 +136,10 @@ module Saint
         raise 'please call %s only inside #model block' % __method__ if model_defined?
         @columns_ignored = args
       end
+    end
+
+    def get_columns
+      @columns
     end
 
     private

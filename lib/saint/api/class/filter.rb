@@ -60,6 +60,46 @@ module Saint
       instance.val
     end
 
+    # detect if given params contains values for any defined filters
+    def filters? params
+      filter = nil
+      @filters.keys.each { |c| break if filter = filter?(c, params) }
+      filter
+    end
+
+    # by default, Saint will build a filter for each property found on given model.
+    #
+    # to build filters only for some columns, use `filters` inside #model block
+    #
+    # @example build filters only for :name and :email
+    #    saint.model SomeModel do
+    #      filters :name, :email
+    #    end
+    #
+    # to ignore some of them, simply use `filters_ignored`
+    #
+    # @example build filters for all columns but :visits
+    #    saint.model SomeModel do
+    #      filters_ignored :visits
+    #    end
+    #
+    # @param [Array] *columns
+    def filters *args
+      if args.size > 0 && configurable?
+        raise 'please call %s only inside #model block' % __method__ if model_defined?
+        return @filters_opted = false if args.first == false
+        @filters_opted = args
+      end
+    end
+
+    # (see #filters)
+    def filters_ignored *args
+      if args.size > 0 && configurable?
+        raise 'please call %s only inside #model block' % __method__ if model_defined?
+        @filters_ignored = args
+      end
+    end
+
     # dual meaning method.
     # if called without arguments, it simply returns actually defined filters,
     # i.e. ones created by "saint.filter"
@@ -107,46 +147,6 @@ module Saint
       end
       return filters.first if filters.size == 1
       filters
-    end
-
-    # detect if given params contains values for any defined filters
-    def filters? params
-      filter = nil
-      @filters.keys.each { |c| break if filter = filter?(c, params) }
-      filter
-    end
-
-    # by default, Saint will build a filter for each property found on given model.
-    #
-    # to build filters only for some columns, use `filters` inside #model block
-    #
-    # @example build filters only for :name and :email
-    #    saint.model SomeModel do
-    #      filters :name, :email
-    #    end
-    #
-    # to ignore some of them, simply use `filters_ignored`
-    #
-    # @example build filters for all columns but :visits
-    #    saint.model SomeModel do
-    #      filters_ignored :visits
-    #    end
-    #
-    # @param [Array] *columns
-    def filters *args
-      if args.size > 0 && configurable?
-        raise 'please call %s only inside #model block' % __method__ if model_defined?
-        return @filters_opted = false if args.first == false
-        @filters_opted = args
-      end
-    end
-
-    # (see #filters)
-    def filters_ignored *args
-      if args.size > 0 && configurable?
-        raise 'please call %s only inside #model block' % __method__ if model_defined?
-        @filters_ignored = args
-      end
     end
 
     private

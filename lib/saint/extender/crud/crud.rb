@@ -28,7 +28,7 @@ module Saint
             order = saint.orm.order(saint.order)
 
             @rows, @errors = saint.orm.filter(orm_filters.merge(limits).merge(order))
-            @columns = summary_columns(saint.columns) if @errors.size == 0
+            @columns = summary_columns(saint.get_columns) if @errors.size == 0
             @__meta_title__ = saint.label
           end
           partial = @errors.size > 0 ? 'error' : 'list/list'
@@ -76,7 +76,7 @@ module Saint
             end
           end
 
-          @elements = crud_columns(saint.columns, @row)
+          @elements = crud_columns(saint.get_columns, @row)
           saint_view.render_layout saint_view.render_partial('edit/edit')
         end
 
@@ -85,7 +85,7 @@ module Saint
           is_new, assoc_updated = false, nil
           if saint.update
             ds, belongs_to = Hash.new, Hash.new
-            saint.columns.select { |n, c| c.save? }.each_value do |column|
+            saint.get_columns.select { |n, c| c.save? }.each_value do |column|
 
               value = http.params[column.name.to_s]
 
@@ -116,7 +116,7 @@ module Saint
             end
 
             @errors = []
-            saint.columns.select { |n, c| c.required? && c.save? }.each_key do |column|
+            saint.get_columns.select { |n, c| c.required? && c.save? }.each_key do |column|
               @errors << '%s is required' % column unless ds[column]
             end
 

@@ -368,7 +368,7 @@ module Saint
 
       if @remote_node
         # remote_node defined, using 3 remote columns
-        remote_columns = @remote_node.saint.columns
+        remote_columns = @remote_node.saint.get_columns
         remote_columns.select { |k, v| remote_columns.keys[0..2].include?(k) }.each_value do |column|
           @columns[column.name] = column
         end
