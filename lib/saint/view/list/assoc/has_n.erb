@@ -1,5 +1,5 @@
 <% if http.xhr? -%>
-    <script type="text/javascript" src="<%= Saint::FileServer["ui.js"] %>"></script>
+    <%= Saint::FileServer.assets.js 'ui.js' %>
 <% end -%>
 
 <% xhr = http.params['xhr']

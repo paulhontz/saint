@@ -9,7 +9,7 @@
 -%>
 
     <% if @xhr -%>
-        <script type="text/javascript" src="<%= Saint::FileServer["ui.js"] %>"></script>
+        <%= Saint::FileServer.assets.js 'ui.js' %>
     <% else -%>
         <div id="<%= @id %>">
     <% end -%>

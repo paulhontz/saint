@@ -4,6 +4,7 @@ module Saint
     DOCUMENT_ROOT = '/__saint-file_server__/'
 
     include Presto::Api
+
     http.map DOCUMENT_ROOT
     http.file_server '%s/static' % Saint.root do |env|
       env['PATH_INFO'] = env['PATH_INFO'].sub(/\.saint\-fs$/i, '')
@@ -11,8 +12,58 @@ module Saint
     end
     node.mount
 
-    def self.[] key
-      [DOCUMENT_ROOT, key, '.saint-fs'].join
+    class Assets
+      def initialize
+        @path = '/'
+      end
+
+      def cd path
+        @path = File.expand_path path, @path
+      end
+
+      def js *paths
+        buffer paths.map { |path| '<script type="text/javascript" src="%s"></script>' % url(path) }.join("\n")
+      end
+
+      def css *paths
+        buffer paths.map { |path| '<link rel="stylesheet" href="%s"/>' % url(path) }.join("\n")
+      end
+
+      def img *paths
+        buffer paths.map { |path| '<img src="%s"/>' % url(path) }.join("\n")
+      end
+
+      def output
+        (@buffer||[]).join("\n")
+      end
+
+      private
+      def url path
+        Saint::FileServer[File.expand_path(path, @path)]
+      end
+
+      def buffer str
+        (@buffer ||= []) << str
+        str
+      end
+
+    end
+
+    class << self
+      include Saint::Utils
+
+      def [] path
+        [DOCUMENT_ROOT, escape_html(normalize_path(unescape_html(path), false, false)), '.saint-fs'].join
+      end
+
+      def assets &proc
+        instance = Assets.new
+        if proc
+          instance.instance_exec(&proc)
+          return instance.output
+        end
+        instance
+      end
     end
 
   end

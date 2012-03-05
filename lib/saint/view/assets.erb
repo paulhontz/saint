@@ -1,28 +1,34 @@
-<script type="text/javascript" src="<%= Saint::FileServer["vendor/jquery.js"] %>"></script>
-<script type="text/javascript" src="<%= Saint::FileServer["vendor/jquery.hoverIntent.js"] %>"></script>
+<%= Saint::FileServer.assets do
 
-<link rel="stylesheet" href="<%= Saint::FileServer["vendor/bootstrap/css/bootstrap.min.css"] %>"/>
-<link rel="stylesheet" href="<%= Saint::FileServer["vendor/bootstrap/css/bootstrap-responsive.min.css"] %>"/>
-<script type="text/javascript" src="<%= Saint::FileServer["vendor/bootstrap/js/bootstrap.min.js"] %>"></script>
+    cd 'vendor'
+    js 'jquery.js', 'jquery.hoverIntent.js', 'supersubs.js'
 
-<link rel="stylesheet" href="<%= Saint::FileServer["vendor/Gritter/css/jquery.gritter.css"] %>"/>
-<script type="text/javascript" src="<%= Saint::FileServer["vendor/Gritter/js/jquery.gritter.min.js"] %>"></script>
+    cd 'bootstrap'
+    css 'css/bootstrap.min.css', 'css/bootstrap-responsive.min.css'
+    js 'js/bootstrap.min.js'
 
-<link rel="stylesheet" href="<%= Saint::FileServer["vendor/superfish/css/superfish.css"] %>"/>
-<script type="text/javascript" src="<%= Saint::FileServer["vendor/superfish/js/superfish.js"] %>"></script>
-<script type="text/javascript" src="<%= Saint::FileServer["vendor/supersubs.js"] %>"></script>
+    cd '../Gritter'
+    css 'css/jquery.gritter.css'
+    js 'js/jquery.gritter.min.js'
 
-<link rel="stylesheet" href="<%= Saint::FileServer["vendor/chosen/chosen.css"] %>"/>
-<script type="text/javascript" src="<%= Saint::FileServer["vendor/chosen/chosen.jquery.min.js"] %>"></script>
+    cd '../superfish'
+    css 'css/superfish.css'
+    js 'js/superfish.js'
 
-<link rel="stylesheet" href="<%= Saint::FileServer["vendor/jquery-ui/css/redmond/jquery-ui.css"] %>"/>
-<script type="text/javascript" src="<%= Saint::FileServer["vendor/jquery-ui/js/jquery-ui.js"] %>"></script>
+    cd '../chosen'
+    css 'chosen.css'
+    js 'chosen.jquery.min.js'
 
-<link rel="stylesheet" href="<%= Saint::FileServer["vendor/jQuery-Timepicker-Addon/jquery-ui-timepicker-addon.css"] %>"/>
-<script type="text/javascript" src="<%= Saint::FileServer["vendor/jQuery-Timepicker-Addon/jquery-ui-timepicker-addon.js"] %>"></script>
+    cd '../jquery-ui'
+    css 'css/redmond/jquery-ui.css'
+    js 'js/jquery-ui.js'
 
-<script type="text/javascript" src="<%= Saint::FileServer["saint.js"] %>"></script>
-<script type="text/javascript" src="<%= Saint::FileServer["ui.js"] %>"></script>
+    cd '../jQuery-Timepicker-Addon'
+    css 'jquery-ui-timepicker-addon.css'
+    js 'jquery-ui-timepicker-addon.js'
 
-<link rel="stylesheet" href="<%= Saint::FileServer["theme.css"] %>"/>
-<link rel="stylesheet" href="<%= Saint::FileServer["media.css"] %>"/>
+    cd '/'
+    js 'saint.js', 'ui.js'
+    css 'theme.css', 'media.css'
+
+end %>

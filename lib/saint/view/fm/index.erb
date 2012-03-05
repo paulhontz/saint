@@ -1,10 +1,20 @@
 <% node = @root_folder || @active_dir
    search_query = @query_string[:q]
 %>
-<link rel="stylesheet" href="<%= Saint::FileServer['vendor/plupload/js/jquery.plupload.queue/css/jquery.plupload.queue.css'] %>"/>
-<script type="text/javascript" src="<%= Saint::FileServer['vendor/plupload/js/plupload.full.js'] %>"></script>
-<script type="text/javascript" src="<%= Saint::FileServer['vendor/plupload/js/jquery.plupload.queue/jquery.plupload.queue.js'] %>"></script>
-<script type="text/javascript" src="<%= Saint::FileServer["vendor/jquery.scrollTo.js"] %>"></script>
+<%= Saint::FileServer.assets do
+
+    cd 'vendor'
+    js 'jquery.scrollTo.js'
+
+    cd 'plupload/js'
+    js 'plupload.full.js'
+
+    cd 'jquery.plupload.queue'
+    css 'css/jquery.plupload.queue.css'
+    js 'jquery.plupload.queue.js'
+    
+end %>
+
 <script type="text/javascript">
     $(function() {
 

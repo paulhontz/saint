@@ -4,5 +4,4 @@
         $('#<%= element.id %>').elrte({<%= [('width: "%s"' % element.width if element.width), ('height: "%s"' % element.height if element.height) ].compact.join(', ') -%>});
     });
 </script>
-<link rel="stylesheet" href="<%= Saint::FileServer["vendor/elrte/css/elrte.min.css"] %>"/>
-<script type="text/javascript" src="<%= Saint::FileServer["vendor/elrte/js/elrte.min.js"] %>"></script>
+<%= Saint::FileServer.assets { cd 'vendor/elrte/'; css 'css/elrte.min.css'; js 'js/elrte.min.js' } %>
