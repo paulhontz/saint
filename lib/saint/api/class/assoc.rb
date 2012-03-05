@@ -116,13 +116,31 @@ module Saint
       @is_tree
     end
 
-    # by default, Saint will manage all relations found on given model.
-    # to ignore some of them, use `saint.relations_ignored`
+    # by default, Saint will manage all relation found on given model.
+    # you can limit them by calling #relations inside #model block.
+    # if first argument is false [Boolean], no relations will be built automatically.
+    # that's for case when you want to declare relations manually.
     #
-    # @note
-    #   it will also delete manually defined associations.
-    #   well, only ones defined before `saint.relations_ignored` called.
-    #   so, call it before defining associations.
+    # @example manage only :country and :author relations
+    #    saint.model SomeModel do
+    #      relations :country, :author
+    #    end
+    #
+    # @example do not build any relations, i'll manually declare them.
+    #    saint.model SomeModel do
+    #      relations false
+    #    end
+    #
+    def relations *args
+      if args.size > 0 && configurable?
+        raise 'please call %s only inside #model block' % __method__ if model_defined?
+        return @relations_opted = false if args.first == false
+        @relations_opted = args
+      end
+    end
+
+    # by default, Saint will manage all relations found on given model.
+    # to ignore some of them, use #relations_ignored inside #model block.
     #
     # @example
     #    # lets consider a model like this:
@@ -142,17 +160,19 @@ module Saint
     #    class AuthorController
     #      include Saint::Api
     #      # basic setup
-    #      saint.model AuthorModel
-    #      saint.relations_ignored :pages
+    #      saint.model AuthorModel do
+    #        relations_ignored :pages
+    #      end
     #    end
     #
-    def relations_ignored *relations
-      if relations.size > 0 && configurable?
-        (@relations_ignored = relations).each { |r| @belongs_to.delete(r); @has_n.delete(r) }
+    def relations_ignored *args
+      if args.size > 0 && configurable?
+        raise 'please call %s only inside #model block' % __method__ if model_defined?
+        @relations_ignored = args
       end
     end
 
-    # instruct Saint to not manage tree associations.
+    # instruct Saint to not manage tree-related associations.
     #
     # @example
     #
@@ -173,26 +193,26 @@ module Saint
     #    class PageController
     #      include Saint::Api
     #      # basic setup
-    #      saint.model PageModel
-    #      saint.tree_ignored true
+    #      saint.model PageModel do
+    #        tree_ignored true
+    #      end
     #    end
     def tree_ignored *args
       if args.size > 0 && configurable?
+        raise 'please call %s only inside #model block' % __method__ if model_defined?
         @tree_ignored = true
-        if tree = is_tree?
-          @belongs_to.each_pair { |n, r| @belongs_to.delete(n) if r.__id__ == tree[:belongs_to].__id__ }
-          @has_n.each_pair { |n, r| @has_n.delete(n) if r.__id__ == tree[:has_n].__id__ }
-        end
-        @tree_setup, @is_tree = nil
       end
     end
 
     private
     # automatically build associations based on properties found on given model
     def build_associations
+      
       return unless configurable?
+      return if @relations_opted == false
+
       tree__has_n, tree__belongs_to = nil
-      ORMUtils.relations(model).reject { |r| @relations_ignored.include?(r[1]) }.each do |relation|
+      selector(ORMUtils.relations(model), @relations_opted, @relations_ignored, 1).each do |relation|
         type, name, remote_model = relation
         if remote_model == model
           tree__has_n = name if type == :has_n

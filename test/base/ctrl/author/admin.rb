@@ -1,7 +1,9 @@
 module Ctrl
   class Author
 
-    saint.model Model::Author
+    saint.model Model::Author do
+      filters_ignored /date/
+    end
 
     #saint.columns_ignored :status
 
@@ -12,8 +14,6 @@ module Ctrl
     #saint.filter :date, :date
     #saint.filter :date_time, :date_time
     #saint.filter :time, :time
-
-    saint.filters_ignored :password
 
     saint.header :name
 

@@ -74,14 +74,14 @@ module Saint
     # to get only some types, pass them as arguments.
     #
     # @example get only http filters
-    #    saint.filters :name, :http
+    #    saint.get_filters :http.params, :http
     #
     # @example get http and html filters
-    #    saint.filters :name, :http, :html
+    #    saint.get_filters http.params, :http, :html
     #
     # @param [Hash] params
     # @param [Array] *types
-    def filters params = nil, *types
+    def get_filters params = nil, *types
 
       @filters ||= Hash.new
       return @filters unless params
@@ -117,28 +117,47 @@ module Saint
     end
 
     # by default, Saint will build a filter for each property found on given model.
-    # to ignore some of them, simply use `saint.filters_ignored`
     #
-    # @note
-    #   it will also delete manually defined filters.
-    #   well, only ones defined before `saint.filters_ignored` called.
-    #   so, call it before defining filters.
+    # to build filters only for some columns, use `filters` inside #model block
     #
-    # @example
-    #    saint.filters_ignored :column1, :column2, :etc
+    # @example build filters only for :name and :email
+    #    saint.model SomeModel do
+    #      filters :name, :email
+    #    end
+    #
+    # to ignore some of them, simply use `filters_ignored`
+    #
+    # @example build filters for all columns but :visits
+    #    saint.model SomeModel do
+    #      filters_ignored :visits
+    #    end
     #
     # @param [Array] *columns
-    def filters_ignored *columns
-      return unless columns.size > 0 && configurable?
-      (@columns_ignored = columns).each { |c| @filters.delete(c) }
+    def filters *args
+      if args.size > 0 && configurable?
+        raise 'please call %s only inside #model block' % __method__ if model_defined?
+        return @filters_opted = false if args.first == false
+        @filters_opted = args
+      end
+    end
+
+    # (see #filters)
+    def filters_ignored *args
+      if args.size > 0 && configurable?
+        raise 'please call %s only inside #model block' % __method__ if model_defined?
+        @filters_ignored = args
+      end
     end
 
     private
     # automatically build filters based on properties found on given model
     def build_filters
+
       return unless configurable?
-      supported_types = %w[ boolean date date_time string time ]
-      ORMUtils.properties(model).reject { |n, t| @filters_ignored.include?(n) }.
+      return if @filters_opted == false
+
+      supported_types = %w[ string boolean date date_time time ]
+      selector(ORMUtils.properties(model), @filters_opted, @filters_ignored).
           select { |n, t| supported_types.include?(t.to_s) }.
           each { |c| filter *c }
     end
@@ -432,7 +451,7 @@ module Saint
     # @param [Array] *columns
     def depends_on *columns
       columns.each do |column|
-        unless filter = @node.saint.filters[column]
+        unless filter = @node.saint.get_filters[column]
           raise "No filter found by #{column} column"
         end
         @depends_on << filter
@@ -443,7 +462,7 @@ module Saint
     # return filters that depends on given filter
     def dependant_filters filter = self, level = 0
       @dependant_filters = Array.new if level == 0
-      @dependant_filters.concat(@node.saint.filters.values.map do |f|
+      @dependant_filters.concat(@node.saint.get_filters.values.map do |f|
         next if f.depends_on.select { |pf| pf.__id__ == filter.__id__ }.size == 0
         dependant_filters(f, level+1)
         f

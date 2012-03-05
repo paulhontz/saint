@@ -4,8 +4,6 @@ module Saint
     include Saint::Utils
     include Saint::Inflector
 
-    attr_reader :columns
-
     # initializing the configuration Api for given node.
     #
     # @param [Object] node
@@ -14,13 +12,21 @@ module Saint
       @node = node
       @ipp = Saint.ipp
       @pkey = :id
-      @columns = Hash.new
-      @columns_ignored, @relations_ignored, @filters_ignored = [], [], []
+
+      @columns = {}
+      @columns_opted, @columns_ignored = [], []
+
+      @belongs_to, @has_n = {}, {}
+      @relations_opted, @relations_ignored = [], []
+
+      @filters_opted, @filters_ignored = [], []
+      
       @header_args, @header_opts = [], {}
 
       @create, @update, @delete, @dashboard = true, true, true, true
-      @belongs_to, @has_n = Hash.new, Hash.new
-      @before, @after = Hash.new, Hash.new
+
+      @before, @after = {}, {}
+      
       @capabilities = {create: true, update: true, delete: true}
 
       @view_scope = self
@@ -39,12 +45,18 @@ module Saint
       if configurable? && model
         @model = model
         @pkey = pkey if pkey
+        self.instance_exec(&proc) if proc
+        @model_defined = true
         build_associations
         build_columns
         build_filters
         extend_node
       end
       @model
+    end
+
+    def model_defined?
+      @model_defined
     end
 
     # define primary key.
@@ -293,6 +305,26 @@ module Saint
 
     def check_capability cap
       @capabilities[cap]
+    end
+
+    def selector default, opted, ignored, index = 0
+      items = []
+      if opted.size > 0
+        default.each do |i|
+          opted.each do |o|
+            items << i if (o.is_a?(Regexp) ? i[index] =~ o : i[index] == o)
+          end
+        end
+      elsif ignored.size > 0
+        default.each do |i|
+          ignored.each do |o|
+            items << i unless (o.is_a?(Regexp) ? i[index] =~ o : i[index] == o)
+          end
+        end
+      else
+        items = default
+      end
+      items
     end
 
   end

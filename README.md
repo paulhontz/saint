@@ -39,41 +39,38 @@ It is aimed to automatize the backend building process, by creating **Summary** 
 Columns
 ---
 
-By default, Saint will create a column for each property found on given model
-(excluding ones of unsupported types as well as primary and foreign keys).
+By default, Saint will manage all columns found on given model
+(except ones of unsupported types as well as primary and foreign keys).
 
-Automatically created columns can be later fine tuned, by using `saint.column`
-or removed from list, by using `saint.ignore`.
+You can instruct Saint to manage only some columns or ignore some of them.
 
-Saint supports columns of various types. Below are some of them.
+@example: manage only :name and :email
 
-###Dropdown
+    class Author
+        include Saint::Api
+        saint.model AuthorModel do
+            columns :name, :email
+        end
+    end
 
-    saint.column :status, :select, options: {1 => :Active, 0 => :Suspended}
+@example: manage all columns but :created_at
 
-<div class="screenshot-container">
-<img src="http://saintrb.org/screenshots/columns/select.png" class="screenshot" />
-</div>
+    class Page
+        include Saint::Api
+        saint.model PageModel do
+            columns_ignored :created_at
+        end
+    end
 
+Automatically created columns can be later fine-tuned, by using `saint.column`.
 
-###Boolean
+@example convert :content into Rich Text Editor
 
-Renders an radio selector with 2 options: 1 => 'Yes' and 0 => 'No'
-
-    saint.column :active, :boolean
-
-<div class="screenshot-container">
-<img src="http://saintrb.org/screenshots/columns/boolean.png" class="screenshot" />
-</div>
-
-### Rich Text Editor
-
-    saint.column :content, :rte
-
-<div class="screenshot-container">
-<img src="http://saintrb.org/screenshots/columns/page-rte.png" class="screenshot" />
-</div>
-
+    class Page
+        include Saint::Api
+        saint.model PageModel
+        saint.column :content, :rte
+    end
 
 [More on Columns](http://saintrb.org/Columns.md)
 
@@ -81,56 +78,82 @@ Renders an radio selector with 2 options: 1 => 'Yes' and 0 => 'No'
 Associations
 ---
 
-The types of associations currently supported by Saint are:
+Saint will manage all associations found on given model.
 
-*   belongs to
-*   has N
-*   has N through
+You can decide what associations to be managed and which to be ignored.
 
-*Example:* Game belongs to Edition
+@example: manage only :author relation
 
-    class Game
-        saint.belongs_to :edition, Model::Edition
+    # DataMapper model
+    class PageModel
+        # basic setup
+        belongs_to :author
+        has n, :menus
+        has n, :visits
     end
 
-*Example:*  Game has N Goals
-
-    class Game
-        saint.has_n :goals, Model::Goal
+    # Saint setup
+    class Page
+        include Saint::Api
+        saint.model PageModel do
+            relations :author
+        end
     end
 
+@example: manage all relations but :visits
 
-*Example:* Game has N Scorers(Players), through PlayersScorers model
-
-    class Game
-        saint.has_n :scorers, Model::Player, Model::PlayersScorers
+    class Page
+        include Saint::Api
+        saint.model PageModel do
+            relations_ignored :visits
+        end
     end
 
+Automatically defined associations can be fine-tuned later.
+
+@example: manage :visits relations in readonly mode
+
+    class Page
+        include Saint::Api
+        saint.model PageModel
+        saint.has_n :visits, VisitsModel, readonly: true
+    end
 
 [More on Associations](http://saintrb.org/Associations.md)
 
 Filters
 ---
 
-**Text Filters**
+Saint will also build filters for each property found on given model.
 
-    saint.filter :name
-    saint.filter :about
+As per columns and associations, you can decide what filters to build and which ones to ignore.
 
+@example: build filters only for :name and :email
 
-*Note:* for filter to work, it should use a earlier defined column or association.
+    class Author
+        include Saint::Api
+        saint.model AuthorModel do
+            filters :name, :email
+        end
+    end
 
-**Dropdown Filters**
+@example: build filters for all columns but :visits
 
-    saint.filter :active, :select, options: {1 => 'Yes', 0 => 'No'}
+    class Page
+        include Saint::Api
+        saint.model PageModel do
+            filters_ignored :visits
+        end
+    end
 
+And of course, any automatically filter can be fine-tuned.
 
-**Associative Filters**
+@example: convert :color filter into a dropdown with multiple options
 
-Filter Page by Author:
-
-    saint.filter :author_id do
-        model Model::Author
+    class Menu
+        include Saint::Api
+        saint.model MenuModel
+        filter :color, :select, multiple: true
     end
 
 
@@ -141,7 +164,7 @@ File Manager
 
 Saint comes with a built-in file manager.
 
-Simply let Saint know the full path to folder and it will turn a class into a fully fledged file manager
+Simply let Saint know the full path to folder and it will turn a class into a fully-fledged file manager
 
     class FileManager
 

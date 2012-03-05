@@ -13,7 +13,7 @@ module Saint
 
         def index
 
-          orm_filters, http_filters = saint.filters(:orm, :http)
+          orm_filters, http_filters = saint.get_filters(:orm, :http)
           page = http.params[Saint::Pager::VAR].to_i
           @rows_total, @errors = saint.orm.count orm_filters
           if @errors.size == 0
@@ -49,7 +49,7 @@ module Saint
 
           @__meta_title__ = saint.h(@row)
 
-          orm_filters, http_filters = saint.filters(:orm, :http)
+          orm_filters, http_filters = saint.get_filters(:orm, :http)
           @pager = Saint::Pager.new(http.params[Saint::Pager::VAR].to_i)
           @pager.paginate(query: http_filters.join('&'), skip_render: true)
 

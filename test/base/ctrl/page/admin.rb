@@ -4,7 +4,9 @@ module Ctrl
     include Saint::OptsApi
     opts Ctrl::Options
 
-    saint.model Model::Page
+    saint.model Model::Page do
+      filters :name
+    end
 
     saint.header :name, ', by #author.name', ', #children.count children'
 

@@ -1,4 +1,59 @@
 
+Saint will manage all associations found on given model.
+
+You can decide what associations to be managed and which to be ignored.
+
+@example: manage only :author relation
+
+    # DataMapper model
+    class PageModel
+        # basic setup
+        belongs_to :author
+        has n, :menus
+        has n, :visits
+    end
+
+    # Saint setup
+    class Page
+        include Saint::Api
+        saint.model PageModel do
+            relations :author
+        end
+    end
+
+@example: manage all relations but :visits
+
+    class Page
+        include Saint::Api
+        saint.model PageModel do
+            relations_ignored :visits
+        end
+    end
+
+To ignore tree-related associations, use `tree_ignored` inside #model block:
+
+    class Page
+        include Saint::Api
+        saint.model PageModel do
+            tree_ignored true
+        end
+    end
+
+
+Automatically defined associations can be fine-tuned later.
+
+@example: manage :visits relations in readonly mode
+
+    class Page
+        include Saint::Api
+        saint.model PageModel
+        saint.has_n :visits, VisitsModel, readonly: true
+    end
+
+
+
+# Manually defining associations
+
 Saint does support *"belongs to"*, *"has N"* and *"has N through"* associations.
 
 Belongs to

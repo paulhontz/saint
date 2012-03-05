@@ -2,21 +2,46 @@
 By default, Saint will create a column for each property found on given model
 (excluding ones of unsupported types as well as primary and foreign keys).
 
-To ignore some of them, simply use `saint.columns_ignored :column1, :column2, :etc`
+To build only some columns, use `saint.columns` inside #model block.
 
-Column type are inherited from property.
+@example build only :title and :meta_* columns
 
-You can fine tune any automatically added column, or even add new ones.
+    saint.model SomeModel do
+      columns :title, /^meta_/
+    end
 
-For example, your model contains :content property.
+If first argument is false [Boolean], no columns will be built automatically.<br/>
+That's for case when you want to declare columns manually.
+
+@example do not build any columns, i'll manually declare them.
+
+    saint.model SomeModel do
+      columns false
+    end
+
+You can also instruct Saint to build all columns but ignore some of them.<br/>
+For this, call `saint.columns_ignored` inside #model block.
+
+@example manage all columns but :meta_* and :visits
+
+    saint.model SomeModel do
+      columns_ignored /^meta_/, :visits
+    end
+
+**Column type are inherited from property it is built from.**
+
+**Columns will be displayed in the order they found in given model.**
+
+You can fine tune any automatically added column, or add new ones.
+
+For example, your model contains :content property of Text type.
 Saint will create an textarea column, but you need an WYSIWYG editor for :content.
 You simply need to override :content column setup:
 
     saint.column :content, :rte
 
-Columns will be displayed in the order they found in given model.
 
-Custom types supported by Saint:
+# Manually declaring columns
 
 Text Fields
 ---

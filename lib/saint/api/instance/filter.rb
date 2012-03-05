@@ -1,8 +1,8 @@
 module Saint
   class InstanceApi
 
-    def filters *types
-      @node.saint.filters @node_instance.http.params, *types
+    def get_filters *types
+      @node.saint.get_filters @node_instance.http.params, *types
     end
 
     def filters?

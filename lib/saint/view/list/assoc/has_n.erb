@@ -7,7 +7,7 @@
    @update_selector_url = http.route(:assoc__any__remote_items, @relation.id, @local_id, "/")
    if (items = @remote_items) && items.size > 0 %>
 
-    <% if xhr.nil? && @attached == 0 && remote_node && filters = remote_node.saint.filters(http.params, :html) -%>
+    <% if xhr.nil? && @attached == 0 && remote_node && filters = remote_node.saint.get_filters(http.params, :html) -%>
         <form action="<%= @update_selector_url %>0" id="saint_assoc_filters-<%= @relation.id %>">
           <input type="hidden" name="xhr" value="true"/>
           <%= filters %>

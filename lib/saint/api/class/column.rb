@@ -36,7 +36,7 @@ module Saint
       type, opts = nil, {}
       type_and_or_opts.each { |a| a.is_a?(Hash) ? opts.update(a) : type = a }
       column = ::Saint::Column.new(name, type, opts.merge(rbw: @node.saint.rbw, grid: @grid), &proc)
-      @columns[column.name] = column
+      columns[column.name] = column
     end
 
     # by default, UI use a fieldset to display elements.
@@ -97,28 +97,57 @@ module Saint
       @grids ||= Hash.new
     end
 
-    # by default, Saint will manage all properties found on given model(excluding primary and foreign keys)
+    # columns setter/getter.
+    # if called with args, it will define columns to be built automatically.
+    # if first argument is false [Boolean], no columns will be built automatically.
+    # that's for case when you want to declare columns manually.
+    #
+    # @example build only :title and :meta_*
+    #    saint.model SomeModel do
+    #      columns :title, /^meta_/
+    #    end
+    #
+    # @example do not build any columns, i'll manually declare them.
+    #    saint.model SomeModel do
+    #      columns false
+    #    end
+    #
+    # @node as setter, this method should be called inside #model block
+    #
+    # if called without args, it will return built columns.
+    def columns *args
+      if args.size > 0 && configurable?
+        raise 'please call %s only inside #model block' % __method__ if model_defined?
+        return @columns_opted = false if args.first == false
+        @columns_opted = args
+      end
+      @columns
+    end
+
+    # by default, Saint will manage all properties found on given model(except primary and foreign keys)
     # to ignore some of them, simply use `saint.columns_ignored`
     #
-    # @note
-    #   it will also delete manually defined columns.
-    #   well, only ones defined before `saint.columns_ignored` called.
-    #   so, call it before defining columns.
+    # @node this method should be called inside #model block
     #
-    # @example
-    #    saint.columns_ignored :column1, :column2, :etc
+    # @example manage all columns but :meta_* and :visits
+    #    saint.model SomeModel do
+    #      columns_ignored /^meta_/, :visits
+    #    end
     #
     # @param [Array] *columns
-    def columns_ignored *columns
-      return unless columns.size > 0 && configurable?
-      (@columns_ignored = columns).each { |c| @columns.delete(c) }
+    def columns_ignored *args
+      if args.size > 0 && configurable?
+        raise 'please call %s only inside #model block' % __method__ if model_defined?
+        @columns_ignored = args
+      end
     end
 
     private
     # automatically build columns based on properties found on given model
     def build_columns
       return unless configurable?
-      ORMUtils.properties(model).reject { |n, t| @columns_ignored.include?(n) }.each { |c| column *c }
+      return if @columns_opted == false
+      selector(ORMUtils.properties(model), @columns_opted, @columns_ignored).each { |c| column *c }
     end
 
   end
