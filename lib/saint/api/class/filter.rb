@@ -156,9 +156,16 @@ module Saint
       return unless configurable?
       return if @filters_opted == false
 
-      supported_types = %w[ string boolean date date_time time ]
+      types = {
+          'string' => true,
+          'text' => 'string',
+          'boolean' => true,
+          'date' => true,
+          'date_time' => true,
+          'time' => true,
+      }
       selector(ORMUtils.properties(model), @filters_opted, @filters_ignored).
-          select { |n, t| supported_types.include?(t.to_s) }.
+          map { |n, t| types[t] == true ? [n, t] : [n, types[t]] if types[t] }.compact.
           each { |c| filter *c }
     end
 

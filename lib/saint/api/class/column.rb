@@ -234,11 +234,12 @@ module Saint
       end
 
       width = @width if select? || checkbox? || radio? || password? || boolean?
+      height ||= '100px' if text?
 
       @css_style = '%s %s %s' % [
           @css_style,
-          ("width: %s;" % width if width),
-          ("height: %s;" % height if height)
+          ('width: %s;' % width if width),
+          ('height: %s;' % height if height)
       ]
     end
 
@@ -423,6 +424,10 @@ module Saint
 
     def password?
       @type == 'password'
+    end
+
+    def text?
+      @type == 'text'
     end
 
     def rte?
