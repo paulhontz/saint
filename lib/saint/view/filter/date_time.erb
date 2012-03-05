@@ -1,6 +1,4 @@
-<div class="saint-filter_label"><%= label %> min</div>
-<input type="text" name="<%= @setup.query_string :min %>" value="<%== ((@val||{})['min'] rescue nil) %>"
-       class="disable_enter_key saint-filters-datetimepicker"/>
-<div class="saint-filter_label"><%= label %> max</div>
-<input type="text" name="<%= @setup.query_string :max %>" value="<%== ((@val||{})['max'] rescue nil) %>"
+<div class="saint-filter_label"><%= [label, range_cardinality].join(' ') %></div>
+<input type="text" name="<%= @setup.query_string range_cardinality %>"
+       value="<%== (@val.is_a?(Hash) ? @val[range_cardinality] : @val) %>"
        class="disable_enter_key saint-filters-datetimepicker"/>

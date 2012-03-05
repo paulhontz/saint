@@ -44,7 +44,7 @@ module Saint
     def filter column, *type_and_or_opts, &proc
       return unless configurable?
       type, opts = nil, {}
-      type_and_or_opts.each { |a| a.is_a?(Hash) ? opts.update(a) : type = a }
+      type_and_or_opts.each { |a| a.is_a?(Hash) ? opts.update(a) : type = a.to_sym }
       (@filters ||= Hash.new)[column] = Filter.new(@node, column, type, opts, &proc)
     end
 
@@ -183,13 +183,15 @@ module Saint
     #
     # @param [Class] node
     # @param [Symbol] column
-    # @param type_and_or_opts
-    # @option type_and_or_opts [Symbol] column
-    # @option type_and_or_opts [Symbol, Array] logic
-    # @option type_and_or_opts [String, Symbol] label
-    # @option type_and_or_opts [Hash, Array] options options to be used on :select type
-    # @option type_and_or_opts [Boolean] multiple
+    # @param [Symbol] type
+    # @param [Hash] opts
     # @param [Proc] proc
+    # @option opts [Symbol] column
+    # @option opts [Symbol, Array] logic
+    # @option opts [String, Symbol] label
+    # @option opts [Hash, Array] options options to be used on :select type
+    # @option opts [Boolean] multiple
+    # @option opts [Boolean] range
     def initialize node, column, type = nil, opts = {}, &proc
 
       @node, @column, @type = node, column, type
@@ -217,7 +219,7 @@ module Saint
       if logic = opts[:logic]
         logic(*[logic].flatten)
       end
-      logic(:eql) if @type == :boolean
+      logic(:eql) if boolean?
 
       if options = opts[:options]
         options(*[options].flatten)
@@ -225,6 +227,8 @@ module Saint
 
       label opts[:label]
       multiple opts[:multiple]
+      range opts[:range]
+      range true if date? || date_time? || time? unless opts.has_key?(:range)
 
       proc && self.instance_exec(&proc)
       @through_model = @remote_opts[:through]
@@ -403,6 +407,17 @@ module Saint
       @multiple
     end
 
+    # used on :select and :string filters.
+    # if set to true, filter will display two fields - min and max
+    def range *args
+      @range = args.first if args.size > 0
+      @range
+    end
+
+    def range?
+      @range
+    end
+
     # set remote model as well as middle model, remote opts and remote proc.
     #
     # @param [Object] model remote model
@@ -486,6 +501,22 @@ module Saint
 
     def string?
       @type == :string
+    end
+
+    def boolean?
+      @type == :boolean
+    end
+
+    def date?
+      @type == :date
+    end
+
+    def date_time?
+      @type == :date_time
+    end
+
+    def time?
+      @type == :time
     end
 
     private
@@ -623,7 +654,12 @@ module Saint
     # render filter into UI representation
     def html xhr = false
       @xhr = xhr
-      saint_view.render_partial ::File.join('filter', @setup.type.to_s)
+      partial = ::File.join('filter', @setup.type.to_s)
+      if @setup.range?
+        %w[min max].map { |c| saint_view.render_partial partial, range_cardinality: c }.join
+      else
+        saint_view.render_partial partial, range_cardinality: nil
+      end
     end
 
     # get HTTP value for given filter.

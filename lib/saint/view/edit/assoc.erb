@@ -9,7 +9,7 @@
       <div class="tabbable">
         <ul class="nav nav-tabs">
           <li class="active">
-            <a href="#<%= tab_id %>-select_existing" data-toggle="tab">
+            <a href="#<%= tab_id %>-select_existing" id="<%= tab_id %>-select_existing-toggle" data-toggle="tab">
               <i class="icon-th-list"></i>
               Select Existing
             </a>
@@ -112,7 +112,6 @@
                             associated = rel.local_model.__id__ == remote_rel.remote_model.__id__ -%>
 
                             <div id="<%= tab_id %>-create_new-tabs-<%= remote_rel.id %>" class="tab-pane">
-
                               <% if row && associated -%>
                                   <div class="alert alert-info">
                                     <label class="checkbox">
@@ -138,10 +137,11 @@
                                               Saint.update_container('saint-crud-header', '<%= http.route :head, row_id %>');
                                               });
                                       }
-                              $('#<%= form_id %>')[0].reset();
+                              Saint.alert(response.message);
+                              $('#<%= tab_id %>-select_existing-toggle').tab('show');
                               Saint.update_container('<%= rel.id %>1', '<%= rel.remote_node.http.route :assoc__any__remote_items, rel.id, row_id, 1 %>');
                               Saint.update_container('<%= rel.id %>0', '<%= rel.remote_node.http.route :assoc__any__remote_items, rel.id, row_id, 0 %>');
-                              Saint.alert(response.message);
+                              $('#<%= form_id %>')[0].reset();
                               });">
                         Save <%= label__singular %>
                       </button>

@@ -146,14 +146,14 @@ As per columns and associations, you can decide what filters to build and which 
         end
     end
 
-And of course, any automatically filter can be fine-tuned.
+And of course, any automatically built filter can be fine-tuned.
 
 @example: convert :color filter into a dropdown with multiple options
 
     class Menu
         include Saint::Api
         saint.model MenuModel
-        filter :color, :select, multiple: true
+        filter :color, :select, options: [:red, :green, :blue], multiple: true
     end
 
 

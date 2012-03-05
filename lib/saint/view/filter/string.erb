@@ -1,5 +1,6 @@
-<div class="saint-filter_label"><%= label %></div>
-<input type="text" name="<%= @setup.query_string %>" value="<%== @val %>" class="disable_enter_key"
+<div class="saint-filter_label"><%= [label, range_cardinality].join(' ') %></div>
+<input type="text" name="<%= @setup.query_string range_cardinality %>"
+       value="<%== (@val.is_a?(Hash) ? @val[range_cardinality] : @val) %>" class="disable_enter_key"
        <% if (dependant_filters = @setup.dependant_filters).size > 0 -%>
        onkeyup="$('<%= dependant_filters.map{|f| "##{f.id + @seed}-input"}.join(',') %>').remove();
                var query_string = $(this).closest('form').serialize();

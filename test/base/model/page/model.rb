@@ -19,6 +19,8 @@ module Model
     property :color2, String
     property :color3, String
 
+    property :visits, Integer
+
     property :content, Text
     property :active, Integer
   end

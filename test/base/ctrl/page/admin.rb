@@ -71,15 +71,21 @@ module Ctrl
       model Model::Country, label: '#name (#authors.count authors)'
     end
 
+    saint.filter :author_name, :string do
+      model Model::Author
+      column :name
+    end
+
     saint.filter :author_id do
       multiple true
       model Model::Author, label: '#name (#pages.count pages)'
       depends_on :country_id
+      depends_on :author_name
     end
 
-    saint.filter :author_name, :string do
-      model Model::Author
-      column :name
+    saint.filter :visits, :select do
+       range true
+       options 0, 10, 20, 50, 100, 200, 300, 400, 1000
     end
 
     saint.before do |item, action|
@@ -88,10 +94,6 @@ module Ctrl
 
     saint.after do |item, action|
       item.update callback_z_test: action
-    end
-
-    saint.crud_tab :blah do
-      'blah!'
     end
 
   end

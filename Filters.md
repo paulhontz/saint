@@ -1,3 +1,36 @@
+Saint will build filters for each property found on given model.
+
+You can decide what filters to build and which ones to ignore.
+
+@example: build filters only for :name and :email
+
+    class Author
+        include Saint::Api
+        saint.model AuthorModel do
+            filters :name, :email
+        end
+    end
+
+@example: build filters for all columns but :visits
+
+    class Page
+        include Saint::Api
+        saint.model PageModel do
+            filters_ignored :visits
+        end
+    end
+
+And of course, any automatically built filter can be fine-tuned.
+
+@example: convert :color filter into a dropdown with multiple options
+
+    class Menu
+        include Saint::Api
+        saint.model MenuModel
+        filter :color, :select, options: [:red, :green, :blue], multiple: true
+    end
+
+# Manually defining filters
 
 Text Filters
 ---
@@ -29,13 +62,43 @@ or
     end
 
 
-
-
 Boolean Filters
 ---
 
     saint.filter :active, :boolean
 
+
+Date, DateTime and Time
+---
+
+    saint.filter :created_at, :date
+    saint.filter :last_visit, :date_time
+    saint.filter :last_login, :time
+
+By default, any date/time related filters are built as range filters,
+so you can filter by min and max values.
+
+To disable range for some filter, use `range: false` option:
+
+    saint.filter :created_at, :date, range: false
+
+
+Ranges
+---
+
+It is possible to turn any dropdown or text filter into a range filter,
+so you can filter by min/max values.
+
+@example: display min/max fields for a text filter
+
+    saint.filter :visits, range: true
+
+@example: display min/max fields for a dropdown filter
+
+    saint.filter :price, :select do
+        range true
+        options 0, 1000, 10_000, 50_000, 100_000
+    end
 
 Associative Filters
 ---

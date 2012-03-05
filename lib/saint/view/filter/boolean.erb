@@ -2,8 +2,8 @@
 <select name="<%= @setup.query_string %>" id="<%= @id %>-input"
         data-placeholder=' any ' class="saint-ui-chosen">
   <option value=""></option>
-  <% Saint::Utils::BOOLEAN_OPTIONS.each_pair do |value, label| -%>
-      <option value="<%= value %>" <%= 'selected' if @val == value.to_s %>>
+  <% Saint::Utils::BOOLEAN_FILTERS.each_pair do |value, label| -%>
+      <option value="<%= value %>" <%= 'selected' if @val == value %>>
         <%= label %>
       </option>
   <% end -%>
