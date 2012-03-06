@@ -275,7 +275,7 @@ module Saint
     end
 
     def render_dashboard scope
-      @rendered_dashboard ||= saint_view(scope).render_layout(saint_view(scope).render_partial('dashboard'))
+      saint_view(scope).render_layout(saint_view(scope).render_partial('dashboard'))
     end
 
     # should the controller be displayed on dashboard?

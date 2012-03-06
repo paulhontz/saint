@@ -1,92 +1,117 @@
 <div class="row">
   <% Saint.ordered_nodes.select { |n| n.saint.dashboard }.each do |node|
-      orm = Saint::ORM.new node.saint.model
-  -%>
-      <div class="span">
-        <div class="well">
-          <h3>
-            <a href="<%= node.http.route %>">
-              <%= node.saint.label %>
-            </a>
-            <%= orm.count[0] %>
-          </h3>
+      if node.saint.model && orm = Saint::ORM.new(node.saint.model) -%>
+          <div class="span" style="min-width: 200px;">
 
-          <div>
-            <span class="label label-success">
-            Latest Items
-            </span>
-            <ul>
-              <% (orm.filter(orm.order(node.saint.pkey => :desc).merge(orm.limit(5)))[0]||[]).each do |item| %>
-                  <li>
-                    <a href="<%= node.http.route :edit, item.send(node.saint.pkey) %>">
-                      <%= node.saint.h item %>
-                    </a>
-                  </li>
-              <% end -%>
-            </ul>
-          </div>
+            <div class="page-header">
 
-          <% if (belongs_to = node.saint.belongs_to.select { |l, a| !a.is_tree? }).size > 0 -%>
+              <i class="icon-list"></i>
+              <strong>
+                <a href="<%= node.http.route %>">
+                  <%= node.saint.menu.label %>
+                </a>
+              </strong>
+              <%= orm.count[0] %>
+              <div class="pull-right">
+                <a class="" href="<%= node.http.route :edit %>">
+                  <i class="icon-plus-sign"></i></a>
+              </div>
+            </div>
+
+            <div class="well">
               <div>
+                <span class="label label-success">
+                    Latest Items
+                </span>
+                <ul>
+                  <% (orm.filter(orm.order(node.saint.pkey => :desc).merge(orm.limit(5)))[0]||[]).each do |item| %>
+                      <li>
+                        <a href="<%= node.http.route :edit, item.send(node.saint.pkey) %>">
+                          <%= node.saint.h item %>
+                        </a>
+                      </li>
+                  <% end -%>
+                </ul>
+              </div>
+
+              <% if (belongs_to = node.saint.belongs_to.select { |l, a| !a.is_tree? }).size > 0 -%>
+                  <div>
                 <span class="label label-success">
                 Belongs To
                 </span>
-                <ul>
-                  <% belongs_to.each do |assoc|
-                      label, assoc = assoc -%>
-                      <li>
-                        <% if assoc.remote_node -%>
-                            <a href="<%= assoc.remote_node.http.route -%>">
-                              <%== label %>
-                            </a>
-                        <% else -%>
-                            <%== label %>
-                        <% end -%>
-                      </li>
-                  <% end -%>
-                </ul>
-              </div>
-          <% end -%>
+                    <ul>
+                      <% belongs_to.each do |assoc|
+                          label, assoc = assoc -%>
+                          <li>
+                            <% if assoc.remote_node -%>
+                                <a href="<%= assoc.remote_node.http.route -%>">
+                                  <%== label %>
+                                </a>
+                            <% else -%>
+                                <%== label %>
+                            <% end -%>
+                          </li>
+                      <% end -%>
+                    </ul>
+                  </div>
+              <% end -%>
 
-          <% if (has_n = node.saint.has_n.select { |l, a| !a.is_tree? }).size > 0 -%>
-              <div>
+              <% if (has_n = node.saint.has_n.select { |l, a| !a.is_tree? }).size > 0 -%>
+                  <div>
                 <span class="label label-success">
                 Has N
                 </span>
-                <ul>
-                  <% has_n.each do |assoc|
-                      label, assoc = assoc -%>
-                      <li>
-                        <% if assoc.remote_node -%>
-                            <a href="<%= assoc.remote_node.http.route -%>">
-                              <%== label %>
-                            </a>
-                        <% else -%>
-                            <%== label %>
-                        <% end -%>
-                      </li>
-                  <% end -%>
-                </ul>
-              </div>
-          <% end -%>
+                    <ul>
+                      <% has_n.each do |assoc|
+                          label, assoc = assoc -%>
+                          <li>
+                            <% if assoc.remote_node -%>
+                                <a href="<%= assoc.remote_node.http.route -%>">
+                                  <%== label %>
+                                </a>
+                            <% else -%>
+                                <%== label %>
+                            <% end -%>
+                          </li>
+                      <% end -%>
+                    </ul>
+                  </div>
+              <% end -%>
 
-          <% if tree = node.saint.is_tree? -%>
-              <div>
-                <span class="label label-success">
-                Tree
-                </span>
-                <ul>
-                  <li>
-                    belongs to: <%= tree[:belongs_to].name %>
-                  </li>
-                  <li>
-                    has n: <%= tree[:has_n].name %>
-                  </li>
-                </ul>
-              </div>
-          <% end -%>
+              <% if node.saint.is_tree? -%>
+                  <div>
+                    <span class="label label-success">
+                        Is Tree
+                    </span>
+                  </div>
+              <% end -%>
 
-        </div>
-      </div>
+            </div>
+
+          </div>
+      <% elsif (file_manager = node.saint.file_manager) -%>
+
+          <div class="span">
+            <div class="page-header">
+              <i class="icon-folder-close"></i>
+              <strong>
+                <a href="<%= node.http.route %>">
+                  <%= node.saint.menu.label %>
+                </a>
+              </strong>
+            </div>
+
+            <% file_manager.roots.each do |root| %>
+                <div class="alert alert-info">
+                  <i class="icon-folder-open"></i>
+                  <a href="<%= root.http.route %>">
+                    <%= root.setup.label %>
+                  </a>
+                </div>
+            <% end -%>
+
+          </div>
+
+      <% end -%>
   <% end -%>
 </div>
