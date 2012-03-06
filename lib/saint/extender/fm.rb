@@ -29,16 +29,8 @@ module Saint
         include Presto::Api
         include Saint::Utils
         http.map node.http.route url
-
-        define_singleton_method :setup do
-          @fm ||= Struct.new(:root, :roots, :url, :label).
-              new(root.freeze, host.roots.freeze, url.freeze, label.freeze).freeze
-        end
-
-        define_method :setup do
-          self.class.setup
-        end
       end
+
       fs = fm.const_set :FileServer, Class.new
       fs.class_exec do
 
@@ -50,6 +42,16 @@ module Saint
 
         def self.[] path
           '%s/%s.saint-fs' % [http.route, Presto::Utils.normalize_path(path, false, false)]
+        end
+      end
+      fm.class_exec do
+        define_singleton_method :setup do
+          @setup ||= Struct.new(:root, :roots, :url, :label, :file_server).
+              new(root.freeze, host.roots.freeze, url.freeze, label.freeze, fs.freeze).freeze
+        end
+
+        define_method :setup do
+          self.class.setup
         end
       end
       extend fm
@@ -267,7 +269,7 @@ module Saint
           )
           node[:path_encoded] = encode_path(node[:path])
           if node[:viewable?]
-            node[:url] = FileServer[file]
+            node[:url] = setup.file_server[file]
             node[:geometry] = @helper.geometry(full_path)
           end
           node
