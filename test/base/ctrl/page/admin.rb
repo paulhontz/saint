@@ -42,13 +42,14 @@ module Ctrl
     saint.grid do
       column :active, :boolean
       column :color1, :checkbox do
-        options ['red', 'green', 'blue']
+        options 'red', 'green', 'blue'
       end
       column :color2, :select do
-        options ['red', 'green', 'blue']
+        options 'red', 'green', 'blue'
+        multiple true
       end
       column :color3, :radio do
-        options ['red', 'green', 'blue']
+        options 'red', 'green', 'blue'
       end
     end
 

@@ -311,12 +311,12 @@ module Saint
     end
 
     # options to be used on select, radio and checkbox selectors
-    def options options = nil
-      if options
+    def options *options
+      if options.size > 0
         if options.is_a?(Array)
           options = Hash[options.zip(options.map { |o| Saint::Inflector.titleize(o) })]
         else
-          raise('options should be either an Hash or an Array') unless options.is_a?(Hash)
+          options.is_a?(Hash) || raise('options should be either an Hash or an Array')
         end
         @options = options
       end
@@ -488,7 +488,7 @@ module Saint
       @row, @scope, @node_instance = row, scope, node_instance
 
       if @options && summary?
-        value = @options[value]
+        value = @options[value] unless checkbox? || multiple?
       end
 
       if boolean? && summary?
