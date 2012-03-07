@@ -109,7 +109,6 @@ module Saint
 
       @model, @subset, @node_instance = model, Hash.new, nil
       node_instance_and_or_subset.each { |a| a.is_a?(Hash) ? @subset.update(a) : @node_instance = a }
-
       @before, @after = Hash.new, Hash.new
     end
 

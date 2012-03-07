@@ -1,3 +1,7 @@
+<script type="text/javascript">
+  var query_string = '<%= @pager.query_string %>';
+</script>
+
 <% remote_node = @relation.remote_node
    readonly = @relation.readonly
    tree = remote_node && remote_node.saint.is_tree?
@@ -24,7 +28,7 @@
   <% items_counter = @pager.items + 1
      update_relation_action = :assoc__has_n__update_remote_item
      update_relation_action = :assoc__has_n__update_through_model if @relation.through_model
-     update_relation_url = http.route(update_relation_action, @relation.id, '/')
+     update_relation_url = http.route update_relation_action
      items.each do |remote_item|
          remote_id = remote_item[@relation.remote_pkey]
          children = tree ? remote_item.send(tree[:has_n].children) : []
@@ -51,16 +55,9 @@
                       <% else
                              disabled = (@relation.is_tree? && (@local_id == remote_id || (@local_item && @local_item.parent_id == remote_id))) ||
                                      (@relation.belongs_to? && remote_item.send(@relation.remote_key) == @local_id) -%>
-                          <a class="btn <%= 'disabled' if disabled %>"
+                          <a class="btn void-link <%= 'disabled' if disabled %>"
                              <% unless disabled -%>
-                             onclick="if(confirm('Please confirm Attach action')){
-                                     Saint.valid_GET('<%= '%s/%s/%s/create' % [update_relation_url, remote_id, @local_id] %>', function(response){
-                                             Saint.update_container('<%= @relation.id %>0', '<%= @update_selector_url + "0" + @pager.query_string %>');
-                                             Saint.update_container('<%= @relation.id %>1', '<%= @update_selector_url + "1" %>');
-                                             Saint.update_container('saint-crud-header', '<%= http.route(:head, @local_id) %>');
-                                             Saint.empty_container('<%= @relation.id %>-edit_assoc_container');
-                                             Saint.alert(response.message);
-                                             });}"
+                             onclick="return saint__assoc__has_n__update('<%= update_relation_url %>', '<%= @relation.id %>', '<%= @local_id %>', '<%= remote_id %>', 'create', query_string);"
                              <% end -%> >
                             attach
                           </a>
@@ -68,15 +65,8 @@
 
                   <% else -%>
 
-                      <a class="btn"
-                         onclick="if(confirm('Please confirm Detach action')){
-                                 Saint.valid_GET('<%= '%s/%s/%s/delete' % [update_relation_url, remote_id, @local_id] %>', function(response){
-                                         Saint.update_container('<%= @relation.id %>0', '<%= @update_selector_url + "0" %>');
-                                         Saint.update_container('<%= @relation.id %>1', '<%= @update_selector_url + "1" + @pager.query_string %>');
-                                         Saint.update_container('saint-crud-header', '<%= http.route(:head, @local_id) %>');
-                                         Saint.empty_container('<%= @relation.id %>-edit_assoc_container');
-                                         Saint.alert(response.message);
-                                         });}">
+                      <a class="btn void-link"
+                         onclick="return saint__assoc__has_n__update('<%= update_relation_url %>', '<%= @relation.id %>', '<%= @local_id %>', '<%= remote_id %>', 'delete', query_string);">
                         detach
                       </a>
                   <% end -%>

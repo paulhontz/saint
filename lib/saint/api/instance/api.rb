@@ -24,7 +24,7 @@ module Saint
     def menu
       @node.saint.render_menu
     end
-    
+
     def dashboard
       @node.saint.render_dashboard @node_instance
     end

@@ -20,6 +20,7 @@ module Saint
       @relations_opted, @relations_ignored = [], []
 
       @filters_opted, @filters_ignored = [], []
+      @subsets = {}
       
       @header_args, @header_opts = [], {}
 
@@ -189,9 +190,8 @@ module Saint
       else
         args = @header_args
         if row && args.size == 0
-          # no snippets defined, so using first non-id column
-          orm = Saint::ORM.new(@node.saint.model)
-          args = [orm.properties.keys.first]
+          # no snippets defined, so using first model property
+          args = [Saint::ORMUtils.properties(@node.saint.model).keys.first]
         end
         args.each do |a|
           (s = column_format(a, row)) && s.strip.size > 0 && header << escape_html(s)
@@ -317,9 +317,7 @@ module Saint
         end
       elsif ignored.size > 0
         default.each do |i|
-          ignored.each do |o|
-            items << i unless (o.is_a?(Regexp) ? i[index] =~ o : i[index] == o)
-          end
+          items << i unless ignored.select { |o| (o.is_a?(Regexp) ? i[index] =~ o : i[index] == o) }.first
         end
       else
         items = default

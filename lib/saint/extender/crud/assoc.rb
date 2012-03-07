@@ -28,13 +28,6 @@ module Saint
           @rows_total, @errors = assoc__any__filters(:count, orm_filters)
           if @errors.size == 0
 
-            if remote_node && @rows_total == 0
-              # if no items found by filters defined by remote node,
-              # clearing filters and trying new search.
-              orm_filters, http_filters = {}, []
-              @rows_total = assoc__any__filters(:count, orm_filters)[0]
-            end
-
             if @rows_total > 0
 
               @pager = Saint::Pager.new(http.params[Saint::Pager::VAR].to_i, @rows_total, @relation.ipp)

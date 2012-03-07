@@ -8,11 +8,37 @@
         <legend>Filters</legend>
 
         <form id="saint-forms-summary-search">
+
           <%= filters %>
+
+          <% saint.subset_instances(http.params, :html).each do |subset_filters|
+              field_attrs = {}
+              subset_id = 'saint-filters-subsets-%s' % subset_filters.__id__ -%>
+
+              <div class="inline topped">
+                <div class="saint-filter_label">&nbsp;</div>
+                <div class="btn-group">
+                  <% subset_filters.each do |subset_filter|
+                      js = "$('#%s').attr('name', '%s').attr('value', '%s');" % [subset_id, *subset_filter.values_at(:name, :value)]
+                      if subset_filter[:active]
+                          js = "$('#%s').remove();" % subset_id
+                          field_attrs = subset_filter
+                      end
+                  -%>
+                      <a class="void-link btn <%= 'active' if subset_filter[:active] %>"
+                         onclick="<%= js %> $('#saint-forms-summary-search').submit();">
+                        <%= subset_filter[:label] %>
+                      </a>
+                  <% end -%>
+                </div>
+              </div>
+              <input type="hidden" id="<%= subset_id %>" name="<%= field_attrs[:name] %>" value="<%= field_attrs[:value] %>"/>
+          <% end -%>
+
           <div class="inline topped">
             <div class="saint-filter_label">&nbsp;</div>
             <div class="btn-group">
-              <a class="btn void-link" onclick="$('#saint-forms-summary-search').submit();">
+              <a class="btn btn-info void-link" onclick="$('#saint-forms-summary-search').submit();">
                 <i class="icon-search"></i>
                 Search
               </a>

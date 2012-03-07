@@ -54,7 +54,7 @@
                              <%= 'checked="true"' if active -%>
                              <%= 'disabled="true"' if disabled -%>
                              <% if @local_id > 0 -%>
-                             onclick="if(confirm('Please confirm Select action')){ <%= "update_relation_%s('%s', 'saint-belongs_to_selector-%s');" % [@relation.id, remote_item_id, @relation.id] %> } else { $(this).attr('checked', false) }"
+                             onclick="return saint__assoc__belongs_to__update('<%= @relation.local_node.http.route(:save, @local_id) %>', '<%= @relation.id %>', '<%= @relation.local_key %>', '<%= @local_id %>', '<%= remote_item_id %>', '<%= @relation.local_node.http.route :assoc__any__remote_items %>');"
                              <% else -%>
                              onclick="Saint.update_value('<%= @relation.id %>-element', '<%= remote_item_id %>');"
                              <% end -%>

@@ -1,9 +1,9 @@
-<div>
-<% filters.each do |filter| -%>
-    <% if filter.depends_on.size == 0 -%>
-        </div>
-        <div class="inline topped">
-    <% end -%>
-    <%= filter.html %>
-<% end -%>
-</div>
+<div class="inline topped">
+  <% filters.each do |filter| -%>
+      <% if filter.depends_on.size == 0 -%>
+          </div>
+          <div class="inline topped">
+      <% end -%>
+      <%= filter.html %>
+  <% end -%>
+  </div>

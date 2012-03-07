@@ -229,9 +229,9 @@ end %>
 <% if search_query
        files = Array.new
 
-       Find.find(root).select { |p| ::File.file?(p) }.each do |p|
+       Find.find(setup.root).select { |p| ::File.file?(p) }.each do |p|
            if ::File.basename(p) =~ /#{search_query}/
-               file = @helper.file(p).merge(path: p.sub(root, ''))
+               file = @helper.file(p).merge(path: p.sub(setup.root, ''))
                file[:path_encoded] = encode_path(file[:path])
                file[:size] = @helper.size(p, true)
                if file[:viewable?]
@@ -268,7 +268,7 @@ end %>
                 <td></td>
                 <td>
                   <div class="saint-text_note ellipsis">
-                    <%= (dirname = File.dirname(file[:path])) && '%s/%s' % [File.basename(root), (dirname == '.' ? '' : dirname.scan(/.{1,#{80}}/).join('<br/>'))] %>
+                    <%= (dirname = File.dirname(file[:path])) && '%s/%s' % [File.basename(setup.root), (dirname == '.' ? '' : dirname.scan(/.{1,#{80}}/).join('<br/>'))] %>
                   </div>
                 </td>
               </tr>

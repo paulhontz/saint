@@ -126,17 +126,18 @@ module Saint
       @filters ||= Hash.new
       return @filters unless params
 
-      types = [:orm, :http, :html] if types.size == 0
+      types = (types.size == 0 ? [:orm, :http, :html] : types).compact
 
       seed = Digest::MD5.hexdigest('%s_%s_%s' % [rand, params, types])
       instances = @filters.values.map { |f| FilterInstance.new(f, params, seed) }
+      subsets = Hash[types.zip subset_instances(params, *types)]
 
-      filters = types.compact.map do |type|
+      filters = types.map do |type|
         case type
           when :orm
-            instances.map { |i| i.send(type) }.inject({}) { |r, e| r.merge(e) }
+            instances.map { |i| i.send(type) }.inject({}) { |f, c| f.update(c) }.update(subsets[type])
           when :http
-            instances.map { |i| i.send(type) }
+            instances.map { |i| i.send(type) }.concat(subsets[type])
           when :html
             if instances.size > 0
               saint_view.render_partial('filter/layout', filters: instances)
@@ -145,8 +146,7 @@ module Saint
             end
         end
       end
-      return filters.first if filters.size == 1
-      filters
+      filters.size == 1 ? filters.first : filters
     end
 
     private

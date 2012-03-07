@@ -5,10 +5,13 @@ module Ctrl
     opts Ctrl::Options
 
     saint.model Model::Page do
-      filters :name
+      filters_ignored :name, /meta/
     end
 
     saint.header :name, ', by #author.name', ', #children.count children'
+
+    saint.subset :active, 'Active Pages' => 1, Suspended: 0
+    saint.subset :color1, Green: /green/i, Red: /red/i, Blue: /blue/i
 
     saint.ipp 10
     saint.order :id, :desc

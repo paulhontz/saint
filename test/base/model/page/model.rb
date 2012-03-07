@@ -22,6 +22,6 @@ module Model
     property :visits, Integer
 
     property :content, Text
-    property :active, Integer
+    property :active, Boolean
   end
 end
