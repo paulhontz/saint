@@ -186,6 +186,8 @@ module Saint
                 :through_remote_key, :through_local_key,
                 :logic, :logic_prefix, :logic_suffix # defines how the db are queried. see {#logic}
 
+    attr_reader :local_columns
+
     # initialize new filter
     #
     # @param [Class] node
@@ -256,6 +258,8 @@ module Saint
 
       @logic ||= @type == :select ? :eql : :like
       logic_setup
+
+      @local_columns = ORMUtils.properties(@local_model, false)
     end
 
     # sometimes, various filters may need to use same columns.
@@ -642,6 +646,7 @@ module Saint
       end
 
       return {@setup.local_pkey => local_keys} if local_keys.size > 0
+      return {@setup.local_pkey => nil} unless @setup.local_columns[@setup.column]
       return default_filters unless @setup.local_orm
       orm_filters val
     end

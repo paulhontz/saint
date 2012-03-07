@@ -80,11 +80,13 @@ module Saint
         end.compact
       end
 
-      def properties model
-        model.properties.reject { |p| p.name.to_s =~ /_id$/ }.inject({}) do |properties, p|
-          (primitive = underscore(demodulize(p.class))) &&
+      def properties model, exclude_keys = true
+        properties = model.properties
+        properties = properties.reject { |p| p.name.to_s =~ /_id$/ } if exclude_keys
+        properties.inject({}) do |f, c|
+          (primitive = underscore(demodulize(c.class))) &&
               (type = PROPERTIES_MAP[primitive]) &&
-              (properties||{}).update(p.name => type == true ? primitive : type)
+              (f||{}).update(c.name => type == true ? primitive : type)
         end
       end
 

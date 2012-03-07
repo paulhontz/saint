@@ -21,13 +21,13 @@ module Saint
 
       @filters_opted, @filters_ignored = [], []
       @subsets = {}
-      
+
       @header_args, @header_opts = [], {}
 
       @create, @update, @delete, @dashboard = true, true, true, true
 
       @before, @after = {}, {}
-      
+
       @capabilities = {create: true, update: true, delete: true}
 
       @view_scope = self
@@ -181,7 +181,7 @@ module Saint
       row, opts = nil, {}
       row_or_opts.each { |a| a.is_a?(Hash) ? opts.update(a) : row = a }
 
-      label = (l=opts.fetch :label, @header_opts[:label]) && escape_html(l)
+      label = ((l=opts[:label]) && escape_html(l.to_s)) || label()
       join = escape_html(opts.fetch :join, ', ')
       header = Array.new
 
@@ -286,8 +286,8 @@ module Saint
 
     # get the label earlier set by `header`
     def label opts = {}
-      l = escape_html((@label ||= ((hl = @header_opts[:label]) && hl.to_s) || pluralize(titleize(demodulize(@node)))))
-      opts[:singular] ? singularize(l) : l
+      @label ||= escape_html((@header_opts[:label] || pluralize(titleize(demodulize(@node)))).to_s)
+      opts[:singular] ? singularize(@label) : @label
     end
 
     private

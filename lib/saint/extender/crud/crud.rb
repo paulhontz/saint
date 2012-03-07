@@ -47,7 +47,7 @@ module Saint
             http.halt error, status: 500
           end
 
-          @__meta_title__ = saint.h(@row)
+          @__meta_title__ = saint.h @row
 
           orm_filters, http_filters = saint.get_filters(:orm, :http)
           @pager = Saint::Pager.new(http.params[Saint::Pager::VAR].to_i)

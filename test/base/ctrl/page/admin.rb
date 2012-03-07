@@ -5,7 +5,7 @@ module Ctrl
     opts Ctrl::Options
 
     saint.model Model::Page do
-      filters_ignored :name, /meta/
+      filters :name
     end
 
     saint.header :name, ', by #author.name', ', #children.count children'
