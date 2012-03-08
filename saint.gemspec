@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 1.9.2'
 
-  s.add_dependency('presto', '>= 0.2.0')
+  s.add_dependency('presto', '>= 0.2.1')
   s.add_dependency('erubis')
   s.add_dependency('data_mapper', '>= 1.1.0')
   s.add_dependency('dm-is-tree', '>= 1.1.0')
