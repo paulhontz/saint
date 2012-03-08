@@ -1,7 +1,7 @@
 module Saint
   class FileServer
 
-    DOCUMENT_ROOT = '/__saint-file_server__/'
+    DOCUMENT_ROOT = '/__saint-file_server__/'.freeze
 
     include Presto::Api
 
@@ -53,7 +53,7 @@ module Saint
       include Saint::Utils
 
       def [] path
-        [DOCUMENT_ROOT, escape_html(normalize_path(unescape_html(path), false, false)), '.saint-fs'].join
+        '%s%s.saint-fs' % [DOCUMENT_ROOT, normalize_path(path)]
       end
 
       def assets &proc

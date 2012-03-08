@@ -44,7 +44,7 @@ module Saint
         end
 
         def self.[] path
-          '%s/%s.saint-fs' % [http.route, Presto::Utils.normalize_path(path, false, false)]
+          '%s%s.saint-fs' % [http.route, Presto::Utils.normalize_path(path)]
         end
       end
       fm.class_exec do
@@ -74,7 +74,7 @@ module Saint
           if (search_query = http.params['q']) && search_query.size > 1
             @query_string[:q] = search_query
           end
-          @path = path ? normalize_path(decode_path(path), false, false) : ''
+          @path = path ? normalize_path(decode_path(path)) : ''
           @__meta_title__ = 'FileManager | %s | %s' % [setup.label, @path]
         end
 
@@ -351,7 +351,7 @@ module Saint
         def path_related_params *params
           params_given = http.params.values_at(*params).compact
           return unless params_given.size == params.size
-          params = params_given.map { |p| normalize_path(p, false, false) }
+          params = params_given.map { |p| normalize_path(p) }
           params.size == 1 ? params.first : params
         end
 

@@ -43,43 +43,43 @@
       <tr style="<%= "background-color: ##{bg_color}" if bg_color && @attached == 0 %>">
         <% if attachable -%>
             <td class="nowrap">
+              <label class="checkbox">
+                <% if @attached == 0
+                       attached = (@attached_keys_or_remote_item||[]).include?(remote_id)
+                       disabled = (@relation.is_tree? && (@local_id == remote_id || (@local_item && @local_item.parent_id == remote_id))) ||
+                               (@relation.belongs_to? && remote_item.send(@relation.remote_key) == @local_id) -%>
 
-              <% if @attached == 0
-                     attached = (@attached_keys_or_remote_item||[]).include?(remote_id)
-                     disabled = (@relation.is_tree? && (@local_id == remote_id || (@local_item && @local_item.parent_id == remote_id))) ||
-                             (@relation.belongs_to? && remote_item.send(@relation.remote_key) == @local_id) -%>
+                    <input type="checkbox"
+                           <%= 'checked="true"' if attached -%>
+                           <%= 'disabled="true"' if disabled -%>
+                           <% unless disabled -%>
+                           onclick="return saint__assoc__has_n__update(
+                                   '<%= update_relation_url %>',
+                                   '<%= @relation.id %>',
+                                   '<%= @local_id %>',
+                                   '<%= remote_id %>',
+                                   '<%= attached ? 'delete' : 'create' %>',
+                                   query_string
+                                   );"
+                           <% end -%> />
 
-                  <input type="checkbox"
-                         <%= 'checked="true"' if attached -%>
-                         <%= 'disabled="true"' if disabled -%>
-                         <% unless disabled -%>
-                         onclick="return saint__assoc__has_n__update(
-                                 '<%= update_relation_url %>',
-                                 '<%= @relation.id %>',
-                                 '<%= @local_id %>',
-                                 '<%= remote_id %>',
-                                 '<%= attached ? 'delete' : 'create' %>',
-                                 query_string
-                                 );"
-                         <% end -%> />
+                <% else -%>
 
-              <% else -%>
+                    <input type="checkbox" checked="true"
+                           onclick="return saint__assoc__has_n__update(
+                                   '<%= update_relation_url %>',
+                                   '<%= @relation.id %>',
+                                   '<%= @local_id %>',
+                                   '<%= remote_id %>',
+                                   'delete',
+                                   query_string
+                                   );"/>
 
-                  <input type="checkbox" checked="true"
-                         onclick="return saint__assoc__has_n__update(
-                                 '<%= update_relation_url %>',
-                                 '<%= @relation.id %>',
-                                 '<%= @local_id %>',
-                                 '<%= remote_id %>',
-                                 'delete',
-                                 query_string
-                                 );"/>
-
-              <% end -%>
-              <span class="saint-text_note">
+                <% end -%>
+                <span class="saint-text_note">
                 #<%= (items_counter -= 1) - @pager.page_number * @pager.items_per_page %>
               </span>
-
+              </label>
             </td>
         <% end -%>
 
