@@ -18,7 +18,7 @@ module Saint
       end
 
       def cd path
-        @path = File.expand_path path, @path
+        @path = expand_path path
       end
 
       def js *paths
@@ -39,12 +39,21 @@ module Saint
 
       private
       def url path
-        Saint::FileServer[File.expand_path(path, @path)]
+        Saint::FileServer[expand_path(path)]
       end
 
       def buffer str
         (@buffer ||= []) << str
         str
+      end
+
+      def expand_path path
+        return @path = path if path == '/'
+        levels = path.scan(Regexp.union('..')).size
+        path = Presto::Utils.normalize_path(path).gsub(/^\/+/, '')
+        return '%s/%s' % [@path, path] if levels == 0
+        dirs = @path.split(/\/+/)
+        [dirs[0, dirs.size - levels], path].join('/')
       end
 
     end
