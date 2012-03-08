@@ -238,6 +238,7 @@ module Saint
       end
 
       width = @width if select? || checkbox? || radio? || password? || boolean?
+      width ||= '100px' if date? || date_time? || time?
       height ||= '100px' if text?
 
       @css_style = '%s %s %s' % [

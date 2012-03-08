@@ -1,4 +1,4 @@
 <div class="saint-filter_label"><%= [label, range_cardinality].join(' ') %></div>
 <input type="text" name="<%= @setup.query_string range_cardinality %>"
        value="<%== (@val.is_a?(Hash) ? @val[range_cardinality] : @val) %>"
-       class="disable_enter_key saint-filters-datepicker"/>
+       class="disable_enter_key saint-filters-datepicker el-100px"/>
