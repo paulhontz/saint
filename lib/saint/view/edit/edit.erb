@@ -45,12 +45,12 @@
 
       <div class="btn-group inline">
         <% if saint.update -%>
-            <a class="btn btn-info el-75px"
-               onclick="<% saint.get_columns.select { |n,c| c.rte? }.each_value do |column| -%>
-                       <%= "$('##{column.id}').val( $('##{column.id}').elrte('val') );" -%>
-                       <% end -%>
-                       <% saint.get_columns.select { |n, c| c.password? }.each_value do |column| -%>
-                       <%= "if($('#%s').val() != $('#%s_confirm').val()) {alert('Values mismatch for %s field'); return false;}" % [column.id, column.id, column.label] %>
+            <a class="btn btn-info"
+               onclick="<% saint.column_instances.select { |n,c| c.rte? }.each_value do |column| -%>
+                       $('#<%= column.id %>').elrte('updateSource');
+                       <% end
+                       saint.column_instances.select { |n, c| c.password? }.each_value do |column| -%>
+                       if($('#<%= column.id %>').val() != $('#<%= column.id %>_confirm').val()) { Saint.alert('Values mismatch for <strong><%= column.name %></strong> field'); return false }
                        <% end -%>
                        Saint.submit_valid_form('<%= form_id %>',function(response){
                                <% if @row_id > 0 -%>

@@ -6,9 +6,21 @@ module Saint
     # this method is aimed to override default order.
     # call it multiple times to order by multiple columns/directions.
     #
-    # @example
+    # @example: order by date, descending
+    #
     #    saint.order :date, :desc
-    #    saint.order :name, :asc
+    #    # SQL: ORDER BY "date" DESC
+    #
+    # @example: order by name, ascending
+    #
+    #    saint.order :name
+    #    # SQL: ORDER BY "date" ASC
+    #
+    # @example: order by both date and name
+    #
+    #    saint.order :date, :desc
+    #    saint.order :name
+    #    # SQL: ORDER BY "date" DESC, "name" ASC
     #
     # @param [Symbol] column
     # @param [Symbol] direction, `:asc`, `:desc`

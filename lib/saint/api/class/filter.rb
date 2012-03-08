@@ -114,14 +114,14 @@ module Saint
     # to get only some types, pass them as arguments.
     #
     # @example get only http filters
-    #    saint.get_filters :http.params, :http
+    #    saint.filter_instances :http.params, :http
     #
     # @example get http and html filters
-    #    saint.get_filters http.params, :http, :html
+    #    saint.filter_instances http.params, :http, :html
     #
     # @param [Hash] params
     # @param [Array] *types
-    def get_filters params = nil, *types
+    def filter_instances params = nil, *types
 
       @filters ||= Hash.new
       return @filters unless params
@@ -473,7 +473,7 @@ module Saint
     # @param [Array] *columns
     def depends_on *columns
       columns.each do |column|
-        unless filter = @node.saint.get_filters[column]
+        unless filter = @node.saint.filter_instances[column]
           raise "No filter found by #{column} column"
         end
         @depends_on << filter
@@ -484,7 +484,7 @@ module Saint
     # return filters that depends on given filter
     def dependant_filters filter = self, level = 0
       @dependant_filters = Array.new if level == 0
-      @dependant_filters.concat(@node.saint.get_filters.values.map do |f|
+      @dependant_filters.concat(@node.saint.filter_instances.values.map do |f|
         next if f.depends_on.select { |pf| pf.__id__ == filter.__id__ }.size == 0
         dependant_filters(f, level+1)
         f

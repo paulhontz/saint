@@ -30,7 +30,34 @@ And of course, any automatically built filter can be fine-tuned.
         filter :color, :select, options: [:red, :green, :blue], multiple: true
     end
 
-# Manually defining filters
+
+Subsets
+---
+
+Subsets can be treated as quick filters, meaning you do need to type/select anything,
+you just click a button and filter applied.
+
+Unlike filters, subsets are not built automatically.
+You have to define them manually.
+
+@example: add an subset for :status column
+
+    saint.subset :status, :Active => 1, :Suspended => 0
+
+@example: quickly filter by color
+
+    saint.subset :color, :Green => /green/, :Red => /red/, :Blue => /blue/
+
+For each option, Saint will create a button that will filter by option value.
+
+In examples above, when Active button clicked,
+Saint will display only items having :status equal to 1.<br/>
+When Green button clicked,
+Saint will display only items with :color matching /green/
+
+<div class="page-header">
+<h2>Manually defining filters</h2>
+</div>
 
 Text Filters
 ---

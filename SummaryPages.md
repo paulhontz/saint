@@ -33,9 +33,21 @@ Order
 By default, items are arranged by primary key, in descending order.<br/>
 Use `saint.order` to arrange items in a custom order.
 
-    saint.order :date, :desc
-    saint.order :name, :asc
+@example: order by date, descending
 
+    saint.order :date, :desc
+    # SQL: ORDER BY "date" DESC
+
+@example: order by name, ascending
+
+    saint.order :name
+    # SQL: ORDER BY "date" ASC
+
+@example: order by both date and name
+
+    saint.order :date, :desc
+    saint.order :name
+    # SQL: ORDER BY "date" DESC, "name" ASC
 
 Text Filters
 ---

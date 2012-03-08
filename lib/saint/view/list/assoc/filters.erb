@@ -3,7 +3,7 @@
 
 <form action="<%= http.route *route_args %>" id="<%= form_id %>">
 
-  <%= @relation.remote_node.saint.get_filters(http.params, :html) -%>
+  <%= @relation.remote_node.saint.filter_instances(http.params, :html) -%>
 
   <% @relation.remote_node.saint.subset_instances(http.params, :html).each do |subset_filters|
       field_attrs = {}

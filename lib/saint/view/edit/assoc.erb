@@ -98,7 +98,7 @@
                                 </div>
                             <% end -%>
 
-                            <%= render_elements crud_columns(rel.remote_node.saint.get_columns), node: rel.remote_node %>
+                            <%= render_elements crud_columns(rel.remote_node.saint.column_instances), node: rel.remote_node %>
                             <% remote_belongs_to.each_value do |remote_rel|
                                 associated = rel.local_model.__id__ == remote_rel.remote_model.__id__ -%>
                                 <input type="hidden" name="<%= remote_rel.local_key %>"

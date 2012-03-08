@@ -138,7 +138,7 @@ module Saint
       end
     end
 
-    def get_columns
+    def column_instances
       @columns
     end
 

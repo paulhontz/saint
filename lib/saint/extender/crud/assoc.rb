@@ -21,7 +21,7 @@ module Saint
           if remote_node
             # however, if remote node provided,
             # filters defined by remote node will be applied here.
-            orm_filters, http_filters = remote_node.saint.get_filters(http.params, :orm, :http)
+            orm_filters, http_filters = remote_node.saint.filter_instances(http.params, :orm, :http)
           end
 
           @remote_items = Array.new

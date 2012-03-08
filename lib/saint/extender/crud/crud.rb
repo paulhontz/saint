@@ -13,7 +13,7 @@ module Saint
 
         def index
 
-          orm_filters, http_filters = saint.get_filters(:orm, :http)
+          orm_filters, http_filters = saint.filter_instances(:orm, :http)
           page = http.params[Saint::Pager::VAR].to_i
           @rows_total, @errors = saint.orm.count orm_filters
           if @errors.size == 0
@@ -29,7 +29,7 @@ module Saint
             order = saint.orm.order(saint.ordered.orm || saint.order)
 
             @rows, @errors = saint.orm.filter(orm_filters.merge(limits).merge(order))
-            @columns = summary_columns(saint.get_columns) if @errors.size == 0
+            @columns = summary_columns(saint.column_instances) if @errors.size == 0
             @__meta_title__ = saint.label
           end
           partial = @errors.size > 0 ? 'error' : 'list/list'
@@ -50,7 +50,7 @@ module Saint
 
           @__meta_title__ = saint.h @row
 
-          orm_filters, http_filters = saint.get_filters(:orm, :http)
+          orm_filters, http_filters = saint.filter_instances(:orm, :http)
           @pager = Saint::Pager.new(http.params[Saint::Pager::VAR].to_i)
           @pager.paginate(query: http_filters.join('&'), skip_render: true)
 
@@ -77,7 +77,7 @@ module Saint
             end
           end
 
-          @elements = crud_columns(saint.get_columns, @row)
+          @elements = crud_columns(saint.column_instances, @row)
           saint_view.render_layout saint_view.render_partial('edit/edit')
         end
 
@@ -86,7 +86,7 @@ module Saint
           is_new, assoc_updated = false, nil
           if saint.update
             ds, belongs_to = Hash.new, Hash.new
-            saint.get_columns.select { |n, c| c.save? }.each_value do |column|
+            saint.column_instances.select { |n, c| c.save? }.each_value do |column|
 
               value = http.params[column.name.to_s]
 
@@ -117,7 +117,7 @@ module Saint
             end
 
             @errors = []
-            saint.get_columns.select { |n, c| c.required? && c.save? }.each_key do |column|
+            saint.column_instances.select { |n, c| c.required? && c.save? }.each_key do |column|
               @errors << '%s is required' % column unless ds[column]
             end
 
