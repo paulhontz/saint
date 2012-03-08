@@ -69,28 +69,6 @@ module Saint
       @pkey
     end
 
-    # set the order to be used when items extracted.
-    # by default, Saint will arrange items by primary key, in descending order.
-    # this method is aimed to override default order.
-    # call it multiple times to order by multiple columns/directions.
-    #
-    # @example
-    #    saint.order :date, :desc
-    #    saint.order :name, :asc
-    #
-    # @param [Symbol] column
-    # @param [Symbol] direction, `:asc`, `:desc`
-    def order column = nil, direction = :asc
-      if column && configurable?
-        raise "Column should be a Symbol,
-          #{column.class} given" unless column.is_a?(Symbol)
-        raise "Unknown direction #{direction}.
-          Should be one of :asc, :desc" unless [:asc, :desc].include?(direction)
-        (@order ||= Hash.new)[column] = direction
-      end
-      @order || {pkey => :desc}
-    end
-
     # self-explanatory
     def items_per_page n = nil
       @ipp = n.to_i if n

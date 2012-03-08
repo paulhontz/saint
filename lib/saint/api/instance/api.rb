@@ -29,6 +29,10 @@ module Saint
       @node.saint.render_dashboard @node_instance
     end
 
+    def ordered
+      @ordered ||= Saint::ClassApi::Ordered.new @node_instance.http.params
+    end
+
     def method_missing *args
       @node.saint.send *args
     end

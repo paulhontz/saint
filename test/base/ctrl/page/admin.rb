@@ -8,13 +8,14 @@ module Ctrl
       filters :name
     end
 
+    saint.order :id
+
     saint.header :name, ', by #author.name', ', #children.count children'
 
     saint.subset :active, 'Active Pages' => 1, Suspended: 0
     saint.subset :color1, Green: /green/i, Red: /red/i, Blue: /blue/i
 
     saint.ipp 10
-    saint.order :id, :desc
 
     saint.grid do
       column :name do

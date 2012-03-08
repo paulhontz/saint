@@ -147,7 +147,12 @@ module Saint
     def build_columns
       return unless configurable?
       return if @columns_opted == false
-      selector(ORMUtils.properties(model), @columns_opted, @columns_ignored).each { |c| column *c }
+      selector(ORMUtils.properties(model), @columns_opted, @columns_ignored).each do |c|
+        name, type = c
+        args = name, type
+        args << {summary: false} if type == 'text'
+        column *args
+      end
     end
 
   end
@@ -207,13 +212,12 @@ module Saint
 
       proc && instance_exec(&proc)
 
-      # by default, all columns are shown on all pages and saved to db.
-      instance_variable_defined?(:@summary) || @summary = true
-      instance_variable_defined?(:@crud) || @crud = true
-      instance_variable_defined?(:@save) || @save = (type == :plain ? false : true)
-
       # default type is string
       @type = (type || 'string').to_s
+      
+      instance_variable_defined?(:@summary) || @summary = (text? || rte? ? false : true)
+      instance_variable_defined?(:@crud) || @crud = true
+      instance_variable_defined?(:@save) || @save = (plain? ? false : true)
 
       # is current column a part of a grid
       @grid = opts[:grid]

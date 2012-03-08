@@ -23,8 +23,7 @@
                       if subset_filter[:active]
                           js = "$('#%s').remove();" % subset_id
                           field_attrs = subset_filter
-                      end
-                  -%>
+                      end -%>
                       <a class="void-link btn <%= 'active' if subset_filter[:active] %>"
                          onclick="<%= js %> $('#saint-forms-summary-search').submit();">
                         <%= subset_filter[:label] %>
@@ -47,6 +46,9 @@
               </a>
             </div>
           </div>
+          <% [saint.ordered.column_var, saint.ordered.vector_var].each do |var| -%>
+              <input type="hidden" name="<%= var %>" id="<%= var %>"/>
+          <% end -%>
         </form>
 
       </fieldset>

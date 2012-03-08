@@ -1,26 +1,29 @@
 <script type="text/javascript">
-  var query_string = '<%= @pager.query_string %>';
+    var query_string = '<%= @pager.query_string %>';
 </script>
 
 <% remote_node = @relation.remote_node
-   readonly = @relation.readonly
    tree = remote_node && remote_node.saint.is_tree?
+   attachable = level == 0 && @relation.readonly.nil?
+   th_label_classes = level == 0 ? 'label label-info' : 'label'
 -%>
 <table class="table">
   <thead>
   <tr>
-    <% if level == 0 -%>
-        <th style="width: 5%;">
-          #
-        </th>
-        <% unless readonly -%>
-            <th style="width: 5%;"></th>
-        <% end -%>
+
+    <% if attachable -%>
+        <th style="width: 5%;"></th>
     <% end -%>
 
+    <th style="width: 5%;">
+      <span class="<%= th_label_classes %>">
+      <%= remote_node ? remote_node.saint.pkey : Saint::ORMUtils.primary_key(@relation.remote_model) %>
+      </span>
+    </th>
     <% @remote_columns.each do |column| -%>
-        <th style="<%= 'width: ' + (90 / @remote_columns.size).ceil.to_s + '%;' %>">
-          <%= column.label %>
+        <th style="<%= 'width: %s%%;' % (90 / @remote_columns.size).ceil %>">
+          <span class="<%= th_label_classes %>">
+            <%= column.label %></span>
         </th>
     <% end -%>
   </tr>
@@ -33,79 +36,82 @@
          remote_id = remote_item[@relation.remote_pkey]
          children = tree ? remote_item.send(tree[:has_n].children) : []
          self_color = color || Saint.tree_colors.sample
-         bg_color = color || (self_color if children.size > 0) -%>
+         bg_color = color || (self_color if children.size > 0)
+         children_container_id = 'saint-assoc-has_n-children_container-%s-%s-%s-%s' % [@relation.id, @attached, level, remote_id]
+  -%>
 
-      <tr class="saint-selectable" style="<%= "background-color: ##{bg_color}" if bg_color %>">
-        <% if level == 0 -%>
-            <td style="text-align: center;">
-              <a class="btn" target="_blank"
-                 href="<%= remote_node ? remote_node.http.route(:edit, remote_id) : 'javascript:void(0);' %>">
-                <%= (items_counter -= 1) - @pager.page_number * @pager.items_per_page %>
-              </a>
+      <tr style="<%= "background-color: ##{bg_color}" if bg_color && @attached == 0 %>">
+        <% if attachable -%>
+            <td class="nowrap">
+
+              <% if @attached == 0
+                     attached = (@attached_keys_or_remote_item||[]).include?(remote_id)
+                     disabled = (@relation.is_tree? && (@local_id == remote_id || (@local_item && @local_item.parent_id == remote_id))) ||
+                             (@relation.belongs_to? && remote_item.send(@relation.remote_key) == @local_id) -%>
+
+                  <input type="checkbox"
+                         <%= 'checked="true"' if attached -%>
+                         <%= 'disabled="true"' if disabled -%>
+                         <% unless disabled -%>
+                         onclick="return saint__assoc__has_n__update(
+                                 '<%= update_relation_url %>',
+                                 '<%= @relation.id %>',
+                                 '<%= @local_id %>',
+                                 '<%= remote_id %>',
+                                 '<%= attached ? 'delete' : 'create' %>',
+                                 query_string
+                                 );"
+                         <% end -%> />
+
+              <% else -%>
+
+                  <input type="checkbox" checked="true"
+                         onclick="return saint__assoc__has_n__update(
+                                 '<%= update_relation_url %>',
+                                 '<%= @relation.id %>',
+                                 '<%= @local_id %>',
+                                 '<%= remote_id %>',
+                                 'delete',
+                                 query_string
+                                 );"/>
+
+              <% end -%>
+              <span class="saint-text_note">
+                #<%= (items_counter -= 1) - @pager.page_number * @pager.items_per_page %>
+              </span>
+
             </td>
-            <% unless readonly -%>
-                <td style="text-align: center;">
-
-                  <% if @attached == 0 -%>
-
-                      <% if (@attached_keys_or_remote_item||[]).include?(remote_id) -%>
-                          <div class="btn btn-info disabled">
-                            attached
-                          </div>
-                      <% else
-                             disabled = (@relation.is_tree? && (@local_id == remote_id || (@local_item && @local_item.parent_id == remote_id))) ||
-                                     (@relation.belongs_to? && remote_item.send(@relation.remote_key) == @local_id) -%>
-                          <a class="btn void-link <%= 'disabled' if disabled %>"
-                             <% unless disabled -%>
-                             onclick="return saint__assoc__has_n__update('<%= update_relation_url %>', '<%= @relation.id %>', '<%= @local_id %>', '<%= remote_id %>', 'create', query_string);"
-                             <% end -%> >
-                            attach
-                          </a>
-                      <% end -%>
-
-                  <% else -%>
-
-                      <a class="btn void-link"
-                         onclick="return saint__assoc__has_n__update('<%= update_relation_url %>', '<%= @relation.id %>', '<%= @local_id %>', '<%= remote_id %>', 'delete', query_string);">
-                        detach
-                      </a>
-                  <% end -%>
-                </td>
-            <% end -%>
         <% end -%>
 
-        <% @remote_columns.each do |column|
-            value = column.summary_value remote_item, self -%>
+        <td class="nowrap">
+          <i class="icon-edit"></i>
+          <% if remote_node -%>
+              <a href="<%= remote_node.http.route(:edit, remote_id) %>" target="_blank">
+                <%= remote_id %>
+              </a>
+          <% else -%>
+              <%= remote_id %>
+          <% end -%>
+          <% if children.size > 0 && @attached == 0 -%>
+              <div id="<%= children_container_id %>-status" class="void-link saint-text_note"
+                   onclick="Saint.Utils.toggleChildrenContainer('<%= children_container_id %>');">
+                children+
+              </div>
+          <% end -%>
+        </td>
+        <% @remote_columns.each do |column| -%>
             <td>
-              <% if remote_node -%>
-                  <a href="<%= remote_node.http.route(:edit, remote_id) %>" target="_blank">
-                    <%= value %>
-                  </a>
-              <% else -%>
-                  <%= value %>
-              <% end -%>
+              <%= column.summary_value remote_item, self %>
             </td>
         <% end -%>
 
       </tr>
 
-      <% if children.size > 0
-             children_container_id = @relation.id + @attached.to_s + level.to_s + remote_id.to_s + '_children_container' -%>
-          <tr>
+      <% if children.size > 0 && @attached == 0 -%>
+          <tr id="<%= children_container_id %>" style="display: none;">
             <td></td>
-            <td style="text-align: right; vertical-align: top;">
-              <% if level == 0 -%>
-                  <div id="<%= children_container_id %>-status"
-                       style="cursor: pointer;" class="saint-text_note"
-                       onclick="Saint.Utils.toggleChildrenContainer('<%= children_container_id %>');">
-                    children+
-                  </div>
-              <% end -%>
-            </td>
-            <td colspan="<%= @remote_columns.size %>">
-              <div id="<%= children_container_id %>" style="<%= 'display: none;' if level == 0 %>">
-                <%= saint_view.render_partial('list/assoc/has_n-partial', items: children, level: level + 1, color: self_color) %>
-              </div>
+            <td colspan="<%= @remote_columns.size + 1 %>">
+              <%= saint_view.render_partial('list/assoc/has_n-partial', items: children, level: level + 1, color: self_color) %>
             </td>
           </tr>
       <% end -%>

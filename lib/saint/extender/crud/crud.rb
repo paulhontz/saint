@@ -25,7 +25,8 @@ module Saint
                 saint.ipp,
                 @pager.page_number * saint.ipp
             ) : {}
-            order = saint.orm.order(saint.order)
+
+            order = saint.orm.order(saint.ordered.orm || saint.order)
 
             @rows, @errors = saint.orm.filter(orm_filters.merge(limits).merge(order))
             @columns = summary_columns(saint.get_columns) if @errors.size == 0
@@ -129,7 +130,7 @@ module Saint
                 is_loop = false
                 if @row && @errors.size == 0
                   # just for convenience
-                  current_item_id  = row_id
+                  current_item_id = row_id
                   belongs_to.select { |a, v| a.is_tree? }.each_pair do |assoc, opted_parent_id|
 
                     # fail if opted parent and current item are the same

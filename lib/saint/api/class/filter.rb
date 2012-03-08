@@ -137,13 +137,9 @@ module Saint
           when :orm
             instances.map { |i| i.send(type) }.inject({}) { |f, c| f.update(c) }.update(subsets[type])
           when :http
-            instances.map { |i| i.send(type) }.concat(subsets[type])
+            instances.map { |i| i.send(type) }.concat(subsets[type]).concat(Ordered.http(params)).flatten.compact
           when :html
-            if instances.size > 0
-              saint_view.render_partial('filter/layout', filters: instances)
-            else
-              nil
-            end
+            instances.size > 0 ? saint_view.render_partial('filter/layout', filters: instances) : nil
         end
       end
       filters.size == 1 ? filters.first : filters

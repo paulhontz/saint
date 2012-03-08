@@ -1,5 +1,4 @@
-<% remote_node = @relation.remote_node
-   container_id = '%s%s-items' % [@relation.id, @attached] -%>
+<% remote_node = @relation.remote_node -%>
 
 <% if http.xhr? -%>
     <%= Saint::FileServer.assets.js 'ui.js' %>
@@ -10,6 +9,19 @@
     <% if (remote_item = @attached_keys_or_remote_item).respond_to?(@relation.remote_pkey) -%>
         <div>
           <p class="alert alert-info">
+            <input type="checkbox" checked="true"
+                   <% if @local_id > 0 -%>
+                   onclick="return saint__assoc__belongs_to__update(
+                           '<%= @relation.local_node.http.route(:save, @local_id) %>',
+                           '<%= @relation.id %>',
+                           '<%= @relation.local_key %>',
+                           '<%= @local_id %>',
+                           '<%= SaintConst::NULL_VALUE %>'
+                           );"
+                   <% else -%>
+                   onclick="if(confirm('Please confirm Detach action')){ Saint.update_value('<%= @relation.id %>-element', '<%= SaintConst::NULL_VALUE %>'); }"
+                   <% end -%>
+                   />
             Belongs to:
             <a href="<%= @relation.remote_node ? @relation.remote_node.http.route(:edit, remote_item[saint.pkey]) : 'javascript:void(0);' %>" target="_blank">
               <%= @relation.remote_node ?
@@ -17,17 +29,6 @@
                           @remote_columns.map { |c| val = c.summary_value(remote_item, self).to_s; val.size > 0 ? val : nil }.compact.join(', ')
               %>
             </a>
-          </p>
-
-          <p>
-            <input type="button" value="detach" class="btn btn-info"
-                   <% if @local_id > 0 -%>
-                   onclick="return saint__assoc__belongs_to__update('<%= @relation.local_node.http.route(:save, @local_id) %>', '<%= @relation.id %>', '<%= @relation.local_key %>', '<%= @local_id %>', '<%= SaintConst::NULL_VALUE %>', '<%= @relation.local_node.http.route :assoc__any__remote_items %>');"
-                   <% else -%>
-                   onclick="if(confirm('Please confirm Detach action')){ Saint.update_value('<%= @relation.id %>-element', '<%= SaintConst::NULL_VALUE %>'); }"
-                   <% end -%>
-                   />
-            if current item does not belong to any <%= @relation.label %>
           </p>
         </div>
     <% end -%>

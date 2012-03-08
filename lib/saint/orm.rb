@@ -80,6 +80,12 @@ module Saint
         end.compact
       end
 
+      def primary_key model
+        if key = model.properties.select{|p| demodulize(p.class) == 'Serial'}.first
+          key.name
+        end
+      end
+
       def properties model, exclude_keys = true
         properties = model.properties
         properties = properties.reject { |p| p.name.to_s =~ /_id$/ } if exclude_keys

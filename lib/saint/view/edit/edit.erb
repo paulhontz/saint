@@ -3,7 +3,6 @@
    belongs_to, has_n = (saint.belongs_to || {}), (saint.has_n || {})
    form_id = 'saint-form-CRUD-%s-%s' % [saint.model.__id__, @row_id] -%>
 
-
 <div class="content">
 
 <div class="adaptive-nav">
@@ -182,12 +181,12 @@
   </div>
 
   <script type="text/javascript">
-      function saint__assoc__belongs_to__update(route, relation_id, local_key, local_id, remote_id, refresh_route) {
+      function saint__assoc__belongs_to__update(route, relation_id, local_key, local_id, remote_id, query_string) {
           if (confirm('Please confirm Select action')) {
               Saint.valid_GET(route + '?' + local_key + '=' + remote_id, function(response) {
                           Saint.update_value(relation_id + '-element', response.status);
+                          Saint.update_container(relation_id + '0', '<%= http.route :assoc__any__remote_items %>/' + relation_id + '/' + local_id + (query_string || ''));
                           Saint.update_container('saint-crud-header', '<%= http.route :head %>/' + local_id);
-                          Saint.update_container(relation_id + '0', refresh_route + '/' + relation_id + '/' + local_id + '/' + '0');
                           Saint.alert(response.message);
                       }, function(response) {
                           $('#saint-belongs_to_selector-' + relation_id).attr('checked', false);
