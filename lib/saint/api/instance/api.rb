@@ -25,8 +25,8 @@ module Saint
       @node.saint.render_menu
     end
 
-    def dashboard
-      @node.saint.render_dashboard @node_instance
+    def dashboard str = nil
+      @node.saint.render_dashboard @node_instance, str
     end
 
     def ordered

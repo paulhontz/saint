@@ -1,5 +1,5 @@
 <% node = @active_file
-   editable_size = @helper.editable_size?(node[:size])
+   is_editable = node[:size] <= setup.edit_max_size
 %>
 
 <%= saint_view.render_view 'fm/partial/delete', node: node %>
@@ -16,7 +16,7 @@
 
   <div class="tabbable">
     <ul class="nav nav-tabs">
-      <% if node[:editable?] && editable_size -%>
+      <% if node[:editable?] && is_editable -%>
           <li>
             <a id="saint-fm-file-buttons-save" class="btn void-link"
                onclick="var button = $(this); var html = button.html();
@@ -74,25 +74,35 @@
         <% dirname = File.dirname node[:path]
            dirname_label = lambda { |d| (d = File.basename(d)) && (d == '.' ? '/' : d) } -%>
         <ul class="dropdown-menu">
+          <li>
+            <a href="<%= http.route %>">
+              <img src="<%= @helper.icon('folder') %>"/>
+              /</a>
+            <% unless dirname == '.' || File.dirname(dirname) == '.' -%>
+                <div style="margin-left: 10%; margin-top: -7px;">...</div>
+            <% end -%>
+          </li>
           <% unless dirname == '.' -%>
+              <% unless File.dirname(dirname) == '.' -%>
+                  <li>
+                    <a href="<%= http.route encode_path(File.dirname(dirname)) %>">
+                      <i class="icon-arrow-up"></i>
+                      <%= dirname_label.call File.dirname(dirname) %>
+                    </a>
+                  </li>
+              <% end -%>
               <li>
-                <a href="<%= http.route encode_path(File.dirname(dirname)) %>">
-                  <i class="icon-arrow-up"></i>
-                  <%= dirname_label.call File.dirname(dirname) %>
+                <a href="<%= http.route encode_path(dirname) %>">
+                  <img src="<%= @helper.icon('folder') %>"/>
+                  <%= dirname_label.call dirname %>
                 </a>
               </li>
           <% end -%>
-          <li>
-            <a href="<%= http.route encode_path(dirname) %>">
-              <img src="<%= @helper.icon('folder') %>"/>
-              <%= dirname_label.call dirname %>
-            </a>
-          </li>
           <% ls(File.join(setup.root, dirname)).each do |n|
               file = File.file?(n) ? @helper.file(n) : nil
-              dirname = n.sub(setup.root, '')
+              dirname = n.sub(setup.root, '').sub('./', '')
               encoded_path = encode_path(dirname)
-              route = file ? [@encoded_path] << @query_string.update(file: encoded_path) : [encoded_path] << @query_string -%>
+              route = (file ? [@encoded_path] << @query_string.update(file: encoded_path) : [encoded_path] << @query_string).compact -%>
               <li class="<%= 'active' if dirname == node[:path] %>">
                 <a href="<%= http.route *route %>">
                   <span style="color: #999;">\_</span>
@@ -153,10 +163,8 @@
     </div>
   </div>
 
-  <div id="saint-fm-file-alerts" class="alert" style="display: none;"></div>
-
   <% if node[:editable?] -%>
-      <% if editable_size -%>
+      <% if is_editable -%>
           <form action="<%= http.route(:save, file: node[:path]) %>" id="saint-fm-file-forms-save" method="post">
             <textarea name="content" id="saint-fm-file-content"
                       style="width: 100%; height: 600px;" disabled="true">
@@ -165,7 +173,7 @@
       <% else -%>
           <div class="alert alert-error">
             Sorry, can not edit files bigger
-            than <%= number_to_human_size(@helper.editable_size) %>
+            than <%= number_to_human_size(setup.edit_max_size) %>
           </div>
       <% end -%>
   <% elsif node[:url] -%>
@@ -176,18 +184,15 @@
       <% end -%>
   <% end -%>
 </div>
-<input type="hidden" id="saint-fm-file-encoded_path" value="<%= node[:path_encoded] %>" />
+<input type="hidden" id="saint-fm-file-encoded_path" value="<%= node[:path_encoded] %>"/>
 <script type="text/javascript">
     $(function() {
         <% if node[:editable?] -%>
         $('#saint-fm-file-buttons-save').hide();
-        <% if editable_size -%>
+        <% if is_editable -%>
         Saint.valid_POST("<%= http.route :read_file %>", {file: $('#saint-fm-file-encoded_path').val()}, function(response) {
             $('#saint-fm-file-content').attr('disabled', false).val(response.content).focus();
             $('#saint-fm-file-buttons-save').show();
-        }, function(response) {
-            $('#saint-fm-file-content').remove();
-            $('#saint-fm-file-alerts').html(response.message).show();
         });
         <% end -%>
         <% end -%>

@@ -1,7 +1,8 @@
 module Saint
   module FileManager
 
-    MAX_FILE_SIZE = 5_242_880.freeze
+    EDIT_MAX_SIZE = 5_242_880.freeze
+    UPLOAD_MAX_SIZE = 10_485_760.freeze
 
     class Helper
 
@@ -101,14 +102,6 @@ module Saint
         end
         return error if error
         true
-      end
-
-      def editable_size
-        MAX_FILE_SIZE
-      end
-      
-      def editable_size? size
-        size < editable_size
       end
 
     end

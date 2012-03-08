@@ -124,6 +124,9 @@ fieldset legend {
     right: 0;
     z-index: 1000;
     background-color: #333;
+    box-shadow: 0 1px 5px #888;
+    -moz-box-shadow: 0 1px 5px #888;
+    -webkit-box-shadow: 0 1px 5px #888;
 }
 
 .el-100px {

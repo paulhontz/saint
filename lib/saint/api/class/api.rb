@@ -252,8 +252,8 @@ module Saint
       @rendered_menu ||= Menu.new.render
     end
 
-    def render_dashboard scope
-      saint_view(scope).render_layout(saint_view(scope).render_partial('dashboard'))
+    def render_dashboard scope, str = nil
+      saint_view(scope).render_layout("%s\n%s" % [saint_view(scope).render_partial('dashboard'), str])
     end
 
     # should the controller be displayed on dashboard?

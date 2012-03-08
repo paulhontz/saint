@@ -15,14 +15,17 @@ module Saint
       end
     end
 
-    def root root, label = nil
+    def root root, opts = {}
 
       root = normalize_path root
       raise '"%s" should be a directory' % root unless File.directory?(root)
 
-      label ||= File.basename(root)
-      url = label.to_s.gsub(/[^\w|\d]/i, '')
       node, host = @node, self
+
+      label = opts.fetch :label, File.basename(root)
+      url = label.to_s.gsub(/[^\w|\d|\-]/i, '_')
+      edit_max_size = opts[:edit] || opts[:edit_max_size] || Saint::FileManager::EDIT_MAX_SIZE
+      upload_max_size = opts[:upload] || opts[:upload_max_size] || Saint::FileManager::UPLOAD_MAX_SIZE
 
       @roots << (fm = node.const_set 'Saint__Fm__' << url, Class.new)
       fm.class_exec do
@@ -46,8 +49,8 @@ module Saint
       end
       fm.class_exec do
         define_singleton_method :setup do
-          @setup ||= Struct.new(:root, :roots, :url, :label, :file_server).
-              new(root.freeze, host.roots.freeze, url.freeze, label.freeze, fs.freeze).freeze
+          @setup ||= Struct.new(:root, :roots, :url, :label, :file_server, :edit_max_size, :upload_max_size).
+              new(root.freeze, host.roots.freeze, url.freeze, label.freeze, fs.freeze, edit_max_size.freeze, upload_max_size.freeze).freeze
         end
 
         define_method :setup do
@@ -238,8 +241,8 @@ module Saint
           file = decode_path file
           return unless ::File.file?(full_path = ::File.join(setup.root, file))
           content, @errors = nil
-          if @helper.size(full_path) > Saint::FileManager::MAX_FILE_SIZE
-            @errors = 'Sorry, files bigger than %s are not editable.' % number_to_human_size(Saint::FileManager::MAX_FILE_SIZE)
+          if @helper.size(full_path) > setup.edit_max_size
+            @errors = 'Sorry, files bigger than %s are not editable.' % number_to_human_size(setup.edit_max_size)
           else
             begin
               content = Saint::Utils.normalize_string ::File.open(full_path, 'r:utf-8').read

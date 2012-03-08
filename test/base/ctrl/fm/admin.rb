@@ -9,7 +9,7 @@ module Ctrl
     end
 
     saint.fm do
-      root File.expand_path '../test-unofficial/file-manager/templates', Pfg.root
+      root File.expand_path('../test-unofficial/file-manager/templates', Pfg.root), edit: 10 * 2**20, upload: 5 * 2**20
       root File.expand_path '../test-unofficial/file-manager/public', Pfg.root
     end
 
