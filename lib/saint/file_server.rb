@@ -48,12 +48,8 @@ module Saint
       end
 
       def expand_path path
-        return @path = path if path == '/'
-        levels = path.scan(Regexp.union('..')).size
-        path = Presto::Utils.normalize_path(path).gsub(/^\/+/, '')
-        return '%s/%s' % [@path, path] if levels == 0
-        dirs = @path.split(/\/+/)
-        [dirs[0, dirs.size - levels], path].join('/')
+        ::File.expand_path(path, @path).
+            sub(/^\w+\:(\/+|\\+)?/, '/') # removing drive letter
       end
 
     end
