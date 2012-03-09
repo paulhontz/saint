@@ -27,7 +27,7 @@
                   <% (orm.filter(orm.order(node.saint.pkey => :desc).merge(orm.limit(5)))[0]||[]).each do |item| %>
                       <li>
                         <a href="<%= node.http.route :edit, item.send(node.saint.pkey) %>">
-                          <%= node.saint.h item %>
+                          <%= node.saint.h item, length: 50 %>
                         </a>
                       </li>
                   <% end -%>
